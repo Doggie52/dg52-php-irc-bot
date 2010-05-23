@@ -17,6 +17,8 @@ include("config.php");
 // Include main class
 include("class_main.php");
 
+if(GUI)
+{
 ?>
 <title>dG52 PHP IRC Bot - Console Window</title>
 <style type="text/css">
@@ -27,8 +29,14 @@ include("class_main.php");
 </style>
 <div id="console">
 <?php
+}
 
 	$bot = new IRCBot();
 
+if(GUI)
+{
 ?>
 </div>
+<?php
+}
+?>
