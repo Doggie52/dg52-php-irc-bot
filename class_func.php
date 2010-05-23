@@ -72,7 +72,6 @@
 		{
 			// ... it was sent to the channel
 			$message = "CHANNEL";
-			debug_message("The received message was of type [".$message."]!");
 			return $message;
 		}
 		// Or if the sent message's receiver is the bots nickname
@@ -80,7 +79,6 @@
 		{
 			// ... it is a private message
 			$message = "PRIVATE";
-			debug_message("The received message was of type [".$message."]!");
 			return $message;
 		}
 	}
@@ -104,7 +102,6 @@
 		}
 		else
 		{
-			debug_message("User ($ident) is not authenticated.");
 			return 0;
 		}
 	}
@@ -258,7 +255,14 @@
 	{
 		if(DEBUG)
 		{
-			echo "\r\n<br>[".date('h:i:s')."] ".$message;
+			if(GUI)
+			{
+				echo "\r\n<br>[".@date('h:i:s')."] ".$message;
+			}
+			else
+			{
+				echo "\r\n[".@date('h:i:s')."] ".$message;
+			}
 		}
 	}
 
