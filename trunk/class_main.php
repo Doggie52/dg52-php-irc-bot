@@ -11,7 +11,7 @@
 	 *		- Structure the class, perhaps outsource some features of main() *PARTIALLY DONE*
 	 *		- Make use of usleep() to minimize CPU load
 	 *		- *DONE* Ability to reload speech array
-	 *		- Ability to add speech on-the-fly
+	 *		- Ability to add speech on-the-fly *DONE*
 	 *		- Users and channel abilities
 	 *			- *DONE* Ability to voice and de-voice (+v / -v)
 	 *			- Ability to set channel topic
@@ -62,7 +62,7 @@ class IRCBot
 		global $users;
 		$users = explode("\n", $userlist);
 		
-		// Include responses and unset the variable to save memory
+		// Include responses
 		$this->response = reload_speech();
 		
 		// Start microtime
@@ -209,6 +209,15 @@ class IRCBot
 							send_data("PRIVMSG", "dG52's PHP IRC Bot", $this->ex['username']);
 							debug_message("Info was sent to ".$this->ex['username']."!");
 						break;
+						case '!add':
+							$line = substr($this->ex['fullcommand'], 5);
+							// Writes the line to the file
+							write_response($line);
+							debug_message("Keyword \"".$this->ex['command'][1]."\" was defined by ".$this->ex['username']."!");
+							send_data("PRIVMSG", "Keyword \"".$this->ex['command'][1]."\" was added!", $this->ex['username']);
+							// Reload responses
+							$this->response = reload_speech();
+						break;
 					}
 				}
 			}
@@ -233,13 +242,13 @@ class IRCBot
 						{
 							// If there is a keyword available
 							send_data("PRIVMSG", $this->response['info'][$keyword], $this->ex['receiver']);
-							debug_message("Keyword \"".$this->ex['command'][1]."\ was defined upon request by ".$this->ex['username']."!");
+							debug_message("Keyword \"".$this->ex['command'][1]."\" was defined upon request by ".$this->ex['username']."!");
 						}
 						else
 						{
 							// If there is no keyword available
 							send_data("PRIVMSG", "No help for this item was found", $this->ex['receiver']);
-							debug_message("Keyword \"".$this->ex['command'][1]."\ was undefined but requested by ".$this->ex['username']."!");
+							debug_message("Keyword \"".$this->ex['command'][1]."\" was undefined but requested by ".$this->ex['username']."!");
 						}
 					break;
 					case '!google':
