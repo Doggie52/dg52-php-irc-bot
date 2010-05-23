@@ -89,7 +89,7 @@
 	 * Checks if sender of message is in the list of authenticated users. (username!hostname)
 	 *
 	 * @param string $ident The username!hostname of the user we want to check
-	 * @param boolean true for an authenticated user, false for one which isn't
+	 * @return boolean true for an authenticated user, false for one which isn't
 	 */
 	function is_authenticated($ident)
 	{
@@ -111,6 +111,8 @@
 	
 	/**
 	 * Reloads the arrays associated with speech
+	 *
+	 * @return string $response The response-array
 	 */
 	function reload_speech()
 	{
@@ -122,7 +124,7 @@
 		include("speech.php");
 		// Include info-keywords and their responses
 		$file = fopen("responses.inc", "r");
-		$keywordlist = fread($file, filesize("responses.inc"));
+		$keywordlist = fread($file, 8192);
 		fclose($file);
 		// Split each line into separate entry
 		$line = explode("\n", $keywordlist);
@@ -131,17 +133,33 @@
 			// Get the first word in [0] and the rest in [1]
 			$explode = explode(" ", $keywordline, 2);
 			// Split them up!
-			$response['info'][$explode[0]] = $explode[1];
+			$response['info'][strtolower($explode[0])] = $explode[1];
 		}
 		
 		debug_message("Speech was successfully reloaded!");
 		return $response;
+	}
+	
+	/**
+	 * Writes to the response-file.
+	 *
+	 * @param $line The line to write to the file
+	 */
+	function write_response($line)
+	{
+		// Opens the responsefile for writing (pointer at end of file) and translate lineendings
+		$file = fopen("responses.inc", "at");
+		// Adds a newline to the beginning of the line to write
+		$line = "\n".$line;
+		$keywordlist = fwrite($file, $line);
+		fclose($file);
 	}
 
 	/**
 	 * Joins a channel. Checks if the channel-name includes a #-sign
 	 *
 	 * @param string $channel The channels you wish the bot to join
+	 * @return string $channel The channelname that was joined
 	 */
 	function join_channel($channel)
 	{
@@ -159,6 +177,7 @@
 	 * Parts (leaves) a channel. Checks if the channel-name includes a #-sign
 	 *
 	 * @param string $channel The channel you wish the bot to part
+	 * @return string $channel The channelname that was parted
 	 */
 	function part_channel($channel)
 	{
