@@ -7,7 +7,7 @@
 			URL: www.douglasstridsberg.com
 	*/
 
-// Disables script time-out and disable errors
+// Disables script time-out and enable errors
 set_time_limit(0);
 ini_set('display_errors', 'on');
 
@@ -15,9 +15,10 @@ ini_set('display_errors', 'on');
 include("config.php");
 
 // Include main class
-include("class.php");
+include("class_main.php");
 
 ?>
+<title>dG52 PHP IRC Bot - Console Window</title>
 <style type="text/css">
 	#console {
 		font-family: "Courier New";
