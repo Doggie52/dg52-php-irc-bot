@@ -123,9 +123,7 @@
 		// Include random responses
 		include("speech.php");
 		// Include info-keywords and their responses
-		$file = fopen("responses.inc", "r");
-		$keywordlist = fread($file, 8192);
-		fclose($file);
+		$keywordlist = file_get_contents("responses.inc");
 		// Split each line into separate entry
 		$line = explode("\n", $keywordlist);
 		foreach($line as $keywordline)
@@ -147,12 +145,9 @@
 	 */
 	function write_response($line)
 	{
-		// Opens the responsefile for writing (pointer at end of file) and translate lineendings
-		$file = fopen("responses.inc", "at");
 		// Adds a newline to the beginning of the line to write
 		$line = "\n".$line;
-		$keywordlist = fwrite($file, $line);
-		fclose($file);
+		file_put_contents("responses.inc", $line, FILE_APPEND);
 	}
 
 	/**
