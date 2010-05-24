@@ -8,6 +8,41 @@
 	 */
 
 	/**
+	 * Prints the bot's header with useful information and some nice ASCII text
+	 *
+	 * @return void
+	 */
+	function print_header()
+	{
+		$ascii = "
+     _  ___ ___ ___ 
+  __| |/ __| __|_  )
+ / _` | (_ |__ \/ / 
+ \__,_|\___|___/___|
+  ___ _  _ ___ 
+ | _ \ || | _ \
+ |  _/ __ |  _/
+ |_| |_||_|_|  
+  ___ ___  ___ 
+ |_ _| _ \/ __|
+  | ||   / (__ 
+ |___|_|_\\___|
+  ___      _   
+ | _ ) ___| |_ 
+ | _ \/ _ \  _|
+ |___/\___/\__|
+			\n";
+		if(GUI)
+		{
+			echo(nl2br($ascii));
+		}
+		else
+		{
+			echo($ascii);
+		}
+	}
+	
+	/**
 	 * Sends data to the server. Important that basic structure of sent message is kept the same, otherwise it will fail.
 	 * 
 	 * @access public
@@ -126,7 +161,7 @@
 			$response['info'][strtolower($explode[0])] = $explode[1];
 		}
 		
-		debug_message("Speech was successfully reloaded!");
+		debug_message("The speech array was successfully loaded into the system!");
 		return $response;
 	}
 	

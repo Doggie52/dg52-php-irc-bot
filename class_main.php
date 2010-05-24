@@ -40,6 +40,9 @@ class IRCBot
 	
 	// This is going to hold our responses
 	var $response;
+	
+	// This is going to hold our starting time
+	var $starttime;
 
 	/**
 	 * Construct item, opens the server connection, logs the bot in, import stuff
@@ -48,13 +51,16 @@ class IRCBot
 	 * @return void
 	 */
 	function __construct()
-	{
+	{		
 		// Our TCP/IP connection
 		global $socket;
 		$socket = fsockopen(SERVER_IP, SERVER_PORT);
 		
 		// Include functions
 		include("class_func.php");
+		
+		// Print header
+		print_header();
 		
 		$this->login();
 		
@@ -68,6 +74,9 @@ class IRCBot
 		
 		// Include responses
 		$this->response = reload_speech();
+		
+		// Declare the starttime
+		$this->starttime = time();
 		
 		$this->main();
 	}
@@ -137,13 +146,19 @@ class IRCBot
 			// If user is authenticated
 			if(is_authenticated($this->ex['ident']) == 1)
 			{
-				// List of commands the bot responds to from an authenticated user
+				// List of commands the bot responds to from an authenticated user either via PM or channel
 				switch(strtolower($this->ex['command'][0]))
 				{
 					case '!info':
 						send_data("PRIVMSG", "dG52's PHP IRC Bot", $this->ex['username']);
+						$currtime = time();
+						$seconds = $currtime - $this->starttime;
+						$minutes = bcmod((intval($seconds) / 60),60);
+						$hours = intval(intval($seconds) / 3600);
+						$seconds = bcmod(intval($seconds),60);
+						send_data("PRIVMSG", "Uptime: ".$hours." hours ".$minutes." minutes ".$seconds." seconds.", $this->ex['username']);
 						debug_message("Info was sent to ".$this->ex['username']."!");
-					break;
+						break;
 					case '!add':
 						$line = substr($this->ex['fullcommand'], 5);
 						// Writes the line to the file
@@ -152,22 +167,24 @@ class IRCBot
 						send_data("PRIVMSG", "Keyword \"".$this->ex['command'][1]."\" was added!", $this->ex['username']);
 						// Reload responses
 						$this->response = reload_speech();
-					break;
+						break;
+					case '!t':
 					case '!topic':
+						$length = strlen($this->ex['command'][0]);
 						// If the receiver message is a PM, assume that the channelname is included
 						if($this->ex['type'] == "PRIVATE")
 						{
 							$channel = $this->ex['command'][1];
-							$topic = substr($this->ex['fullcommand'], 8+strlen($channel));
+							$topic = substr($this->ex['fullcommand'], 1+$length+1+strlen($channel));
 						}
 						else
 						{
 							$channel = $this->ex['receiver'];
-							$topic = substr($this->ex['fullcommand'], 7);
+							$topic = substr($this->ex['fullcommand'], $length+1);
 						}
 						set_topic($channel, $topic);
 						send_data("PRIVMSG", "Topic of ".$channel." was changed!", $this->ex['username']);
-					break;
+						break;
 				}
 
 				if($this->ex['type'] == "PRIVATE")
@@ -175,56 +192,60 @@ class IRCBot
 					// List of commands the bot responds to from an authenticated user only via PM
 					switch(strtolower($this->ex['command'][0]))
 					{
+						case '!j':
 						case '!join':
 							// 0 is the command and 1 is the channel
 							send_data("PRIVMSG", "Channel ".join_channel($this->ex['command'][1])." was joined!", $this->ex['username']);
-						break;
+							break;
+						case '!p':
 						case '!part':
 							// 0 is the command and 1 is the channel
 							send_data("PRIVMSG", "Channel ".part_channel($this->ex['command'][1])." was parted!", $this->ex['username']);
-						break;
+							break;
+						case '!q':
 						case '!quit':
 							send_data("PRIVMSG", "Bot is quitting!", $this->ex['username']);
-							debug_message("Bot is quitting!");
 							send_data("QUIT", ":".BOT_QUITMSG);
-						break;
+							debug_message("Bot has quitted!\r\n");
+							break;
 						case '!reload':
 							reload_speech();
 							send_data("PRIVMSG", "Speech was reloaded!", $this->ex['username']);
-						break;
+							break;
 						/*
 						case '!nick':
 							// interpret_privmsg will not work with PM's until BOT_NICKNAME can be changed
 							send_data("NICK", $this->ex['command'][1]);
 							send_data("PRIVMSG", "My nickname was changed to ".$this->ex['command'][1]."!", );
 							debug_message("BOT_NICKNAME was re-defined as ".$this->ex['command'][1]."!", $this->ex['username']);
-						break;
+							break;
 						*/
+						case '!s':
 						case '!say':
 							// Length of command plus channel
 							$length = strlen($this->ex['command'][0]." ".$this->ex['command'][1]);
-							send_data("PRIVMSG", substr($this->ex['fullcommand'], $length + 1), $this->ex['command'][1]);
-						break;
+							send_data("PRIVMSG", substr($this->ex['fullcommand'], $length+1), $this->ex['command'][1]);
+							break;
 						case '!op':
 							// 0 is the command, 1 is the channel and 2 is the user
 							op_user($this->ex['command'][1], $this->ex['command'][2], true);
 							send_data("PRIVMSG", "User ".($this->ex['command'][2] ? $this->ex['command'][2] : $this->ex['username'])." was given operator status!", $this->ex['username']);
-						break;
+							break;
 						case '!deop':
 							// 0 is the command, 1 is the channel and 2 is the user
 							op_user($this->ex['command'][1], $this->ex['command'][2], false);
 							send_data("PRIVMSG", "User ".($this->ex['command'][2] ? $this->ex['command'][2] : $this->ex['username'])." was taken operator status!", $this->ex['username']);
-						break;
+							break;
 						case '!voice':
 							// 0 is the command, 1 is the channel and 2 is the user
 							voice_user($this->ex['command'][1], $this->ex['command'][2], true);
 							send_data("PRIVMSG", "User ".($this->ex['command'][2] ? $this->ex['command'][2] : $this->ex['username'])." was given voice!", $this->ex['username']);
-						break;
+							break;
 						case '!devoice':
 							// 0 is the command, 1 is the channel and 2 is the user
 							voice_user($this->ex['command'][1], $this->ex['command'][2], false);
 							send_data("PRIVMSG", "User ".($this->ex['command'][2] ? $this->ex['command'][2] : $this->ex['username'])." was de-voiced!", $this->ex['username']);
-						break;
+							break;
 					}
 				}
 				elseif($this->ex['type'] == "CHANNEL")
@@ -232,14 +253,16 @@ class IRCBot
 					// List of commands the bot responds to from an authenticated user via channel
 					switch(strtolower($this->ex['command'][0]))
 					{
+						case '!s':
 						case '!say':
-							// Subtract 4 characters (!say) plus a space
-							send_data("PRIVMSG", substr($this->ex['fullcommand'], 5), $this->ex['receiver']);
-						break;
+							// Subtract the amount of characters of the command plus a space
+							$length = strlen($this->ex['command'][0]);
+							send_data("PRIVMSG", substr($this->ex['fullcommand'], $length+1), $this->ex['receiver']);
+							break;
 						case '!me':
 							// Subtract 3 characters (!me) plus a space
 							send_data("PRIVMSG", "/me ".substr($this->ex['fullcommand'], 4), $this->ex['receiver']);
-						break;
+							break;
 					}
 				}
 			}
@@ -272,15 +295,15 @@ class IRCBot
 							send_data("PRIVMSG", "No help for this item was found", $this->ex['receiver']);
 							debug_message("Keyword \"".$this->ex['command'][1]."\" was undefined but requested by ".$this->ex['username']."!");
 						}
-					break;
+						break;
 					case '!google':
 						$query = "q=".urlencode(substr($this->ex['fullcommand'], 8));
 						send_data("PRIVMSG", "http://www.google.com/search?".$query, $this->ex['receiver']);
-					break;
+						break;
 					case '!youtube':
 						$query = "search_query=test".urlencode(substr($this->ex['fullcommand'],9));
 						send_data("PRIVMSG", "http://www.youtube.com/results?".$query, $this->ex['receiver']);
-					break;
+						break;
 				}
 			}
 		}
