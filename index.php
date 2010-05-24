@@ -1,11 +1,11 @@
 <?php
-	/*
-		dG52 PHP IRC Bot
-
-		Author: Douglas Stridsberg
-			Email: doggie52@gmail.com
-			URL: www.douglasstridsberg.com
-	*/
+	/**
+	 * dG52 PHP IRC Bot
+	 *
+	 * @author: Douglas Stridsberg
+	 * @email: doggie52@gmail.com
+	 * @url: www.douglasstridsberg.com
+	 */
 
 // Disables script time-out and enable errors
 set_time_limit(0);
