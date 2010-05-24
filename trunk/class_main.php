@@ -8,13 +8,13 @@
 	 *	
 	 * TODO:
 	 * 		- Documentation
-	 *		- Structure the class, perhaps outsource some features of main() *PARTIALLY DONE*
+	 *		- *PARTIALLY DONE* Structure the class, perhaps outsource some features of main()
 	 *		- Make use of usleep() to minimize CPU load
 	 *		- *DONE* Ability to reload speech array
-	 *		- Ability to add speech on-the-fly *DONE*
+	 *		- *DONE* Ability to add speech on-the-fly
 	 *		- Users and channel abilities
 	 *			- *DONE* Ability to voice and de-voice (+v / -v)
-	 *			- Ability to set channel topic
+	 *			- *DONE* Ability to set channel topic
 	 *			- Ability to /whois a user and get response in a PM
 	 *			- Ability to invite a user
 	 *		- Bot abilities
@@ -23,8 +23,12 @@
 	 *			- *NOT WORKING* Ability to change nickname for the session
 	 */
 
+/**
+ * IRCBot class.
+ * 
+ */
 class IRCBot
-{	
+{
 	// This is going to hold the data received from the socket
 	var $data;
 
@@ -34,14 +38,14 @@ class IRCBot
 	// This is going to hold all of the authenticated users
 	var $users = array();
 	
-	// This is going to hold our starttime
-	var $starttime;
-	
 	// This is going to hold our responses
 	var $response;
 
 	/**
 	 * Construct item, opens the server connection, logs the bot in, import stuff
+	 *
+	 * @access public
+	 * @return void
 	 */
 	function __construct()
 	{
@@ -65,14 +69,14 @@ class IRCBot
 		// Include responses
 		$this->response = reload_speech();
 		
-		// Start microtime
-		$this->starttime = microtime_float();
-		
 		$this->main();
 	}
 
 	/**
 	 * Logs the bot in on the server
+	 *
+	 * @access public
+	 * @return void
 	 */
 	function login()
 	{
@@ -83,6 +87,9 @@ class IRCBot
 
 	/**
 	 * This is the workhorse function, grabs the data from the server and displays on the browser if DEBUG_OUTPUT is true.
+	 *
+	 * @access public
+	 * @return void
 	 */
 	function main()
 	{
@@ -121,7 +128,7 @@ class IRCBot
 			$hostlength = strlen(strstr($this->ex[0], '!'));
 			$this->ex['username']	= substr($this->ex[0], 1, -$hostlength);
 			
-			// The receiver of the sent message
+			// The receiver of the sent message (either the channelname or the bots nickname)
 			$this->ex['receiver']	= $this->ex[2];
 			
 			// Interpret the type of message received ("PRIVATE" or "CHANNEL") depending on the receiver
@@ -130,7 +137,39 @@ class IRCBot
 			// If user is authenticated
 			if(is_authenticated($this->ex['ident']) == 1)
 			{
-				// If the received message is a PM
+				// List of commands the bot responds to from an authenticated user
+				switch(strtolower($this->ex['command'][0]))
+				{
+					case '!info':
+						send_data("PRIVMSG", "dG52's PHP IRC Bot", $this->ex['username']);
+						debug_message("Info was sent to ".$this->ex['username']."!");
+					break;
+					case '!add':
+						$line = substr($this->ex['fullcommand'], 5);
+						// Writes the line to the file
+						write_response($line);
+						debug_message("Keyword \"".$this->ex['command'][1]."\" was defined by ".$this->ex['username']."!");
+						send_data("PRIVMSG", "Keyword \"".$this->ex['command'][1]."\" was added!", $this->ex['username']);
+						// Reload responses
+						$this->response = reload_speech();
+					break;
+					case '!topic':
+						// If the receiver message is a PM, assume that the channelname is included
+						if($this->ex['type'] == "PRIVATE")
+						{
+							$channel = $this->ex['command'][1];
+							$topic = substr($this->ex['fullcommand'], 8+strlen($channel));
+						}
+						else
+						{
+							$channel = $this->ex['receiver'];
+							$topic = substr($this->ex['fullcommand'], 7);
+						}
+						set_topic($channel, $topic);
+						send_data("PRIVMSG", "Topic of ".$channel." was changed!", $this->ex['username']);
+					break;
+				}
+
 				if($this->ex['type'] == "PRIVATE")
 				{
 					// List of commands the bot responds to from an authenticated user only via PM
@@ -148,10 +187,6 @@ class IRCBot
 							send_data("PRIVMSG", "Bot is quitting!", $this->ex['username']);
 							debug_message("Bot is quitting!");
 							send_data("QUIT", ":".BOT_QUITMSG);
-						break;
-						case '!info':
-							send_data("PRIVMSG", "dG52's PHP IRC Bot", $this->ex['username']);
-							debug_message("Info was sent to ".$this->ex['username']."!");
 						break;
 						case '!reload':
 							reload_speech();
@@ -204,19 +239,6 @@ class IRCBot
 						case '!me':
 							// Subtract 3 characters (!me) plus a space
 							send_data("PRIVMSG", "/me ".substr($this->ex['fullcommand'], 4), $this->ex['receiver']);
-						break;
-						case '!info':
-							send_data("PRIVMSG", "dG52's PHP IRC Bot", $this->ex['username']);
-							debug_message("Info was sent to ".$this->ex['username']."!");
-						break;
-						case '!add':
-							$line = substr($this->ex['fullcommand'], 5);
-							// Writes the line to the file
-							write_response($line);
-							debug_message("Keyword \"".$this->ex['command'][1]."\" was defined by ".$this->ex['username']."!");
-							send_data("PRIVMSG", "Keyword \"".$this->ex['command'][1]."\" was added!", $this->ex['username']);
-							// Reload responses
-							$this->response = reload_speech();
 						break;
 					}
 				}
