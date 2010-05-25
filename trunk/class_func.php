@@ -8,13 +8,31 @@
 	 */
 
 	/**
+	 * Gets the latest revision of an SVN repository with a general HTML output
+	 * 
+	 * @access public
+	 * @param string $site The URI of the repository (with http://)
+	 * @return string $revision The revision number extracted
+	 */
+	function get_latest_rev($site)
+	{
+		$raw = file_get_contents($site);
+		$regex = "/(Revision)(\\s+)(\\d+)(:)/is";
+		preg_match_all($regex, $raw, $match);
+		$revision = $match[3][0];
+		
+		return $revision;
+	}
+	
+	/**
 	 * Prints the bot's header with useful information and some nice ASCII text
 	 *
 	 * @return void
 	 */
 	function print_header()
 	{
-		$ascii = "
+		$svnrev = get_latest_rev("http://dg52-php-irc-bot.googlecode.com/svn/trunk/");
+		$info = "
      _  ___ ___ ___ 
   __| |/ __| __|_  )
  / _` | (_ |__ \/ / 
@@ -31,14 +49,27 @@
  | _ ) ___| |_ 
  | _ \/ _ \  _|
  |___/\___/\__|
+
+ dG52 PHP IRC Bot
+   Author: Douglas Stridsberg
+   Email: doggie52@gmail.com
+   URL: www.douglasstridsberg.com
+   Latest (online) revision: r".$svnrev."
+     (if you have an earlier revision than this, please update!)
+ 
+ Any issues, questions or feedback should be redirected
+ to the following URL.
+ 
+ http://code.google.com/p/dg52-php-irc-bot
+
 			\n";
 		if(GUI)
 		{
-			echo(nl2br($ascii));
+			echo(nl2br($info));
 		}
 		else
 		{
-			echo($ascii);
+			echo($info);
 		}
 	}
 	
