@@ -7,7 +7,8 @@
 	 * @url: www.douglasstridsberg.com
 	 *	
 	 * TODO:
-	 * 		- Documentation
+	 * 		- *PARTIALLY DONE* Documentation for bot-commands
+	 *		- Documentation for class
 	 *		- *PARTIALLY DONE* Structure the class, perhaps outsource some features of main()
 	 *		- Make use of usleep() to minimize CPU load
 	 *		- *DONE* Ability to reload speech array
@@ -62,6 +63,7 @@ class IRCBot
 		// Print header
 		print_header();
 		
+		// Log bot in
 		$this->login();
 		
 		// Open the users.inc file
@@ -150,14 +152,7 @@ class IRCBot
 				switch(strtolower($this->ex['command'][0]))
 				{
 					case '!info':
-						send_data("PRIVMSG", "dG52's PHP IRC Bot", $this->ex['username']);
-						$currtime = time();
-						$seconds = $currtime - $this->starttime;
-						$minutes = bcmod((intval($seconds) / 60),60);
-						$hours = intval(intval($seconds) / 3600);
-						$seconds = bcmod(intval($seconds),60);
-						send_data("PRIVMSG", "Uptime: ".$hours." hours ".$minutes." minutes ".$seconds." seconds.", $this->ex['username']);
-						debug_message("Info was sent to ".$this->ex['username']."!");
+						print_info($this->ex['username'], $this->starttime);
 						break;
 					case '!add':
 						$line = substr($this->ex['fullcommand'], 5);
@@ -192,6 +187,9 @@ class IRCBot
 					// List of commands the bot responds to from an authenticated user only via PM
 					switch(strtolower($this->ex['command'][0]))
 					{
+						case '!help':
+							lookup_help($this->ex['command'][1], $this->response['commands']['pm'], $this->ex['username']);
+							break;
 						case '!j':
 						case '!join':
 							// 0 is the command and 1 is the channel
@@ -281,7 +279,7 @@ class IRCBot
 				}
 				switch(strtolower($this->ex['command'][0]))
 				{
-					case '!help':
+					case '!define':
 						$keyword = strtolower($this->ex['command'][1]);
 						if($this->response['info'][$keyword])
 						{

@@ -74,6 +74,26 @@
 	}
 	
 	/**
+	 * Prints general information about the bot along with uptime to a user.
+	 * 
+	 * @access public
+	 * @param string $username The username the info should be sent to
+	 * @param string $starttime The start-time of the script in UNIX-timestamp format
+	 * @return void
+	 */
+	function print_info($username, $starttime)
+	{
+		send_data("PRIVMSG", "dG52's PHP IRC Bot", $username);
+		$currtime = time();
+		$seconds = $currtime - $starttime;
+		$minutes = bcmod((intval($seconds) / 60),60);
+		$hours = intval(intval($seconds) / 3600);
+		$seconds = bcmod(intval($seconds),60);
+		send_data("PRIVMSG", "Uptime: ".$hours." hours ".$minutes." minutes ".$seconds." seconds.", $username);
+		debug_message("Info was sent to ".$username."!");
+	}
+	
+	/**
 	 * Sends data to the server. Important that basic structure of sent message is kept the same, otherwise it will fail.
 	 * 
 	 * @access public
@@ -139,6 +159,35 @@
 			// ... it is a private message
 			$message = "PRIVATE";
 			return $message;
+		}
+	}
+	
+	function lookup_help($command, $commandarray, $username)
+	{
+		$command = strtolower($command);
+		// If the user is not looking for specific support for a command
+		if(!$command)
+		{
+			send_data("PRIVMSG", "List of commands usable via PM", $username);
+			foreach($commandarray as $commandname => $commandusage)
+			{
+				send_data("PRIVMSG", " - !".$commandname, $username);
+			}
+		}
+		else
+		{
+			// If the command looked up exists in the documentation
+			if(array_key_exists($command, $commandarray))
+			{
+				foreach($commandarray[$command] as $usage)
+				{
+					send_data("PRIVMSG", $usage, $username);
+				}
+			}
+			else
+			{
+				send_data("PRIVMSG", "Command \"".$command."\" was not defined in the documentation!", $username);
+			}
 		}
 	}
 	
