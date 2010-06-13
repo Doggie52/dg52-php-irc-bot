@@ -13,11 +13,12 @@
 	 *		- Make use of usleep() to minimize CPU load
 	 *		- *DONE* Ability to reload speech array
 	 *		- *DONE* Ability to add speech on-the-fly
+	 *		- *DONE* Ability to format sent PMs
 	 *		- Users and channel abilities
 	 *			- *DONE* Ability to voice and de-voice (+v / -v)
 	 *			- *DONE* Ability to set channel topic
 	 *			- Ability to /whois a user and get response in a PM
-	 *			- Ability to invite a user
+	 *			- *DONE* Ability to invite a user
 	 *		- Bot abilities
 	 *			- *DONE* Ability to use /me
 	 *			- Ability to use /notice
@@ -125,7 +126,7 @@ class IRCBot
 			}
 			
 			// Get length of everything before command including last space
-			$identlength = strlen($this->ex[0]." ".$this->ex[1]." ".$this->ex[2]." ");
+			$identlength = strlen($this->ex[0]." ".(isset($this->ex[1]) ? $this->ex[1] : "")." ".(isset($this->ex[2]) ? $this->ex[2] : "")." ");
 			// Retain all that is in $data after $identlength characters with replaced chr(10)'s and chr(13)'s and minus the first ':'
 			$rawcommand = substr($this->data, $identlength);
 			$this->ex['fullcommand'] = substr(str_replace(array(chr(10), chr(13)), '', $rawcommand), 1);
@@ -140,7 +141,7 @@ class IRCBot
 			$this->ex['username']	= substr($this->ex[0], 1, -$hostlength);
 			
 			// The receiver of the sent message (either the channelname or the bots nickname)
-			$this->ex['receiver']	= $this->ex[2];
+			$this->ex['receiver']	= (isset($this->ex[2]) ? $this->ex[2] : "");
 			
 			// Interpret the type of message received ("PRIVATE" or "CHANNEL") depending on the receiver
 			$this->ex['type']		= interpret_privmsg($this->ex['receiver']);
@@ -180,6 +181,22 @@ class IRCBot
 						set_topic($channel, $topic);
 						send_data("PRIVMSG", "Topic of ".$channel." was changed!", $this->ex['username']);
 						break;
+					case '!i':
+					case '!invite':
+						// If the receiver message is a PM, assume that the channelname is included
+						if($this->ex['type'] == "PRIVATE")
+						{
+							$channel = $this->ex['command'][2];
+							$username = $this->ex['command'][1];
+						}
+						else
+						{
+							$channel = $this->ex['receiver'];
+							$username = $this->ex['command'][1];
+						}
+						send_data("INVITE", $username." ".$channel);
+						send_data("PRIVMSG", "User ".$username." was invited to ".$channel."!", $this->ex['username']);
+						break;
 				}
 
 				if($this->ex['type'] == "PRIVATE")
@@ -187,8 +204,9 @@ class IRCBot
 					// List of commands the bot responds to from an authenticated user only via PM
 					switch(strtolower($this->ex['command'][0]))
 					{
+						case '!h':
 						case '!help':
-							lookup_help($this->ex['command'][1], $this->response['commands']['pm'], $this->ex['username']);
+							lookup_help((isset($this->ex['command'][1]) ? $this->ex['command'][1] : ""), $this->response['commands']['pm'], $this->ex['username']);
 							break;
 						case '!j':
 						case '!join':
