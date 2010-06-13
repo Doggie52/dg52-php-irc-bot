@@ -125,11 +125,31 @@
 	/**
 	 * Parses the raw commands sent by the server and splits them up into different parts, storing them in the $ex array for future use.
 	 *
-	 * @todo Put this function to use.
+	 * @param string $data The raw data sent by the socket
+	 * @return array $ex
 	 */
-	function parse_raw_command()
+	function parse_raw_command($data)
 	{
+	     // Explodes the raw data into an initial array
+		$ex				= explode(" ", $data);
+		// Get length of everything before command including last space
+		$identlength		= strlen($ex[0]." ".(isset($ex[1]) ? $ex[1] : "")." ".(isset($ex[2]) ? $ex[2] : "")." ");
+		// Retain all that is in $data after $identlength characters with replaced chr(10)'s and chr(13)'s and minus the first ':'
+		$rawcommand		= substr($data, $identlength);
+		$ex['fullcommand']	= substr(str_replace(array(chr(10), chr(13)), '', $rawcommand), 1);
+		// Split the commandstring up into a second array with words
+		$ex['command']		= explode(" ", $ex['fullcommand']);
+		// The username!hostname of the sender (don't include the first ':' - start from 1)
+		$ex['ident']		= substr($ex[0], 1);
+		// Only the username of the sender (one step extra because only that before the ! wants to be parsed)
+		$hostlength		= strlen(strstr($ex[0], '!'));
+		$ex['username']	= substr($ex[0], 1, -$hostlength);
+		// The receiver of the sent message (either the channelname or the bots nickname)
+		$ex['receiver']	= (isset($ex[2]) ? $ex[2] : "");
+		// Interpret the type of message received ("PRIVATE" or "CHANNEL") depending on the receiver
+		$ex['type']		= interpret_privmsg($ex['receiver']);
 		
+		return $ex;
 	}
 	
 	/**
@@ -265,6 +285,22 @@
 		$line = "\n".$line;
 		file_put_contents("responses.inc", $line, FILE_APPEND);
 	}
+	
+	/**
+	 * Converts input to a proper channel-name if it isn't already
+	 *
+	 * @access public
+	 * @param string $channel The channelname to be converted
+	 * @return string $channel The converted channel
+	 */
+	function to_channel($channel)
+	{
+          if($channel[0] != "#")
+		{
+			$channel = "#".$channel;
+		}
+		return $channel;
+	}
 
 	/**
 	 * Joins a channel. Checks if the channel-name includes a #-sign
@@ -275,10 +311,7 @@
 	 */
 	function join_channel($channel)
 	{
-		if($channel[0] != "#")
-		{
-			$channel = "#".$channel;
-		}
+		$channel = to_channel($channel);
 		send_data("JOIN", $channel);
 		debug_message("Channel ".$channel." was joined!");
 		
@@ -294,10 +327,7 @@
 	 */
 	function part_channel($channel)
 	{
-		if($channel[0] != "#")
-		{
-			$channel = "#".$channel;
-		}
+		$channel = to_channel($channel);
 		send_data("PART", $channel);
 		debug_message("Channel ".$channel." was parted!");
 		
@@ -314,6 +344,7 @@
 	 */
 	function set_topic($channel, $topic)
 	{
+	     $channel = to_channel($channel);
 		send_data("TOPIC", $channel." :".$topic);
 		debug_message("Channel topic for ".$channel." was altered to \"".$topic."\"!");
 	}
@@ -322,24 +353,21 @@
 	 * OP's or de-OP's a user (depending on the boolean sent). If the bot has right to do so, it will give the specified user operator rights in the specified channel.
 	 *
 	 * @access public
-	 * @param string $channel The channel you wish to OP the user in (default: '')
-	 * @param string $user The user you wish to OP (default: '')
+	 * @param array $ex The full command-array used to grab either the receiver or the username
 	 * @param bool $op Whether you wish to OP or de-OP the user (default: true)
 	 * @return void
 	 */
-	function op_user($channel = '', $user = '', $op = true)
+	function op_user($ex, $op = true)
 	{
-		if($channel == '' || $user == '')
+	     $channel = to_channel($ex['command'][1]);
+	     // If the username is not supplied assume it is identical to that which the PM originated from
+		if(!isset($ex['command'][2]))
 		{
-			if($channel == '')
-			{
-				$channel = $this->ex['receiver'];
-			}
-
-			if($user == '')
-			{
-				$user = $this->ex['username'];
-			}
+			$user = $ex['username'];
+		}
+		else
+		{
+               $user = $ex['command'][2];
 		}
 
 		if($op)
@@ -356,26 +384,24 @@
 	 * Voices or de-voices a user (depending on the boolean sent). If the bot has right to do so, it will give the specified user voice in the specified channel.
 	 *
 	 * @access public
-	 * @param string $channel The channel you wish to voice the user in (default: '')
-	 * @param string $user The user you wish to voice (default: '')
-	 * @param bool $op Whether you wish to voice or de-voice the user (default: true)
+      * @param array $ex The full command-array used to grab either the receiver or the username
+	 * @param bool $voice Whether you wish to voice or de-voice the user (default: true)
 	 * @return void
 	 */
-	function voice_user($channel = '', $user = '', $op = true)
+	function voice_user($ex, $voice = true)
 	{
-		if($channel == '' || $user == '')
+		$channel = to_channel($ex['command'][1]);
+	     // If the username is not supplied assume it is identical to that which the PM originated from
+		if(!isset($ex['command'][2]))
 		{
-			if($channel == '')
-			{
-				$channel = $this->ex['receiver'];
-			}
-
-			if($user == '')
-			{
-				$user = $this->ex['username'];
-			}
+			$user = $ex['username'];
 		}
-		if($op)
+		else
+		{
+               $user = $ex['command'][2];
+		}
+		
+		if($voice)
 		{
 			send_data("MODE", $channel . ' +v ' . $user);
 		}

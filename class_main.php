@@ -116,7 +116,8 @@ class IRCBot
 				echo nl2br($this->data);
 			}
 			flush();
-			$this->ex = explode(" ", $this->data);
+			
+			$this->ex = parse_raw_command($this->data);
 
 			if($this->ex[0] == "PING")
 			{
@@ -124,27 +125,6 @@ class IRCBot
 				send_data("PONG", $this->ex[1]);
 				debug_message("PONG was sent.");
 			}
-			
-			// Get length of everything before command including last space
-			$identlength = strlen($this->ex[0]." ".(isset($this->ex[1]) ? $this->ex[1] : "")." ".(isset($this->ex[2]) ? $this->ex[2] : "")." ");
-			// Retain all that is in $data after $identlength characters with replaced chr(10)'s and chr(13)'s and minus the first ':'
-			$rawcommand = substr($this->data, $identlength);
-			$this->ex['fullcommand'] = substr(str_replace(array(chr(10), chr(13)), '', $rawcommand), 1);
-			// Split the commandstring up into a second array with words
-			$this->ex['command'] = explode(" ", $this->ex['fullcommand']);
-			
-			// The username!hostname of the sender (don't include the first ':' - start from 1)
-			$this->ex['ident']		= substr($this->ex[0], 1);
-			
-			// Only the username of the sender (one step extra because only that before the ! wants to be parsed)
-			$hostlength = strlen(strstr($this->ex[0], '!'));
-			$this->ex['username']	= substr($this->ex[0], 1, -$hostlength);
-			
-			// The receiver of the sent message (either the channelname or the bots nickname)
-			$this->ex['receiver']	= (isset($this->ex[2]) ? $this->ex[2] : "");
-			
-			// Interpret the type of message received ("PRIVATE" or "CHANNEL") depending on the receiver
-			$this->ex['type']		= interpret_privmsg($this->ex['receiver']);
 			
 			// If user is authenticated
 			if(is_authenticated($this->ex['ident']) == 1)
@@ -194,8 +174,8 @@ class IRCBot
 							$channel = $this->ex['receiver'];
 							$username = $this->ex['command'][1];
 						}
-						send_data("INVITE", $username." ".$channel);
-						send_data("PRIVMSG", "User ".$username." was invited to ".$channel."!", $this->ex['username']);
+						send_data("INVITE", $username." ".to_channel($channel));
+						send_data("PRIVMSG", "User ".$username." was invited to ".to_channel($channel)."!", $this->ex['username']);
 						break;
 				}
 
@@ -240,27 +220,27 @@ class IRCBot
 						case '!say':
 							// Length of command plus channel
 							$length = strlen($this->ex['command'][0]." ".$this->ex['command'][1]);
-							send_data("PRIVMSG", substr($this->ex['fullcommand'], $length+1), $this->ex['command'][1]);
+							send_data("PRIVMSG", substr($this->ex['fullcommand'], $length+1), to_channel($this->ex['command'][1]));
 							break;
 						case '!op':
 							// 0 is the command, 1 is the channel and 2 is the user
-							op_user($this->ex['command'][1], $this->ex['command'][2], true);
-							send_data("PRIVMSG", "User ".($this->ex['command'][2] ? $this->ex['command'][2] : $this->ex['username'])." was given operator status!", $this->ex['username']);
+							op_user($this->ex, true);
+							send_data("PRIVMSG", "User ".(isset($this->ex['command'][2]) ? $this->ex['command'][2] : $this->ex['username'])." was given operator status!", $this->ex['username']);
 							break;
 						case '!deop':
 							// 0 is the command, 1 is the channel and 2 is the user
-							op_user($this->ex['command'][1], $this->ex['command'][2], false);
-							send_data("PRIVMSG", "User ".($this->ex['command'][2] ? $this->ex['command'][2] : $this->ex['username'])." was taken operator status!", $this->ex['username']);
+							op_user($this->ex, false);
+							send_data("PRIVMSG", "User ".(isset($this->ex['command'][2]) ? $this->ex['command'][2] : $this->ex['username'])." was taken operator status!", $this->ex['username']);
 							break;
 						case '!voice':
 							// 0 is the command, 1 is the channel and 2 is the user
-							voice_user($this->ex['command'][1], $this->ex['command'][2], true);
-							send_data("PRIVMSG", "User ".($this->ex['command'][2] ? $this->ex['command'][2] : $this->ex['username'])." was given voice!", $this->ex['username']);
+							voice_user($this->ex, true);
+							send_data("PRIVMSG", "User ".(isset($this->ex['command'][2]) ? $this->ex['command'][2] : $this->ex['username'])." was given voice!", $this->ex['username']);
 							break;
 						case '!devoice':
 							// 0 is the command, 1 is the channel and 2 is the user
-							voice_user($this->ex['command'][1], $this->ex['command'][2], false);
-							send_data("PRIVMSG", "User ".($this->ex['command'][2] ? $this->ex['command'][2] : $this->ex['username'])." was de-voiced!", $this->ex['username']);
+							voice_user($this->ex, false);
+							send_data("PRIVMSG", "User ".(isset($this->ex['command'][2]) ? $this->ex['command'][2] : $this->ex['username'])." was de-voiced!", $this->ex['username']);
 							break;
 					}
 				}
@@ -284,9 +264,9 @@ class IRCBot
 			}
 			
 			// List of commands the bot responds to from any user via channel
-			// If the bots nickname is found in the full command sent to a channel
 			if($this->ex['type'] == "CHANNEL")
 			{
+			     // If the bots nickname is found in the full command sent to a channel
 				if(stristr($this->ex['fullcommand'], BOT_NICKNAME) != FALSE)
 				{
 					// Shuffle the array, bring out a random key and say it in the channel
