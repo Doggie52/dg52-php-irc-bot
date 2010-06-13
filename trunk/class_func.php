@@ -37,19 +37,17 @@
   __| |/ __| __|_  )
  / _` | (_ |__ \/ / 
  \__,_|\___|___/___|
-  ___ _  _ ___ 
- | _ \ || | _ \
- |  _/ __ |  _/
- |_| |_||_|_|  
-  ___ ___  ___ 
- |_ _| _ \/ __|
-  | ||   / (__ 
- |___|_|_\\___|
+                    
+  ___ _  _ ___   ___ ___  ___ 
+ | _ \ || | _ \ |_ _| _ \/ __|
+ |  _/ __ |  _/  | ||   / (__ 
+ |_| |_||_|_|   |___|_|_\\___|
+                              
   ___      _   
  | _ ) ___| |_ 
  | _ \/ _ \  _|
  |___/\___/\__|
-
+ 
  dG52 PHP IRC Bot
    Author: Douglas Stridsberg
    Email: doggie52@gmail.com
@@ -162,13 +160,22 @@
 		}
 	}
 	
+	/**
+	 * Looks up the specified command's help
+	 * 
+	 * @access public
+	 * @param string $command The command specified
+	 * @param string $commandarray The array of commands and their respective help entries
+	 * @param string $username The username that requests the help
+	 * @return void
+	 */
 	function lookup_help($command, $commandarray, $username)
 	{
 		$command = strtolower($command);
 		// If the user is not looking for specific support for a command
 		if(!$command)
 		{
-			send_data("PRIVMSG", "List of commands usable via PM", $username);
+			send_data("PRIVMSG", format_text("bold", "COMMANDS AVAILABLE VIA PM"), $username);
 			foreach($commandarray as $commandname => $commandusage)
 			{
 				send_data("PRIVMSG", " - !".$commandname, $username);
@@ -376,6 +383,46 @@
 		{
 			send_data("MODE", $channel . ' -v ' . $user);
 		}
+	}
+	
+	/**
+	 * Formats the text according to an array of different styles
+	 * 
+	 * @access public
+	 * @param mixed $styles The styles to format the text with (choose between bold, italic or underline)
+	 * @param string $message The message to format
+	 * @return string $message The formatted message
+	 */
+	function format_text($styles, $message)
+	{
+		// If the input is not an array, explode it into one
+		if(!is_array($styles))
+		{
+			$styles = explode(" ", $styles);
+		}
+		
+		if(in_array("bold", $styles))
+		{
+			// Send STX for bold
+			$message = chr(2).$message;
+		}
+		
+		if(in_array("italic", $styles))
+		{
+			// Send SYN for italic
+			$message = chr(22).$message;
+		}
+		
+		if(in_array("underline", $styles))
+		{
+			// Send US for underline
+			$message = chr(31).$message;
+		}
+		
+		// Send SI for end of message
+		$message = $message.chr(15);
+		
+		return $message;
 	}
 	
 	/**
