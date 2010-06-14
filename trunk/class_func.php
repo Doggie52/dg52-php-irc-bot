@@ -130,7 +130,7 @@
 	 */
 	function parse_raw_command($data)
 	{
-	     // Explodes the raw data into an initial array
+		// Explodes the raw data into an initial array
 		$ex				= explode(" ", $data);
 		// Get length of everything before command including last space
 		$identlength		= strlen($ex[0]." ".(isset($ex[1]) ? $ex[1] : "")." ".(isset($ex[2]) ? $ex[2] : "")." ");
@@ -223,23 +223,27 @@
 	 * 
 	 * @access public
 	 * @param string $ident The username!hostname of the user we want to check
-	 * @return boolean true for an authenticated user, false for one which isn't
+	 * @return boolean $authenticated true for an authenticated user, false for one which isn't
 	 */
 	function is_authenticated($ident)
 	{
 		// Fetch the userlist array
 		global $users;
 		
-		// If the ident is found in the userlist array, return true
+		// If the lower-case ident is found in the userlist array, return true
+		$ident = strtolower($ident);
 		if(in_array($ident, $users))
 		{
 			debug_message("User ($ident) is authenticated.");
-			return 1;
+			$authenticated = true;
 		}
 		else
 		{
-			return 0;
+		     debug_message("User ($ident) is not authenticated.");
+			$authenticated = false;
 		}
+		
+		return $authenticated;
 	}
 	
 	/**
