@@ -19,6 +19,7 @@
 	 *			- *DONE* Ability to set channel topic
 	 *			- Ability to /whois a user and get response in a PM
 	 *			- *DONE* Ability to invite a user
+	 *			- Ability to add bot admin on-the-fly
 	 *		- Bot abilities
 	 *			- *DONE* Ability to use /me
 	 *			- Ability to use /notice
@@ -69,7 +70,8 @@ class IRCBot
 		
 		// Open the users.inc file
 		$file = fopen("users.inc", "r");
-		$userlist = fread($file, filesize("users.inc"));
+		// Turn the hostnames into lowercase (does not compromise security, as hostnames are unique anyway)
+		$userlist = strtolower(fread($file, filesize("users.inc")));
 		fclose($file);
 		// Split each line into separate entry in a global array
 		global $users;
@@ -297,7 +299,7 @@ class IRCBot
 						send_data("PRIVMSG", "http://www.google.com/search?".$query, $this->ex['receiver']);
 						break;
 					case '!youtube':
-						$query = "search_query=test".urlencode(substr($this->ex['fullcommand'],9));
+						$query = "search_query=".urlencode(substr($this->ex['fullcommand'],9));
 						send_data("PRIVMSG", "http://www.youtube.com/results?".$query, $this->ex['receiver']);
 						break;
 				}
