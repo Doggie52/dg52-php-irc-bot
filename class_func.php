@@ -196,10 +196,13 @@
 		if(!$command)
 		{
 			send_data("PRIVMSG", format_text("bold", "COMMANDS AVAILABLE VIA PM"), $username);
+			$commandlist = "";
 			foreach($commandarray as $commandname => $commandusage)
 			{
-				send_data("PRIVMSG", " - !".$commandname, $username);
+				$commandlist .= "!".$commandname.", ";
 			}
+			send_data("PRIVMSG", substr($commandlist, 0, -2), $username);
+			send_data("PRIVMSG", "Type !help <command> to see the corresponding syntax.", $username);
 		}
 		else
 		{
@@ -281,13 +284,34 @@
 	 *
 	 * @access public
 	 * @param string $line The line to write to the file
-	 * @return void
+	 * @param array $commandarray The array of commands and their respective help entries
+	 * @return bool $successs Whether the write was successful or not
 	 */
-	function write_response($line)
+	function write_response($line, $commandarray)
 	{
-		// Adds a newline to the beginning of the line to write
-		$line = "\n".$line;
-		file_put_contents("responses.inc", $line, FILE_APPEND);
+	     if($line)
+	     {
+	          if($line[0] != " ")
+	          {
+				$linearray = explode(" ", $line);
+				// Does there exist a definition?
+				if($linearray[1])
+				{
+					if(!array_key_exists($linearray[0], $commandarray))
+					{
+						$line = "\n".$line;
+						// Appends the new line only if it meets the following: existant, not blankspace and unique
+						file_put_contents("responses.inc", $line, FILE_APPEND);
+						$success = 1;
+					}
+				}
+			}
+		}
+		else
+		{
+			$success = 0;
+		}
+		return $success;
 	}
 	
 	/**
