@@ -140,11 +140,17 @@ class IRCBot
 					case '!add':
 						$line = substr($this->ex['fullcommand'], 5);
 						// Writes the line to the file
-						write_response($line);
-						debug_message("Keyword \"".$this->ex['command'][1]."\" was defined by ".$this->ex['username']."!");
-						send_data("PRIVMSG", "Keyword \"".$this->ex['command'][1]."\" was added!", $this->ex['username']);
-						// Reload responses
-						$this->response = reload_speech();
+						if(write_response($line, $this->response['info']) != 0)
+						{
+							debug_message("Keyword \"".$this->ex['command'][1]."\" was defined by ".$this->ex['username']."!");
+							send_data("PRIVMSG", "Keyword \"".$this->ex['command'][1]."\" was added!", $this->ex['username']);
+							// Reload responses
+							$this->response = reload_speech();
+						}
+						else
+						{
+                                   send_data("PRIVMSG", "An error occurred when defining the word!", $this->ex['username']);
+						}
 						break;
 					case '!t':
 					case '!topic':
@@ -271,7 +277,8 @@ class IRCBot
 			     // If the bots nickname is found in the full command sent to a channel
 				if(stristr($this->ex['fullcommand'], BOT_NICKNAME) != FALSE)
 				{
-					// Shuffle the array, bring out a random key and say it in the channel
+					// Seed the random number generator and shuffle the array, then bring out a random key and say it in the channel
+					srand((float)microtime() * 10000);
 					shuffle($this->response['mention']);
 					$randommention = array_rand($this->response['mention'], 1);
 					send_data("PRIVMSG", $this->response['mention'][$randommention], $this->ex['receiver']);
