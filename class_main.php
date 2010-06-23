@@ -11,6 +11,7 @@
 	 *		- Documentation for class
 	 *		- *PARTIALLY DONE* Structure the class, perhaps outsource some features of main()
 	 *		- Make use of usleep() to minimize CPU load
+	 *      - *DONE* Log all actions in a log-file
 	 *		- *DONE* Ability to reload speech array
 	 *		- *DONE* Ability to add speech on-the-fly
 	 *		- *DONE* Ability to format sent PMs
