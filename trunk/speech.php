@@ -14,7 +14,15 @@
 		"Someone said my name!",
 		"Cool, I am being mentioned!",
 		BOT_NICKNAME." is my name, yes indeed...",
-		"I am here, what do you want!"
+		"I am here, what do you want!",
+		"What can I do for you?",
+		"How can I be of service?",
+		"Quocom is my name, answering questions is my game.",
+		"Hello %username%, how can I help?",
+		"It's a beautiful day to be talking to you %username%, but let's get down to business.",
+		"Greetings good Sir! (Or Madam!). Do you require my assistance?",
+		"Have no fear, for I am here!",
+		"Have no fear, for ".BOT_NICKNAME." is here!"
 	);
 	
 	$response['commands']['pm'] = array(

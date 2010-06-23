@@ -23,6 +23,7 @@
 	 *			- Ability to add bot admin on-the-fly
 	 *		- Bot abilities
 	 *			- *DONE* Ability to use /me
+	 *          - *DONE* Ability to refer to a username when responding
 	 *			- Ability to use /notice
 	 *			- *NOT WORKING* Ability to change nickname for the session
 	 */
@@ -141,16 +142,16 @@ class IRCBot
 					case '!add':
 						$line = substr($this->ex['fullcommand'], 5);
 						// Writes the line to the file
-						if(write_response($line, $this->response['info']) != 0)
+						if(write_definition($line, $this->response['info']) != 0)
 						{
 							debug_message("Keyword \"".$this->ex['command'][1]."\" was defined by ".$this->ex['username']."!");
-							send_data("PRIVMSG", "Keyword \"".$this->ex['command'][1]."\" was added!", $this->ex['username']);
+							send_data("PRIVMSG", "A definition for keyword \"".$this->ex['command'][1]."\" was added!", $this->ex['username']);
 							// Reload responses
 							$this->response = reload_speech();
 						}
 						else
 						{
-                                   send_data("PRIVMSG", "An error occurred when defining the word!", $this->ex['username']);
+                                   send_data("PRIVMSG", "An error occurred when adding the definition!", $this->ex['username']);
 						}
 						break;
 					case '!t':
@@ -172,19 +173,37 @@ class IRCBot
 						break;
 					case '!i':
 					case '!invite':
-						// If the receiver message is a PM, assume that the channelname is included
-						if($this->ex['type'] == "PRIVATE")
-						{
-							$channel = $this->ex['command'][2];
-							$username = $this->ex['command'][1];
-						}
-						else
-						{
-							$channel = $this->ex['receiver'];
-							$username = $this->ex['command'][1];
-						}
-						send_data("INVITE", $username." ".to_channel($channel));
-						send_data("PRIVMSG", "User ".$username." was invited to ".to_channel($channel)."!", $this->ex['username']);
+							// If the receiver message is a PM, assume that the channelname is included
+							if($this->ex['type'] == "PRIVATE")
+							{
+							    // If both a valid username and a channel has been entered
+					    		if($this->ex['command'][1] && $this->ex['command'][2])
+					    		{
+					    		    $username = $this->ex['command'][1];
+									$channel = $this->ex['command'][2];
+									send_data("INVITE", $username." ".to_channel($channel));
+									send_data("PRIVMSG", "User ".$username." was invited to ".to_channel($channel)."!", $this->ex['username']);
+								}
+								else
+								{
+									send_data("PRIVMSG", "Not enough data was entered!", $this->ex['username']);
+								}
+							}
+							else
+							{
+							    // If a valid username has been entered
+							    if($this->ex['command'][1])
+							    {
+								    $username = $this->ex['command'][1];
+									$channel = $this->ex['receiver'];
+									send_data("INVITE", $username." ".to_channel($channel));
+									send_data("PRIVMSG", "User ".$username." was invited to ".to_channel($channel)."!", $this->ex['username']);
+								}
+								else
+								{
+									send_data("PRIVMSG", "Not enough data was entered!", $this->ex['username']);
+								}
+							}
 						break;
 				}
 
@@ -282,7 +301,9 @@ class IRCBot
 					srand((float)microtime() * 10000);
 					shuffle($this->response['mention']);
 					$randommention = array_rand($this->response['mention'], 1);
-					send_data("PRIVMSG", $this->response['mention'][$randommention], $this->ex['receiver']);
+					// Match %username% to the user who mentioned the bot
+					$response = preg_replace("/%username%/", $this->ex['username'], $this->response['mention'][$randommention]);
+					send_data("PRIVMSG", $response, $this->ex['receiver']);
 					debug_message("Bot was mentioned and thus it replied!");
 				}
 				switch(strtolower($this->ex['command'][0]))
@@ -291,13 +312,13 @@ class IRCBot
 						$keyword = strtolower($this->ex['command'][1]);
 						if($this->response['info'][$keyword])
 						{
-							// If there is a keyword available
+							// If the entered keyword matches a definition available
 							send_data("PRIVMSG", $this->response['info'][$keyword], $this->ex['receiver']);
 							debug_message("Keyword \"".$this->ex['command'][1]."\" was defined upon request by ".$this->ex['username']."!");
 						}
 						else
 						{
-							// If there is no keyword available
+							// If the entered keyword does not match a definition available
 							send_data("PRIVMSG", "No help for this item was found", $this->ex['receiver']);
 							debug_message("Keyword \"".$this->ex['command'][1]."\" was undefined but requested by ".$this->ex['username']."!");
 						}

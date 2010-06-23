@@ -281,31 +281,30 @@
 		}
 		// Include random responses
 		include("speech.php");
-		// Include info-keywords and their responses
-		$keywordlist = file_get_contents("responses.inc");
+		// Include definitions and their responses
+		$definitionlist = file_get_contents(DEFINITION_PATH);
 		// Split each line into separate entry
-		$line = explode("\n", $keywordlist);
-		foreach($line as $keywordline)
+		$line = explode("\n", $definitionlist);
+		foreach($line as $definitionline)
 		{
 			// Get the first word in [0] and the rest in [1]
-			$explode = explode(" ", $keywordline, 2);
+			$explode = explode(" ", $definitionline, 2);
 			// Split them up!
 			$response['info'][strtolower($explode[0])] = $explode[1];
 		}
-		
-		debug_message("The speech array was successfully loaded into the system!");
+		debug_message("The speech and definition arrays were successfully loaded into the system!");
 		return $response;
 	}
 	
 	/**
-	 * Writes to the response-file.
+	 * Writes to the list of keywords and their definitions
 	 *
 	 * @access public
 	 * @param string $line The line to write to the file
 	 * @param array $commandarray The array of commands and their respective help entries
 	 * @return bool $successs Whether the write was successful or not
 	 */
-	function write_response($line, $commandarray)
+	function write_definition($line, $commandarray)
 	{
 	     if($line)
 	     {
@@ -319,7 +318,7 @@
 					{
 						$line = "\n".$line;
 						// Appends the new line only if it meets the following: existant, not blankspace and unique
-						file_put_contents("responses.inc", $line, FILE_APPEND);
+						file_put_contents(DEFINITION_PATH, $line, FILE_APPEND);
 						$success = 1;
 					}
 				}
