@@ -98,7 +98,7 @@
 		}
 		else
 		{
-            send_data("PRIVMSG", "  Server OS: ".strtolower(PHP_OS), $username);
+			send_data("PRIVMSG", "  Server OS: ".strtolower(PHP_OS), $username);
 		}
 		$currtime = time();
 		$seconds = $currtime - $starttime;
@@ -306,10 +306,10 @@
 	 */
 	function write_definition($line, $commandarray)
 	{
-	     if($line)
-	     {
-	          if($line[0] != " ")
-	          {
+		if($line)
+		{
+			if($line[0] != " ")
+			{
 				$linearray = explode(" ", $line);
 				// Does there exist a definition?
 				if($linearray[1])
@@ -340,13 +340,13 @@
 	 */
 	function to_channel($channel)
 	{
-          if($channel[0] != "#")
+		if($channel[0] != "#")
 		{
 			$channel = "#".$channel;
 		}
 		return $channel;
 	}
-
+	
 	/**
 	 * Joins a channel. Checks if the channel-name includes a #-sign
 	 *
@@ -362,7 +362,7 @@
 		
 		return $channel;
 	}
-
+	
 	/**
 	 * Parts (leaves) a channel. Checks if the channel-name includes a #-sign.
 	 *
@@ -389,11 +389,11 @@
 	 */
 	function set_topic($channel, $topic)
 	{
-	     $channel = to_channel($channel);
+		$channel = to_channel($channel);
 		send_data("TOPIC", $channel." :".$topic);
 		debug_message("Channel topic for ".$channel." was altered to \"".$topic."\"!");
 	}
-
+	
 	/**
 	 * OP's or de-OP's a user (depending on the boolean sent). If the bot has right to do so, it will give the specified user operator rights in the specified channel.
 	 *
@@ -404,17 +404,17 @@
 	 */
 	function op_user($ex, $op = true)
 	{
-	     $channel = to_channel($ex['command'][1]);
-	     // If the username is not supplied assume it is identical to that which the PM originated from
+		$channel = to_channel($ex['command'][1]);
+		// If the username is not supplied assume it is identical to that which the PM originated from
 		if(!isset($ex['command'][2]))
 		{
 			$user = $ex['username'];
 		}
 		else
 		{
-               $user = $ex['command'][2];
+			$user = $ex['command'][2];
 		}
-
+		
 		if($op)
 		{
 			send_data("MODE", $channel . ' +o ' . $user);
@@ -429,7 +429,7 @@
 	 * Voices or de-voices a user (depending on the boolean sent). If the bot has right to do so, it will give the specified user voice in the specified channel.
 	 *
 	 * @access public
-      * @param array $ex The full command-array used to grab either the receiver or the username
+	 * @param array $ex The full command-array used to grab either the receiver or the username
 	 * @param bool $voice Whether you wish to voice or de-voice the user (default: true)
 	 * @return void
 	 */
@@ -443,7 +443,7 @@
 		}
 		else
 		{
-               $user = $ex['command'][2];
+			$user = $ex['command'][2];
 		}
 		
 		if($voice)
@@ -454,6 +454,84 @@
 		{
 			send_data("MODE", $channel . ' -v ' . $user);
 		}
+	}
+	
+	/**
+	 * Query Google AJAX Search API. All credits to http://w-shadow.com/blog/2009/01/05/get-google-search-results-with-php-google-ajax-api-and-the-seo-perspective/.
+	 *
+	 * @todo Implement this function, checking if curl is enabled or not and test the function itself
+	 *
+	 * @access public
+	 * @param array $args URL arguments. For most endpoints only "q" (query) is required.
+	 * @param string $referer Referer to use in the HTTP header (must be valid).
+	 * @param string $endpoint API endpoint. Defaults to 'web' (web search).
+	 * @return object or NULL on failure
+	 */
+	function google_search_api($args, $referer = 'http://localhost/', $endpoint = 'web')
+	{
+		$url = "http://ajax.googleapis.com/ajax/services/search/".$endpoint;
+		if (!array_key_exists('v', $args))
+		{
+			$args['v'] = '1.0';
+		}
+		$url .= '?'.http_build_query($args, '', '&');
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		// note that the referer *must* be set
+		curl_setopt($ch, CURLOPT_REFERER, $referer);
+		$body = curl_exec($ch);
+		curl_close($ch);
+		//decode and return the response
+		return json_decode($body);
+	}
+	
+	/**
+	 * Query a regular Google search page and extract results from it. All credits to http://www.roscripts.com/snippets/show/141.
+	 *
+	 * @todo Search result descriptions ($result['description'][$i]) do not work when Facebook user profiles are returned
+	 *
+	 * @access public
+	 * @param string $query The search-query
+	 * @param int $numresults The number of results to fetch (default: 3)
+	 * @return mixed Either an array with the results or NULL if there are no results
+	 */
+	function google_search_html($query, $numresults = 3)
+	{
+		$off_site = 'http://www.google.com/search?q='.urlencode($query).'&ie=UTF-8&oe=UTF-8';
+		$buf = file_get_contents($off_site) or die("Unable to grab contents.");
+		// Get rid of highlights and linebreaks
+		$buf = str_replace("<em>", "", $buf);
+		$buf = str_replace("</em>", "", $buf);
+		$buf = str_replace("<b>", "", $buf);
+		$buf = str_replace("</b>", "", $buf);
+		$buf = str_replace("<br>", "", $buf);
+		// Find the results, if there are any
+		if(($parts = explode('<h3 class="r">', $buf, -1)))
+		{
+			// Start a counter to count the returned results
+			$i = 0;
+		    foreach($parts as $parts)
+		    {
+		        // For each array entry check if the counter is less than or equal to the desired number of results
+		        // Also, if it is 1 (i.e. the initial/first entry) do not touch it
+		        if($i <= $numresults && $i != 0)
+		        {
+					$parts2 = explode('http://', $parts);
+					$parts3 = explode('>', $parts2[1]);
+					// Get the desired fields by subtracting certain bits off the end of every entry
+					$result[$i]['id'] = $i;
+					$result[$i]['url'] = "http://".substr($parts3[0], 0, -9);
+					$result[$i]['title'] = html_entity_decode(substr($parts3[1], 0, -3));
+					// Search result descriptions do not work when Facebook user profiles are returned
+					$result[$i]['description'] = html_entity_decode(substr($parts3[4], 0, -13), ENT_COMPAT, "UTF-8");
+					// debug_message("#".$i." - URL: ".$result['url'][$i]." - TITLE: ".$result['title'][$i]." - DESC: ".$result['description'][$i]);
+				}
+				$i++;
+			}
+			return $result;
+		}
+		return;
 	}
 	
 	/**
@@ -507,15 +585,16 @@
 	{
 		if(DEBUG)
 		{
+		    $line = "[".@date('h:i:s')."] ".$message."\r\n";
 			if(GUI)
 			{
-				echo "\r\n<br>[".@date('h:i:s')."] ".$message;
+				echo "<br>".$line;
 			}
 			else
 			{
-				echo "\r\n[".@date('h:i:s')."] ".$message;
+				echo $line;
 				$newpath = preg_replace("/%date%/", @date('Ymd'), LOG_PATH);
-				file_put_contents($newpath, "\r\n[".@date('h:i:s')."] ".$message, FILE_APPEND);
+				file_put_contents($newpath, $line, FILE_APPEND);
 			}
 		}
 	}

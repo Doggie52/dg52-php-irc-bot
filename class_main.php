@@ -11,7 +11,7 @@
 	 *		- Documentation for class
 	 *		- *PARTIALLY DONE* Structure the class, perhaps outsource some features of main()
 	 *		- Make use of usleep() to minimize CPU load
-	 *      - *DONE* Log all actions in a log-file
+	 *		- *DONE* Log all actions in a log-file
 	 *		- *DONE* Ability to reload speech array
 	 *		- *DONE* Ability to add speech on-the-fly
 	 *		- *DONE* Ability to format sent PMs
@@ -23,7 +23,7 @@
 	 *			- Ability to add bot admin on-the-fly
 	 *		- Bot abilities
 	 *			- *DONE* Ability to use /me
-	 *          - *DONE* Ability to refer to a username when responding
+	 *			- *DONE* Ability to refer to a username when responding
 	 *			- Ability to use /notice
 	 *			- *NOT WORKING* Ability to change nickname for the session
 	 */
@@ -36,7 +36,7 @@ class IRCBot
 {
 	// This is going to hold the data received from the socket
 	var $data;
-
+	
 	// This is going to hold all of the messages from both server and client
 	var $ex = array();
 	
@@ -48,7 +48,7 @@ class IRCBot
 	
 	// This is going to hold our starting time
 	var $starttime;
-
+	
 	/**
 	 * Construct item, opens the server connection, logs the bot in, import stuff
 	 *
@@ -68,12 +68,13 @@ class IRCBot
 		print_header();
 		
 		// Log bot in
-		$this->login();
+		$channels = explode(" ", BOT_CHANNELS);
+		$this->login($channels);
 		
 		// Open the users.inc file
-		$file = fopen("users.inc", "r");
+		$file = fopen(USERS_PATH, "r");
 		// Turn the hostnames into lowercase (does not compromise security, as hostnames are unique anyway)
-		$userlist = strtolower(fread($file, filesize("users.inc")));
+		$userlist = strtolower(fread($file, filesize(USERS_PATH)));
 		fclose($file);
 		// Split each line into separate entry in a global array
 		global $users;
@@ -85,22 +86,43 @@ class IRCBot
 		// Declare the starttime
 		$this->starttime = time();
 		
+		// Initializes the main bot workhorse
 		$this->main();
+		
+		// Closes the socket
+		fclose($socket) or die('Unable to close the socket!');
 	}
-
+	
 	/**
 	 * Logs the bot in on the server
 	 *
 	 * @access public
+	 * @param array $channels An array of channels to join directly on connect
 	 * @return void
 	 */
-	function login()
+	function login($channels)
 	{
 		send_data('USER', BOT_NICKNAME.' douglasstridsberg.com '.BOT_NICKNAME.' :'.BOT_NAME);
 		send_data('NICK', BOT_NICKNAME);
 		debug_message("Bot connected successfully!");
+		// Temporarily tap into the socket
+		global $socket;
+		while(!feof($socket))
+		{
+			$tempdata = fgets($socket);
+			// If "welcome" is found the bot hass been fully connected. Break the loop
+			if(strpos($tempdata, "welcome"))
+			{
+				debug_message("Bot was greeted.");
+				break;
+			}
+		}
+		foreach($channels as $channel)
+		{
+			join_channel($channel);
+		}
 	}
-
+	
 	/**
 	 * This is the workhorse function, grabs the data from the server and displays on the browser if DEBUG_OUTPUT is true.
 	 *
@@ -122,7 +144,7 @@ class IRCBot
 			flush();
 			
 			$this->ex = parse_raw_command($this->data);
-
+			
 			if($this->ex[0] == "PING")
 			{
 				// Plays ping-pong with the server to stay connected
@@ -151,7 +173,7 @@ class IRCBot
 						}
 						else
 						{
-                                   send_data("PRIVMSG", "An error occurred when adding the definition!", $this->ex['username']);
+							send_data("PRIVMSG", "An error occurred when adding the definition!", $this->ex['username']);
 						}
 						break;
 					case '!t':
@@ -176,10 +198,10 @@ class IRCBot
 							// If the receiver message is a PM, assume that the channelname is included
 							if($this->ex['type'] == "PRIVATE")
 							{
-							    // If both a valid username and a channel has been entered
-					    		if($this->ex['command'][1] && $this->ex['command'][2])
-					    		{
-					    		    $username = $this->ex['command'][1];
+								// If both a valid username and a channel has been entered
+								if($this->ex['command'][1] && $this->ex['command'][2])
+								{
+									$username = $this->ex['command'][1];
 									$channel = $this->ex['command'][2];
 									send_data("INVITE", $username." ".to_channel($channel));
 									send_data("PRIVMSG", "User ".$username." was invited to ".to_channel($channel)."!", $this->ex['username']);
@@ -191,10 +213,10 @@ class IRCBot
 							}
 							else
 							{
-							    // If a valid username has been entered
-							    if($this->ex['command'][1])
-							    {
-								    $username = $this->ex['command'][1];
+								// If a valid username has been entered
+								if($this->ex['command'][1])
+								{
+									$username = $this->ex['command'][1];
 									$channel = $this->ex['receiver'];
 									send_data("INVITE", $username." ".to_channel($channel));
 									send_data("PRIVMSG", "User ".$username." was invited to ".to_channel($channel)."!", $this->ex['username']);
@@ -206,7 +228,7 @@ class IRCBot
 							}
 						break;
 				}
-
+				
 				if($this->ex['type'] == "PRIVATE")
 				{
 					// List of commands the bot responds to from an authenticated user only via PM
@@ -230,7 +252,7 @@ class IRCBot
 						case '!quit':
 							send_data("PRIVMSG", "Bot is quitting!", $this->ex['username']);
 							send_data("QUIT", ":".BOT_QUITMSG);
-							debug_message("Bot has quitted!\r\n");
+							debug_message("Bot has disconnected and been turned off!");
 							break;
 						case '!reload':
 							reload_speech();
@@ -294,7 +316,7 @@ class IRCBot
 			// List of commands the bot responds to from any user via channel
 			if($this->ex['type'] == "CHANNEL")
 			{
-			     // If the bots nickname is found in the full command sent to a channel
+				// If the bots nickname is found in the full command sent to a channel
 				if(stristr($this->ex['fullcommand'], BOT_NICKNAME) != FALSE)
 				{
 					// Seed the random number generator and shuffle the array, then bring out a random key and say it in the channel
@@ -308,6 +330,7 @@ class IRCBot
 				}
 				switch(strtolower($this->ex['command'][0]))
 				{
+					case '!d':
 					case '!define':
 						$keyword = strtolower($this->ex['command'][1]);
 						if($this->response['info'][$keyword])
@@ -324,8 +347,13 @@ class IRCBot
 						}
 						break;
 					case '!google':
-						$query = "q=".urlencode(substr($this->ex['fullcommand'], 8));
-						send_data("PRIVMSG", "http://www.google.com/search?".$query, $this->ex['receiver']);
+						$query = substr($this->ex['fullcommand'], 8);
+						$results = google_search_html($query);
+						foreach($results as $results)
+						{
+							send_data("PRIVMSG", "#".$results['id']." ".format_text("bold", $results['title'])." (".$results['url'].")", $this->ex['receiver']);
+							send_data("PRIVMSG", format_text("italic", $results['description']), $this->ex['receiver']);
+						}
 						break;
 					case '!youtube':
 						$query = "search_query=".urlencode(substr($this->ex['fullcommand'],9));
