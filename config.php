@@ -29,6 +29,7 @@
 	define("DEBUG", 			TRUE);							// Do you wish to receive debug messages? If not, no logs will be written either
 	define("DEBUG_OUTPUT", 		FALSE);							// Do you wish to receive the full server output? This will not be logged
 	define("LOG_PATH", 			"log_%date%.txt");				// Path to the log-file relative to index.php. %date% results in "20100623"
+	define("LOG_APPEND",		FALSE);							// Either append or overwrite the log
 	
 	/**
 	 * Miscellaneous paths

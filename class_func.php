@@ -260,7 +260,7 @@
 		}
 		else
 		{
-		     debug_message("User ($ident) is not authenticated.");
+		    debug_message("User ($ident) is not authenticated.");
 			$authenticated = false;
 		}
 		
@@ -487,9 +487,7 @@
 	}
 	
 	/**
-	 * Query a regular Google search page and extract results from it. All credits to http://www.roscripts.com/snippets/show/141.
-	 *
-	 * @todo Search result descriptions ($result['description'][$i]) do not work when Facebook user profiles are returned
+	 * Query a regular Google search page and extract results from it.
 	 *
 	 * @access public
 	 * @param string $query The search-query
@@ -500,37 +498,60 @@
 	{
 		$off_site = 'http://www.google.com/search?q='.urlencode($query).'&ie=UTF-8&oe=UTF-8';
 		$buf = file_get_contents($off_site) or die("Unable to grab contents.");
-		// Get rid of highlights and linebreaks
+		// Get rid of highlights and linebreaks along with other tags
 		$buf = str_replace("<em>", "", $buf);
 		$buf = str_replace("</em>", "", $buf);
 		$buf = str_replace("<b>", "", $buf);
 		$buf = str_replace("</b>", "", $buf);
-		$buf = str_replace("<br>", "", $buf);
+		$buf = str_replace("<nobr>", "", $buf);
+		$buf = str_replace("</nobr>", "", $buf);
+		$buf = str_replace("<div class=\"f\">", "", $buf);
+		$buf = str_replace("</div>", " ", $buf);
+		// Define patterns
+		$urlpattern = "/(?:<h3 class=\"r\"><a href=\")(.*?)(?:\")/i";
+		$titlepattern = "/(?:<h3 class=\"r\"><a href=\")(?:.*?)(?:\" class=l>)(.*?)(?:<\/a>)/i";
+		$descriptionpattern = "/(?:<div class=\"s\">)(.*?)(?:<br>)/i";
+		// Match the raw HTML with the patterns
+		preg_match_all($urlpattern, $buf, $urls);
+		preg_match_all($titlepattern, $buf, $titles);
+		preg_match_all($descriptionpattern, $buf, $descriptions);
+		
 		// Find the results, if there are any
-		if(($parts = explode('<h3 class="r">', $buf, -1)))
+		if($urls && $descriptions)
 		{
-			// Start a counter to count the returned results
+			// Initiate counter for amount of search results found
 			$i = 0;
-		    foreach($parts as $parts)
-		    {
-		        // For each array entry check if the counter is less than or equal to the desired number of results
-		        // Also, if it is 1 (i.e. the initial/first entry) do not touch it
-		        if($i <= $numresults && $i != 0)
-		        {
-					$parts2 = explode('http://', $parts);
-					$parts3 = explode('>', $parts2[1]);
-					// Get the desired fields by subtracting certain bits off the end of every entry
+			foreach($urls[1] as $url)
+			{
+				if($i <= $numresults)
+				{
 					$result[$i]['id'] = $i;
-					$result[$i]['url'] = "http://".substr($parts3[0], 0, -9);
-					$result[$i]['title'] = html_entity_decode(substr($parts3[1], 0, -3));
-					// Search result descriptions do not work when Facebook user profiles are returned
-					$result[$i]['description'] = html_entity_decode(substr($parts3[4], 0, -13), ENT_COMPAT, "UTF-8");
-					// debug_message("#".$i." - URL: ".$result['url'][$i]." - TITLE: ".$result['title'][$i]." - DESC: ".$result['description'][$i]);
+					$result[$i]['url'] = html_entity_decode(htmlspecialchars_decode($url, ENT_QUOTES), ENT_QUOTES);
+					$i++;
 				}
-				$i++;
+			}
+			$i = 0;
+			foreach($titles[1] as $title)
+			{
+				if($i <= $numresults)
+				{
+					$result[$i]['title'] = html_entity_decode(htmlspecialchars_decode($title, ENT_QUOTES), ENT_QUOTES);
+					$i++;
+				}
+			}
+			$i = 0;
+			foreach($descriptions[1] as $description)
+			{
+				if($i <= $numresults)
+				{
+					$result[$i]['description'] = html_entity_decode(htmlspecialchars_decode($description, ENT_QUOTES), ENT_QUOTES);
+					$i++;
+				}
 			}
 			return $result;
 		}
+		
+		// If no results are found, return nothing
 		return;
 	}
 	
@@ -593,9 +614,9 @@
 			else
 			{
 				echo $line;
-				$newpath = preg_replace("/%date%/", @date('Ymd'), LOG_PATH);
-				file_put_contents($newpath, $line, FILE_APPEND);
 			}
+			$newpath = preg_replace("/%date%/", @date('Ymd'), LOG_PATH);
+			file_put_contents($newpath, $line, FILE_APPEND);
 		}
 	}
 

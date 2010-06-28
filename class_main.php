@@ -64,6 +64,17 @@ class IRCBot
 		// Include functions
 		include("class_func.php");
 		
+		// Replaces %date% with the date in the form yyyymmdd
+		$newpath = preg_replace("/%date%/", @date('Ymd'), LOG_PATH);
+		// Clears the logfile if LOG_APPEND is FALSE and if the file already exists
+		if(!LOG_APPEND && file_exists($newpath))
+		{
+			if(unlink($newpath))
+			{
+				debug_message("Log cleared!");
+			}
+		}
+		
 		// Print header
 		print_header();
 		
@@ -152,8 +163,8 @@ class IRCBot
 				debug_message("PONG was sent.");
 			}
 			
-			// If user is authenticated
-			if(is_authenticated($this->ex['ident']) == 1)
+			// If first letter is an (!) and user is authenticated
+			if(@$this->ex['command'][0][0] == "!" && is_authenticated($this->ex['ident']) == 1)
 			{
 				// List of commands the bot responds to from an authenticated user either via PM or channel
 				switch(strtolower($this->ex['command'][0]))
