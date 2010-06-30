@@ -366,7 +366,7 @@ class IRCBot
 							lookup_help((isset($this->ex['command'][1]) ? $this->ex['command'][1] : ""), $this->response['commands'][0], $this->ex['username']);
 							break;
 						default:
-							send_data("PRIVMSG", "Command not found or you lack privileges!", $this->ex['username']);
+							send_data("PRIVMSG", "Either the command was not found or you lack the privileges to use it!", $this->ex['username']);
 							break;
 					}
 				}
@@ -430,7 +430,7 @@ class IRCBot
 								}
 								break;
 							default:
-								send_data("PRIVMSG", "Command not found or you lack privileges!", $this->ex['username']);
+								send_data("PRIVMSG", "Either the command was not found or you lack the privileges to use it!", $this->ex['username']);
 								break;
 						}
 					}

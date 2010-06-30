@@ -510,7 +510,7 @@
 		if($urls && $titles)
 		{
 			// Initiate counter for amount of search results found
-			$i = 0;
+			$i = 1;
 			foreach($urls[1] as $url)
 			{
 				if($i <= $numresults)
@@ -520,7 +520,7 @@
 					$i++;
 				}
 			}
-			$i = 0;
+			$i = 1;
 			foreach($titles[1] as $title)
 			{
 				if($i <= $numresults)
@@ -529,7 +529,7 @@
 					$i++;
 				}
 			}
-			$i = 0;
+			$i = 1;
 			foreach($descriptions[1] as $description)
 			{
 				if($i <= $numresults)
@@ -578,7 +578,7 @@
 		if($urls && $titles)
 		{
 			// Initiate counter for amount of search results found
-			$i = 0;
+			$i = 1;
 			foreach($urls[1] as $url)
 			{
 				if($i <= $numresults)
@@ -588,7 +588,7 @@
 					$i++;
 				}
 			}
-			$i = 0;
+			$i = 1;
 			foreach($titles[1] as $title)
 			{
 				if($i <= $numresults)
@@ -597,7 +597,7 @@
 					$i++;
 				}
 			}
-			$i = 0;
+			$i = 1;
 			foreach($descriptions[1] as $description)
 			{
 				if($i <= $numresults)
