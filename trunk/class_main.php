@@ -160,13 +160,121 @@ class IRCBot
 			{
 				// Plays ping-pong with the server to stay connected
 				send_data("PONG", $this->ex[1]);
-				debug_message("PONG was sent.");
+				if(!SUPPRESS_PING)
+				{
+					debug_message("PONG was sent.");
+				}
 			}
 			
-			// If first letter is an (!) and user is authenticated
+			/**
+			 * List of commands
+			 *
+			 * @structure
+			 * 		- Authenticated users
+			 * 			- PM only
+			 * 			- Channel only
+			 * 			- Both
+			 * 		- Non-authenticated users
+			 * 			- PM only
+			 * 			- Channel only
+			 * 			- Both
+			 */
+			
+			/**
+			 * [AUTH] Commands for authenticated users
+			 */
 			if(@$this->ex['command'][0][0] == "!" && is_authenticated($this->ex['ident']) == 1)
 			{
-				// List of commands the bot responds to from an authenticated user either via PM or channel
+				/**
+				 * [AUTH] PM only
+				 */
+				if($this->ex['type'] == "PRIVATE")
+				{
+					switch(strtolower($this->ex['command'][0]))
+					{
+						case '!h':
+						case '!help':
+							// Lock up help for both authenticated users and non-authenticated users
+							// Put them in individual strings to ensure both are run
+							$authed = lookup_help((isset($this->ex['command'][1]) ? $this->ex['command'][1] : ""), $this->response['commands'][1], $this->ex['username']);
+							$nonauthed = lookup_help((isset($this->ex['command'][1]) ? $this->ex['command'][1] : ""), $this->response['commands'][0], $this->ex['username']);
+							// If both return 0 the command was not defined
+							if($authed == '0'	&& $nonauthed == '0')
+							{
+								send_data("PRIVMSG", "Command \"".$this->ex['command'][1]."\" was not defined in the documentation!", $this->ex['username']);
+							}
+							// However if one of them returns 1 the command was defined (or all commands were listed)
+							elseif($authed == '1' || $nonauthed == '1')
+							{
+								send_data("PRIVMSG", "Type !help <command> to see the corresponding syntax.", $this->ex['username']);
+							}
+							break;
+						case '!j':
+						case '!join':
+							// 0 is the command and 1 is the channel
+							send_data("PRIVMSG", "Channel ".join_channel($this->ex['command'][1])." was joined!", $this->ex['username']);
+							break;
+						case '!p':
+						case '!part':
+							// 0 is the command and 1 is the channel
+							send_data("PRIVMSG", "Channel ".part_channel($this->ex['command'][1])." was parted!", $this->ex['username']);
+							break;
+						case '!q':
+						case '!quit':
+							send_data("PRIVMSG", "Bot is quitting!", $this->ex['username']);
+							send_data("QUIT", ":".BOT_QUITMSG);
+							debug_message("Bot has disconnected and been turned off!");
+							break;
+						case '!reload':
+							reload_speech();
+							send_data("PRIVMSG", "Speech was reloaded!", $this->ex['username']);
+							break;
+						case '!s':
+						case '!say':
+							// Length of command plus channel
+							$length = strlen($this->ex['command'][0]." ".$this->ex['command'][1]);
+							send_data("PRIVMSG", substr($this->ex['fullcommand'], $length+1), to_channel($this->ex['command'][1]));
+							break;
+						case '!op':
+							mode_user($this->ex, "+o");
+							send_data("PRIVMSG", "User ".(isset($this->ex['command'][2]) ? $this->ex['command'][2] : $this->ex['username'])." was given operator status!", $this->ex['username']);
+							break;
+						case '!deop':
+							mode_user($this->ex, "-o");
+							send_data("PRIVMSG", "User ".(isset($this->ex['command'][2]) ? $this->ex['command'][2] : $this->ex['username'])." was taken operator status!", $this->ex['username']);
+							break;
+						case '!voice':
+							mode_user($this->ex, "+v");
+							send_data("PRIVMSG", "User ".(isset($this->ex['command'][2]) ? $this->ex['command'][2] : $this->ex['username'])." was given voice!", $this->ex['username']);
+							break;
+						case '!devoice':
+							mode_user($this->ex, "-v");
+							send_data("PRIVMSG", "User ".(isset($this->ex['command'][2]) ? $this->ex['command'][2] : $this->ex['username'])." was de-voiced!", $this->ex['username']);
+							break;
+						default:
+							send_data("PRIVMSG", "Command not found!", $this->ex['username']);
+							break;
+					}
+				}
+				/**
+				 * [AUTH] Channel only
+				 */
+				if($this->ex['type'] == "CHANNEL")
+				{
+					switch(strtolower($this->ex['command'][0]))
+					{
+						case '!me':
+							// Subtract 3 characters (!me) plus a space
+							send_data("PRIVMSG", "/me ".substr($this->ex['fullcommand'], 4), $this->ex['receiver']);
+							break;
+						default:
+							send_data("PRIVMSG", "Command not found!", $this->ex['username']);
+							break;
+					}
+				}
+				/**
+				 * [AUTH] Both PM and channel
+				 */
 				switch(strtolower($this->ex['command'][0]))
 				{
 					case '!info':
@@ -239,138 +347,97 @@ class IRCBot
 							}
 						break;
 				}
-				
+			}
+			
+			/**
+			 * [non-AUTH] Commands for non-authenticated users
+			 */
+			if(@$this->ex['command'][0][0] == "!" && is_authenticated($this->ex['ident']) == 0)
+			{
+				/**
+				 * [non-AUTH] PM only
+				 */
 				if($this->ex['type'] == "PRIVATE")
 				{
-					// List of commands the bot responds to from an authenticated user only via PM
 					switch(strtolower($this->ex['command'][0]))
 					{
 						case '!h':
 						case '!help':
-							lookup_help((isset($this->ex['command'][1]) ? $this->ex['command'][1] : ""), $this->response['commands']['pm'], $this->ex['username']);
+							lookup_help((isset($this->ex['command'][1]) ? $this->ex['command'][1] : ""), $this->response['commands'][0], $this->ex['username']);
 							break;
-						case '!j':
-						case '!join':
-							// 0 is the command and 1 is the channel
-							send_data("PRIVMSG", "Channel ".join_channel($this->ex['command'][1])." was joined!", $this->ex['username']);
-							break;
-						case '!p':
-						case '!part':
-							// 0 is the command and 1 is the channel
-							send_data("PRIVMSG", "Channel ".part_channel($this->ex['command'][1])." was parted!", $this->ex['username']);
-							break;
-						case '!q':
-						case '!quit':
-							send_data("PRIVMSG", "Bot is quitting!", $this->ex['username']);
-							send_data("QUIT", ":".BOT_QUITMSG);
-							debug_message("Bot has disconnected and been turned off!");
-							break;
-						case '!reload':
-							reload_speech();
-							send_data("PRIVMSG", "Speech was reloaded!", $this->ex['username']);
-							break;
-						/*
-						case '!nick':
-							// interpret_privmsg will not work with PM's until BOT_NICKNAME can be changed
-							send_data("NICK", $this->ex['command'][1]);
-							send_data("PRIVMSG", "My nickname was changed to ".$this->ex['command'][1]."!", );
-							debug_message("BOT_NICKNAME was re-defined as ".$this->ex['command'][1]."!", $this->ex['username']);
-							break;
-						*/
-						case '!s':
-						case '!say':
-							// Length of command plus channel
-							$length = strlen($this->ex['command'][0]." ".$this->ex['command'][1]);
-							send_data("PRIVMSG", substr($this->ex['fullcommand'], $length+1), to_channel($this->ex['command'][1]));
-							break;
-						case '!op':
-							// 0 is the command, 1 is the channel and 2 is the user
-							op_user($this->ex, true);
-							send_data("PRIVMSG", "User ".(isset($this->ex['command'][2]) ? $this->ex['command'][2] : $this->ex['username'])." was given operator status!", $this->ex['username']);
-							break;
-						case '!deop':
-							// 0 is the command, 1 is the channel and 2 is the user
-							op_user($this->ex, false);
-							send_data("PRIVMSG", "User ".(isset($this->ex['command'][2]) ? $this->ex['command'][2] : $this->ex['username'])." was taken operator status!", $this->ex['username']);
-							break;
-						case '!voice':
-							// 0 is the command, 1 is the channel and 2 is the user
-							voice_user($this->ex, true);
-							send_data("PRIVMSG", "User ".(isset($this->ex['command'][2]) ? $this->ex['command'][2] : $this->ex['username'])." was given voice!", $this->ex['username']);
-							break;
-						case '!devoice':
-							// 0 is the command, 1 is the channel and 2 is the user
-							voice_user($this->ex, false);
-							send_data("PRIVMSG", "User ".(isset($this->ex['command'][2]) ? $this->ex['command'][2] : $this->ex['username'])." was de-voiced!", $this->ex['username']);
+						default:
+							send_data("PRIVMSG", "Command not found or you lack privileges!", $this->ex['username']);
 							break;
 					}
 				}
-				elseif($this->ex['type'] == "CHANNEL")
+				/**
+				 * [non-AUTH] Channel only
+				 */
+				if($this->ex['type'] == "CHANNEL")
 				{
-					// List of commands the bot responds to from an authenticated user via channel
-					switch(strtolower($this->ex['command'][0]))
+					// If the bots nickname is found in the full command sent to a channel
+					if(stristr($this->ex['fullcommand'], BOT_NICKNAME) != FALSE)
 					{
-						case '!s':
-						case '!say':
-							// Subtract the amount of characters of the command plus a space
-							$length = strlen($this->ex['command'][0]);
-							send_data("PRIVMSG", substr($this->ex['fullcommand'], $length+1), $this->ex['receiver']);
-							break;
-						case '!me':
-							// Subtract 3 characters (!me) plus a space
-							send_data("PRIVMSG", "/me ".substr($this->ex['fullcommand'], 4), $this->ex['receiver']);
-							break;
+						// Seed the random number generator and shuffle the array, then bring out a random key and say it in the channel
+						srand((float)microtime() * 10000);
+						shuffle($this->response['mention']);
+						$randommention = array_rand($this->response['mention'], 1);
+						// Match %username% to the user who mentioned the bot
+						$response = preg_replace("/%username%/", $this->ex['username'], $this->response['mention'][$randommention]);
+						send_data("PRIVMSG", $response, $this->ex['receiver']);
+						debug_message("Bot was mentioned and thus it replied!");
+					}
+					if(@$this->ex['command'][0][0] == "!")
+					{
+						switch(strtolower($this->ex['command'][0]))
+						{
+							case '!d':
+							case '!define':
+								$keyword = strtolower($this->ex['command'][1]);
+								if($this->response['info'][$keyword])
+								{
+									// If the entered keyword matches a definition available
+									send_data("PRIVMSG", $this->response['info'][$keyword], $this->ex['receiver']);
+									debug_message("Keyword \"".$this->ex['command'][1]."\" was defined upon request by ".$this->ex['username']."!");
+								}
+								else
+								{
+									// If the entered keyword does not match a definition available
+									send_data("PRIVMSG", "No help for this item was found", $this->ex['receiver']);
+									debug_message("Keyword \"".$this->ex['command'][1]."\" was undefined but requested by ".$this->ex['username']."!");
+								}
+								break;
+							case '!thetime':
+								$date = date("H:ia T");
+								send_data("PRIVMSG", $date, $this->ex['receiver']);
+								break;
+							case '!google':
+								$query = substr($this->ex['fullcommand'], 8);
+								$results = google_search_html($query);
+								foreach($results as $results)
+								{
+									send_data("PRIVMSG", "#".$results['id']." ".format_text("bold", $results['title'])." (".$results['url'].")", $this->ex['receiver']);
+									send_data("PRIVMSG", format_text("italic", $results['description']), $this->ex['receiver']);
+								}
+								break;
+							case '!youtube':
+								$query = substr($this->ex['fullcommand'], 9);
+								$results = youtube_search_html($query);
+								foreach($results as $results)
+								{
+									send_data("PRIVMSG", "#".$results['id']." ".format_text("bold", $results['title'])." (".$results['url'].")", $this->ex['receiver']);
+									send_data("PRIVMSG", format_text("italic", $results['description']), $this->ex['receiver']);
+								}
+								break;
+							default:
+								send_data("PRIVMSG", "Command not found or you lack privileges!", $this->ex['username']);
+								break;
+						}
 					}
 				}
-			}
-			
-			// List of commands the bot responds to from any user via channel
-			if($this->ex['type'] == "CHANNEL")
-			{
-				// If the bots nickname is found in the full command sent to a channel
-				if(stristr($this->ex['fullcommand'], BOT_NICKNAME) != FALSE)
-				{
-					// Seed the random number generator and shuffle the array, then bring out a random key and say it in the channel
-					srand((float)microtime() * 10000);
-					shuffle($this->response['mention']);
-					$randommention = array_rand($this->response['mention'], 1);
-					// Match %username% to the user who mentioned the bot
-					$response = preg_replace("/%username%/", $this->ex['username'], $this->response['mention'][$randommention]);
-					send_data("PRIVMSG", $response, $this->ex['receiver']);
-					debug_message("Bot was mentioned and thus it replied!");
-				}
-				switch(strtolower($this->ex['command'][0]))
-				{
-					case '!d':
-					case '!define':
-						$keyword = strtolower($this->ex['command'][1]);
-						if($this->response['info'][$keyword])
-						{
-							// If the entered keyword matches a definition available
-							send_data("PRIVMSG", $this->response['info'][$keyword], $this->ex['receiver']);
-							debug_message("Keyword \"".$this->ex['command'][1]."\" was defined upon request by ".$this->ex['username']."!");
-						}
-						else
-						{
-							// If the entered keyword does not match a definition available
-							send_data("PRIVMSG", "No help for this item was found", $this->ex['receiver']);
-							debug_message("Keyword \"".$this->ex['command'][1]."\" was undefined but requested by ".$this->ex['username']."!");
-						}
-						break;
-					case '!google':
-						$query = substr($this->ex['fullcommand'], 8);
-						$results = google_search_html($query);
-						foreach($results as $results)
-						{
-							send_data("PRIVMSG", "#".$results['id']." ".format_text("bold", $results['title'])." (".$results['url'].")", $this->ex['receiver']);
-							send_data("PRIVMSG", format_text("italic", $results['description']), $this->ex['receiver']);
-						}
-						break;
-					case '!youtube':
-						$query = "search_query=".urlencode(substr($this->ex['fullcommand'],9));
-						send_data("PRIVMSG", "http://www.youtube.com/results?".$query, $this->ex['receiver']);
-						break;
-				}
+				/**
+				 * [non-AUTH] Both PM and channel
+				 */
 			}
 		}
 	}
