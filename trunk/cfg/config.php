@@ -5,6 +5,8 @@
 	 * @author: Douglas Stridsberg
 	 * @email: doggie52@gmail.com
 	 * @url: www.douglasstridsberg.com
+	 *
+	 * Main bot configuration file
 	 */
 	 
 	/**
@@ -35,7 +37,7 @@
 	/**
 	 * Miscellaneous paths
 	 */
-	define("DEFINITION_PATH", 	"encyclopedia.inc");			// The path to the definitions the bot uses relative to index.php
-	define("USERS_PATH", 		"users.inc");					// The path to the definitions the bot uses relative to index.php
+	define("USERS_PATH", 		"cfg/users.inc");					// The path to the definitions the bot uses relative to index.php
+	define("DEFINITION_PATH", 	"extra/encyclopedia.inc");			// The path to the definitions the bot uses relative to index.php
 
 ?>
