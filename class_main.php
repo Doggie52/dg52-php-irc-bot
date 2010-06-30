@@ -411,7 +411,7 @@ class IRCBot
 							case '!d':
 							case '!define':
 								$keyword = strtolower($this->ex['command'][1]);
-								if($this->response['info'][$keyword])
+								if(isset($this->response['info'][$keyword]))
 								{
 									// If the entered keyword matches a definition available
 									send_data("PRIVMSG", $this->response['info'][$keyword], $this->ex['receiver']);
