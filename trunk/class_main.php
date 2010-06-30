@@ -251,6 +251,14 @@ class IRCBot
 							mode_user($this->ex, "-v");
 							send_data("PRIVMSG", "User ".(isset($this->ex['command'][2]) ? $this->ex['command'][2] : $this->ex['username'])." was de-voiced!", $this->ex['username']);
 							break;
+						// A number of empty switches to prevent error
+						case '!info':
+						case '!add':
+						case '!topic':
+						case '!t':
+						case '!invite':
+						case '!i':
+							break;
 						default:
 							send_data("PRIVMSG", "Command not found!", $this->ex['username']);
 							break;
@@ -266,6 +274,14 @@ class IRCBot
 						case '!me':
 							// Subtract 3 characters (!me) plus a space
 							send_data("PRIVMSG", "/me ".substr($this->ex['fullcommand'], 4), $this->ex['receiver']);
+							break;
+						// A number of empty switches to prevent error
+						case '!info':
+						case '!add':
+						case '!topic':
+						case '!t':
+						case '!invite':
+						case '!i':
 							break;
 						default:
 							send_data("PRIVMSG", "Command not found!", $this->ex['username']);
@@ -333,7 +349,7 @@ class IRCBot
 							else
 							{
 								// If a valid username has been entered
-								if($this->ex['command'][1])
+								if(isset($this->ex['command'][1]))
 								{
 									$username = $this->ex['command'][1];
 									$channel = $this->ex['receiver'];
@@ -363,6 +379,7 @@ class IRCBot
 					{
 						case '!h':
 						case '!help':
+							// Only look up help for non-authenticated users
 							lookup_help((isset($this->ex['command'][1]) ? $this->ex['command'][1] : ""), $this->response['commands'][0], $this->ex['username']);
 							break;
 						default:
