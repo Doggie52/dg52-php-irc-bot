@@ -5,6 +5,8 @@
 	 * @author: Douglas Stridsberg
 	 * @email: doggie52@gmail.com
 	 * @url: www.douglasstridsberg.com
+	 *
+	 * Arrays of speech available to the bot
 	 */
 	
 	/**
