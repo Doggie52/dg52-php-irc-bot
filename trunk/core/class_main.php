@@ -159,6 +159,10 @@
 				 * 			- PM only
 				 * 			- Channel only
 				 * 			- Both
+				 * 		- Both auth and non-auth users
+				 * 			- PM only
+				 * 			- Channel only
+				 * 			- Both
 				 */
 				
 				/**
@@ -232,17 +236,6 @@
 								mode_user($this->ex, "-v");
 								send_data("PRIVMSG", "User ".(isset($this->ex['command'][2]) ? $this->ex['command'][2] : $this->ex['username'])." was de-voiced!", $this->ex['username']);
 								break;
-							// A number of empty switches to prevent error
-							case '!info':
-							case '!add':
-							case '!topic':
-							case '!t':
-							case '!invite':
-							case '!i':
-								break;
-							default:
-								send_data("PRIVMSG", "Command not found!", $this->ex['username']);
-								break;
 						}
 					}
 					/**
@@ -255,17 +248,6 @@
 							case '!me':
 								// Subtract 3 characters (!me) plus a space
 								send_data("PRIVMSG", "/me ".substr($this->ex['fullcommand'], 4), $this->ex['receiver']);
-								break;
-							// A number of empty switches to prevent error
-							case '!info':
-							case '!add':
-							case '!topic':
-							case '!t':
-							case '!invite':
-							case '!i':
-								break;
-							default:
-								send_data("PRIVMSG", "Command not found!", $this->ex['username']);
 								break;
 						}
 					}
@@ -373,6 +355,27 @@
 					 */
 					if($this->ex['type'] == "CHANNEL")
 					{
+					}
+					/**
+					 * [non-AUTH] Both PM and channel
+					 */
+				}
+				/**
+				 * [both] Commands for both authenticated and non-authenticated users
+				 */
+				if(@$this->ex['command'][0][0] == "!")
+				{
+					/**
+					 * [both] PM only
+					 */
+					if($this->ex['type'] == "PRIVATE")
+					{
+					}
+					/**
+					 * [both] Channel only
+					 */
+					if($this->ex['type'] == "CHANNEL")
+					{
 						// If the bots nickname is found in the full command sent to a channel
 						if(stristr($this->ex['fullcommand'], BOT_NICKNAME) != FALSE)
 						{
@@ -385,57 +388,51 @@
 							send_data("PRIVMSG", $response, $this->ex['receiver']);
 							debug_message("Bot was mentioned and thus it replied!");
 						}
-						if(@$this->ex['command'][0][0] == "!")
+						switch(strtolower($this->ex['command'][0]))
 						{
-							switch(strtolower($this->ex['command'][0]))
-							{
-								case '!d':
-								case '!define':
-									$keyword = strtolower($this->ex['command'][1]);
-									if(isset($this->response['info'][$keyword]))
-									{
-										// If the entered keyword matches a definition available
-										send_data("PRIVMSG", $this->response['info'][$keyword], $this->ex['receiver']);
-										debug_message("Keyword \"".$this->ex['command'][1]."\" was defined upon request by ".$this->ex['username']."!");
-									}
-									else
-									{
-										// If the entered keyword does not match a definition available
-										send_data("PRIVMSG", "No help for this item was found", $this->ex['receiver']);
-										debug_message("Keyword \"".$this->ex['command'][1]."\" was undefined but requested by ".$this->ex['username']."!");
-									}
-									break;
-								case '!thetime':
-									$date = date("H:ia T");
-									send_data("PRIVMSG", $date, $this->ex['receiver']);
-									break;
-								case '!google':
-									$query = substr($this->ex['fullcommand'], 8);
-									$results = google_search_html($query);
-									foreach($results as $results)
-									{
-										send_data("PRIVMSG", "#".$results['id']." ".format_text("bold", $results['title'])." (".$results['url'].")", $this->ex['receiver']);
-										send_data("PRIVMSG", format_text("italic", $results['description']), $this->ex['receiver']);
-									}
-									break;
-								case '!youtube':
-									$query = substr($this->ex['fullcommand'], 9);
-									$results = youtube_search_html($query);
-									foreach($results as $results)
-									{
-										send_data("PRIVMSG", "#".$results['id']." ".format_text("bold", $results['title'])." (".$results['url'].")", $this->ex['receiver']);
-										send_data("PRIVMSG", format_text("italic", $results['description']), $this->ex['receiver']);
-									}
-									break;
-								default:
-									send_data("PRIVMSG", "Either the command was not found or you lack the privileges to use it!", $this->ex['username']);
-									break;
-							}
+							case '!d':
+							case '!define':
+								$keyword = strtolower($this->ex['command'][1]);
+								if(isset($this->response['info'][$keyword]))
+								{
+									// If the entered keyword matches a definition available
+									send_data("PRIVMSG", $this->response['info'][$keyword], $this->ex['receiver']);
+									debug_message("Keyword \"".$this->ex['command'][1]."\" was defined upon request by ".$this->ex['username']."!");
+								}
+								else
+								{
+									// If the entered keyword does not match a definition available
+									send_data("PRIVMSG", "No help for this item was found", $this->ex['receiver']);
+									debug_message("Keyword \"".$this->ex['command'][1]."\" was undefined but requested by ".$this->ex['username']."!");
+								}
+								break;
+							case '!thetime':
+								$date = date("H:ia T");
+								send_data("PRIVMSG", $date, $this->ex['receiver']);
+								break;
+							case '!google':
+								$query = substr($this->ex['fullcommand'], 8);
+								$results = google_search_html($query);
+								foreach($results as $results)
+								{
+									send_data("PRIVMSG", "#".$results['id']." ".format_text("bold", $results['title'])." (".$results['url'].")", $this->ex['receiver']);
+									send_data("PRIVMSG", format_text("italic", $results['description']), $this->ex['receiver']);
+								}
+								break;
+							case '!youtube':
+								$query = substr($this->ex['fullcommand'], 9);
+								$results = youtube_search_html($query);
+								foreach($results as $results)
+								{
+									send_data("PRIVMSG", "#".$results['id']." ".format_text("bold", $results['title'])." (".$results['url'].")", $this->ex['receiver']);
+									send_data("PRIVMSG", format_text("italic", $results['description']), $this->ex['receiver']);
+								}
+								break;
+							default:
+								send_data("PRIVMSG", "Either the command was not found or you lack the privileges to use it!", $this->ex['username']);
+								break;
 						}
 					}
-					/**
-					 * [non-AUTH] Both PM and channel
-					 */
 				}
 			}
 		}
