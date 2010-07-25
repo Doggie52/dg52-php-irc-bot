@@ -165,10 +165,13 @@
 				 * 			- Both
 				 */
 				
+				// Is the user authenticated?
+				$authlevel = is_authenticated($this->ex['ident']);
+				
 				/**
 				 * [AUTH] Commands for authenticated users
 				 */
-				if(@$this->ex['command'][0][0] == "!" && is_authenticated($this->ex['ident']) == 1)
+				if(@$this->ex['command'][0][0] == "!" && $authlevel == 1)
 				{
 					/**
 					 * [AUTH] PM only
@@ -297,7 +300,7 @@
 								if($this->ex['type'] == "PRIVATE")
 								{
 									// If both a valid username and a channel has been entered
-									if($this->ex['command'][1] && $this->ex['command'][2])
+									if(isset($this->ex['command'][1]) && isset($this->ex['command'][2]))
 									{
 										$username = $this->ex['command'][1];
 										$channel = $this->ex['command'][2];
@@ -331,7 +334,7 @@
 				/**
 				 * [non-AUTH] Commands for non-authenticated users
 				 */
-				if(@$this->ex['command'][0][0] == "!" && is_authenticated($this->ex['ident']) == 0)
+				if(@$this->ex['command'][0][0] == "!" && $authlevel == 0)
 				{
 					/**
 					 * [non-AUTH] PM only
@@ -427,9 +430,6 @@
 									send_data("PRIVMSG", "#".$results['id']." ".format_text("bold", $results['title'])." (".$results['url'].")", $this->ex['receiver']);
 									send_data("PRIVMSG", format_text("italic", $results['description']), $this->ex['receiver']);
 								}
-								break;
-							default:
-								send_data("PRIVMSG", "Either the command was not found or you lack the privileges to use it!", $this->ex['username']);
 								break;
 						}
 					}
