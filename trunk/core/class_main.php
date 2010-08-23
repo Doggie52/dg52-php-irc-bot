@@ -396,7 +396,18 @@
 							case '!d':
 							case '!define':
 								$keyword = strtolower($this->ex['command'][1]);
-								if(isset($this->response['info'][$keyword]))
+								if($keyword == "list")
+								{
+									// If the user wants to list all definitions
+									send_data("PRIVMSG", "All definitions available:", $this->ex['username']);
+									$keywordlist = "";
+									foreach($this->response['info'] as $term => $definition)
+									{
+										$keywordlist .= $term.", ";
+									}
+									send_data("PRIVMSG", substr($keywordlist, 0, -2), $this->ex['username']);
+								}
+								elseif(isset($this->response['info'][$keyword]))
 								{
 									// If the entered keyword matches a definition available
 									send_data("PRIVMSG", $this->response['info'][$keyword], $this->ex['receiver']);
