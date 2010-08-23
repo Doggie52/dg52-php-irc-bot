@@ -238,7 +238,7 @@
 	 */
 	function write_definition($line, $commandarray)
 	{
-		if($line)
+		if(isset($line) && $line != "list")
 		{
 			if($line[0] != " ")
 			{

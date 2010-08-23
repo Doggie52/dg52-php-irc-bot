@@ -103,8 +103,9 @@
 						"Queries Google search for <query> and returns the results."),
 		"youtube"	=> array(format_text("bold", "Usage:")." !youtube <query>",
 						"Queries YouTube search for <query> and returns the results."),
-		"define"	=> array(format_text("bold", "Usage:")." !define <query>",
-						"Looks up <query> in the bot's list of keywords and returns the definition."),
+		"define"	=> array(format_text("bold", "Usage:")." !define <query>/list",
+						"Looks up <query> in the bot's list of keywords and returns the definition.",
+						"If 'list' is used, a list of the defined keywords is sent to the user."),
 		"thetime"	=> array(format_text("bold", "Usage:")." !thetime",
 						"Displays the current server time and the respective timezone."),
 	);
