@@ -40,9 +40,9 @@
 		}
 		$currtime = time();
 		$seconds = $currtime - $starttime;
-		$minutes = bcmod((intval($seconds) / 60),60);
-		$hours = intval(intval($seconds) / 3600);
-		$seconds = bcmod(intval($seconds),60);
+		$minutes = floor($seconds / 60);
+		$hours = floor($seconds / 3600);
+		$seconds = $seconds;
 		send_data("PRIVMSG", "  Bot uptime: ".$hours." hours ".$minutes." minutes ".$seconds." seconds.", $username);
 		debug_message("Info was sent to ".$username."!");
 	}

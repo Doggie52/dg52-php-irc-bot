@@ -37,7 +37,7 @@
 	/**
 	 * Miscellaneous paths
 	 */
-	define("USERS_PATH", 		"cfg/users.inc");					// The path to the definitions the bot uses relative to index.php
-	define("DEFINITION_PATH", 	"extra/encyclopedia.inc");			// The path to the definitions the bot uses relative to index.php
+	define("USERS_PATH", 		"cfg/users.inc");				// The path to the list of administrators the bot uses (relative to index.php)
+	define("DEFINITION_PATH", 	"extra/encyclopedia.inc");		// The path to the definitions the bot uses (relative to index.php)
 
 ?>

@@ -103,7 +103,7 @@
 			{
 				$tempdata = fgets($socket);
 				// If "welcome" is found the bot hass been fully connected. Break the loop
-				if(strpos($tempdata, "welcome"))
+				if(strpos($tempdata, "MOTD"))
 				{
 					debug_message("Bot was greeted.");
 					break;
