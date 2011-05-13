@@ -30,7 +30,7 @@
 		var $starttime;
 		
 		/**
-		 * Construct item, opens the server connection, logs the bot in, import stuff
+		 * Constructs the bot by opening the server connection and CLI interface, logging the bot in and importing list of administrators.
 		 *
 		 * @access public
 		 * @return void
@@ -94,7 +94,7 @@
 		}
 		
 		/**
-		 * Logs the bot in on the server
+		 * Registers the bot on the server and joins specified channels.
 		 *
 		 * @access public
 		 * @param array $channels An array of channels to join directly on connect
@@ -115,7 +115,6 @@
 					debug_message("Bot was greeted.");
 					break;
 				}
-				echo "trying... \n";
 			}
 			foreach($channels as $channel)
 			{
