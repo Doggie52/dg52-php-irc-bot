@@ -176,7 +176,7 @@
 	 * 
 	 * @access public
 	 * @param string $ident The username!hostname of the user we want to check
-	 * @return boolean $authenticated true for an authenticated user, false for one which isn't
+	 * @return boolean $authenticated TRUE for an authenticated user, FALSE for one which isn't
 	 */
 	function is_authenticated($ident)
 	{
@@ -200,10 +200,28 @@
 	}
 	
 	/**
+	 * (re)Loads the array of administrators
+	 *
+	 * @access public
+	 * @return array $users The array of administrators
+	 */
+	function reload_users()
+	{
+		// Open the users.inc file
+		$file = fopen(USERS_PATH, "r");
+		// Turn the hostnames into lowercase (does not compromise security, as hostnames are unique anyway)
+		$userlist = strtolower(fread($file, filesize(USERS_PATH)));
+		fclose($file);
+		// Split each line into separate entry in the returned array
+		$users = explode("\n", $userlist);
+		return $users;
+	}
+	
+	/**
 	 * Reloads the arrays associated with speech
 	 *
 	 * @access public
-	 * @return string $response The response-array
+	 * @return array $response The response-array
 	 */
 	function reload_speech()
 	{
