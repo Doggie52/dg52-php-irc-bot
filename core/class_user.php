@@ -278,7 +278,7 @@
 	}
 	
 	/**
-	 * Query a regular YouTube search page and extract results from it.
+	 * [UNFINISHED] Query a regular YouTube search page and extract results from it.
 	 *
 	 * @access public
 	 * @param string $query The search-query
@@ -298,20 +298,21 @@
 		$buf = str_replace("\t", "", $buf);
 		$buf = str_replace("\n", "", $buf);
 		// Define patterns
-		$urlpattern = "/(?:<div class=\"video-long-title\">)(?:.*?)(?:href=\")(.*?)(?:\")/i";
-		$titlepattern = "/(?:<div class=\"video-long-title\">)(?:.*?)(?:title=\")(.*?)(?:\")/i";
+		$videopattern = "/(?:<div class=\"result-item-main-content\">)(?:.*?)(?:href=\")(.*?)(?:\")(?:.*?)(?:dir=\"ltr\")(?:.*?)(?:\")(.*?)(?:\")/i";
+		// $titlepattern = "/(?:<div class=\"video-long-title\">)(?:.*?)(?:title=\")(.*?)(?:\")/i"; -- no longer valid
 		$descriptionpattern = "/(?:class=\"video-description\">)(.*?)(?:<\/div>)/i";
 		// Match the raw HTML with the patterns
-		preg_match_all($urlpattern, $buf, $urls);
-		preg_match_all($titlepattern, $buf, $titles);
+		// $videos: [1] is the URL, [2] is the title
+		preg_match_all($urlpattern, $buf, $videos);
+		// preg_match_all($titlepattern, $buf, $titles);
 		preg_match_all($descriptionpattern, $buf, $descriptions);
 		
 		// Find the results, if there are any
-		if($urls && $titles)
+		if($videos)
 		{
 			// Initiate counter for amount of search results found
 			$i = 1;
-			foreach($urls[1] as $url)
+			foreach($videos[1] as $url)
 			{
 				if($i <= $numresults)
 				{
@@ -321,7 +322,7 @@
 				}
 			}
 			$i = 1;
-			foreach($titles[1] as $title)
+			foreach($videos[2] as $title)
 			{
 				if($i <= $numresults)
 				{

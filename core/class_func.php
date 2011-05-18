@@ -117,28 +117,28 @@
 	 * Parses the raw commands sent by the server and splits them up into different parts, storing them in the $ex array for future use.
 	 *
 	 * @param string $data The raw data sent by the socket
-	 * @return array $ex
+	 * @return array $ex The parsed raw command, split into an array
 	 */
 	function parse_raw_command($data)
 	{
 		// Explodes the raw data into an initial array
-		$ex				= explode(" ", $data);
+		$ex					= explode(" ", $data);
 		// Get length of everything before command including last space
 		$identlength		= strlen($ex[0]." ".(isset($ex[1]) ? $ex[1] : "")." ".(isset($ex[2]) ? $ex[2] : "")." ");
 		// Retain all that is in $data after $identlength characters with replaced chr(10)'s and chr(13)'s and minus the first ':'
-		$rawcommand		= substr($data, $identlength);
+		$rawcommand			= substr($data, $identlength);
 		$ex['fullcommand']	= substr(str_replace(array(chr(10), chr(13)), '', $rawcommand), 1);
 		// Split the commandstring up into a second array with words
 		$ex['command']		= explode(" ", $ex['fullcommand']);
 		// The username!hostname of the sender (don't include the first ':' - start from 1)
 		$ex['ident']		= substr($ex[0], 1);
 		// Only the username of the sender (one step extra because only that before the ! wants to be parsed)
-		$hostlength		= strlen(strstr($ex[0], '!'));
-		$ex['username']	= substr($ex[0], 1, -$hostlength);
+		$hostlength			= strlen(strstr($ex[0], '!'));
+		$ex['username']		= substr($ex[0], 1, -$hostlength);
 		// The receiver of the sent message (either the channelname or the bots nickname)
-		$ex['receiver']	= (isset($ex[2]) ? $ex[2] : "");
+		$ex['receiver']		= (isset($ex[2]) ? $ex[2] : "");
 		// Interpret the type of message received ("PRIVATE" or "CHANNEL") depending on the receiver
-		$ex['type']		= interpret_privmsg($ex['receiver']);
+		$ex['type']			= interpret_privmsg($ex['receiver']);
 		
 		return $ex;
 	}
@@ -214,6 +214,7 @@
 		fclose($file);
 		// Split each line into separate entry in the returned array
 		$users = explode("\n", $userlist);
+		debug_message("The list of administrators was successfully loaded into the system!");
 		return $users;
 	}
 	
@@ -270,6 +271,7 @@
 						// Appends the new line only if it meets the following: existant, not blankspace and unique
 						file_put_contents(DEFINITION_PATH, $line, FILE_APPEND);
 						$success = 1;
+						debug_message("\"".$line."\" was written to the list of definitions!");
 					}
 				}
 			}
