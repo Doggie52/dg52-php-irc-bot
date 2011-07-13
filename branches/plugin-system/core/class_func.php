@@ -139,6 +139,8 @@
 		$ex['receiver']		= (isset($ex[2]) ? $ex[2] : "");
 		// Interpret the type of message received ("PRIVATE" or "CHANNEL") depending on the receiver
 		$ex['type']			= interpret_privmsg($ex['receiver']);
+		// Get whether the user is authenticated
+		$ex['authlevel'] 	= is_authenticated($ex['ident']);
 		
 		return $ex;
 	}
@@ -153,10 +155,10 @@
 	function interpret_privmsg($privmsg)
 	{
 		// Regular expressions to match "#channel"
-		$re = '/(#)((?:[a-z][a-z]+))/is';
+		$regex = '/(#)((?:[a-z][a-z]+))/is';
 		
 		// If the receiver includes a channelname
-		if(preg_match($re, $privmsg))
+		if(preg_match($regex, $privmsg))
 		{
 			// ... it was sent to the channel
 			$message = "CHANNEL";

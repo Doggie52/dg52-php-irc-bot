@@ -1,0 +1,76 @@
+<?php
+	/**
+	 * dG52 PHP IRC Bot
+	 *
+	 * @author: Douglas Stridsberg
+	 * @email: doggie52@gmail.com
+	 * @url: www.douglasstridsberg.com
+	 *
+	 * Handles plugins
+	 */
+
+	class Plugin
+	{
+		private $pluginNames = array();
+		private $plugins = array();
+		
+		/**
+		 * Loads all plugins and appends them to arrays
+		 */
+		function __construct()
+		{
+			include("class_plugin.php");
+			foreach(glob("core/plugins/*.php") as $pluginName)
+			{
+				include_once($pluginName);
+				$this->pluginNames[] = basename($pluginName, ".php");
+			}
+			foreach($this->pluginNames as $pluginName)
+			{
+				$this->plugins[] = new $pluginName;
+			}
+		}
+		
+		/**
+		 * Triggers an event notification based on what is in the $event array
+		 * 
+		 * @access public
+		 * @param string $type Type of event (load, connect, disconnect, message, command)
+		 * @param string $data (opt.) Incoming message or command
+		 * @param string $dataType (opt.) type of message or command (PRIVATE, CHANNEL)
+		 * @param string $from (opt.) sender of message or command
+		 * @param string $authLevel (opt.) whether the sender is an administrator or not (1, 0)
+		 * @return void
+		 */
+		function triggerEvent($type, $data = null, $dataType = null, $from = null, $authLevel = null)
+		{
+			switch($type)
+			{
+				case "load":
+					foreach($this->plugins as $plugin)
+					{
+							$plugin->onLoad();
+					}
+					break;
+				case "connect":
+					foreach($this->plugins as $plugin)
+					{
+							$plugin->onConnect();
+					}
+					break;
+				case "disconnect":
+					foreach($this->plugins as $plugin)
+					{
+							$plugin->onDisconnect();
+					}
+					break;
+				case "command":
+					foreach($this->plugins as $plugin)
+					{
+							$plugin->onCommand($data, $dataType, $from, $authLevel);
+					}
+			}
+		}
+		
+	}
+?>
