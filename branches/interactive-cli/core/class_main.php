@@ -20,9 +20,6 @@
 		// This is going to hold all of the messages from both server and client
 		var $ex = array();
 		
-		// This is going to hold all of the authenticated users
-		var $users = array();
-		
 		// This is going to hold our responses
 		var $response;
 		
@@ -71,14 +68,9 @@
 			$channels = explode(" ", BOT_CHANNELS);
 			$this->login($channels);
 			
-			// Open the users.inc file
-			$file = fopen(USERS_PATH, "r");
-			// Turn the hostnames into lowercase (does not compromise security, as hostnames are unique anyway)
-			$userlist = strtolower(fread($file, filesize(USERS_PATH)));
-			fclose($file);
-			// Split each line into separate entry in a global array
+			// Stores list of administrators
 			global $users;
-			$users = explode("\n", $userlist);
+			$users = reload_users();
 			
 			// Include responses
 			$this->response = reload_speech();
