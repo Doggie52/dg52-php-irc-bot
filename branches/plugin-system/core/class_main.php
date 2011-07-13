@@ -23,9 +23,6 @@
 		// This is going to hold our responses
 		var $response;
 		
-		// This is going to hold our starting time
-		var $startTime;
-		
 		// This holds the plugins object
 		var $plugins;
 		
@@ -56,7 +53,7 @@
 			
 			// Instantiate plugin object and trigger the load
 			$this->plugins = new Plugin;
-			$this->plugins->triggerEvent(array("load"));
+			$this->plugins->triggerEvent("load");
 			
 
 			 // Replaces %date% with the date in the form yyyymmdd
@@ -83,9 +80,6 @@
 			
 			// Include responses
 			$this->response = reload_speech();
-			
-			// Declare the starttime
-			$this->starttime = time();
 			
 			// Initializes the main bot workhorse
 			$this->main();
@@ -166,27 +160,29 @@
 					}
 					
 					// If the message is a command
-					if(strtolower($this->parsedData['command'][0][0]) == "!")
+					if(@strtolower($this->parsedData['command'][0][0]) == "!")
 					{
-						// Distinguish between channelmsg and privmsg - the latter needs 'username' as the $from parameter
+						// Distinguish between channelmsg and privmsg - the latter needs 'username' as the $from parameter whilst the former needs to include information about the sender
 						if($this->parsedData['type'] == "CHANNEL")
 						{
 							$this->plugins->triggerEvent("command",
-								substr(strtolower($this->parsedData['command'][0]), 1),
+								substr($this->parsedData['fullcommand'], 1),
 								$this->parsedData['type'],
+								$this->parsedData['username'],
 								$this->parsedData['receiver'],
 								$this->parsedData['authlevel']);
 						}
 						elseif($this->parsedData['type'] == "PRIVATE")
 						{
 							$this->plugins->triggerEvent("command",
-								substr(strtolower($this->parsedData['command'][0]), 1),
+								substr($this->parsedData['fullcommand'], 1),
 								$this->parsedData['type'],
 								$this->parsedData['username'],
+								NULL,
 								$this->parsedData['authlevel']);
 						}
 					}
-					// If the message is a message - to be implemented
+					// If the message is a message
 					else
 					{
 						

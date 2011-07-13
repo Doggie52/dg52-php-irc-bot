@@ -29,9 +29,10 @@
 		 * @param string $command The command sent (without the !)
 		 * @param string $type Type of command sent (CHANNEL, PRIVMSG)
 		 * @param string $from The sender of the command
+		 * @param string $channel Channel in which message or command was sent
 		 * @param string $authLevel Whether the sender is administrator
 		 */
-		abstract function onCommand($command, $type, $from, $authLevel);	// only triggered by !-prefixed messages
+		abstract function onCommand($command, $type, $from, $channel, $authLevel);	// only triggered by !-prefixed messages
 		
 		/**
 		 * Displays a message to either the channel or a client
@@ -47,7 +48,7 @@
 		/**
 		 * Variables
 		 */
-		public $PLUGIN_NAME, $PLUGIN_ID, $PLUGIN_DESCRIPTION, $PLUGIN_VERSION;
+		public $PLUGIN_NAME, $PLUGIN_ID, $PLUGIN_AUTHOR, $PLUGIN_DESCRIPTION, $PLUGIN_VERSION;
 	}
 
 ?>

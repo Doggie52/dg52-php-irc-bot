@@ -36,13 +36,14 @@
 		 * 
 		 * @access public
 		 * @param string $type Type of event (load, connect, disconnect, message, command)
-		 * @param string $data (opt.) Incoming message or command
+		 * @param string $data (opt.) Incoming message or command together with any parameters (i.e. the whole string)
 		 * @param string $dataType (opt.) type of message or command (PRIVATE, CHANNEL)
 		 * @param string $from (opt.) sender of message or command
+		 * @param string $channel (opt.) channel in which message or command was sent
 		 * @param string $authLevel (opt.) whether the sender is an administrator or not (1, 0)
 		 * @return void
 		 */
-		function triggerEvent($type, $data = null, $dataType = null, $from = null, $authLevel = null)
+		function triggerEvent($type, $data = null, $dataType = null, $from = null, $channel = null, $authLevel = null)
 		{
 			switch($type)
 			{
@@ -67,7 +68,7 @@
 				case "command":
 					foreach($this->plugins as $plugin)
 					{
-							$plugin->onCommand($data, $dataType, $from, $authLevel);
+							$plugin->onCommand($data, $dataType, $from, $channel, $authLevel);
 					}
 			}
 		}
