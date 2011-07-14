@@ -15,16 +15,16 @@
 	class IRCBot
 	{
 		// This is going to hold the data received from the socket
-		var $rawData;
+		private $rawData;
 		
 		// This is going to hold all of the messages from both server and client
-		var $parsedData = array();
+		private $parsedData = array();
 		
 		// This is going to hold our responses
-		var $response;
+		private $response;
 		
-		// This holds the plugins object
-		var $plugins;
+		// This holds the plugin objects
+		private $plugins;
 		
 		/**
 		 * Constructs the bot by opening the server connection and CLI interface, logging the bot in and importing list of administrators.
@@ -32,7 +32,7 @@
 		 * @access public
 		 * @return void
 		 */
-		function __construct()
+		public function __construct()
 		{		
 			// Our TCP/IP connection
 			global $socket;
@@ -50,29 +50,26 @@
 			include("core/class_func.php");
 			include("core/class_user.php");
 			include("core/class_pluginhandler.php");
-			
-			// Instantiate plugin object and trigger the load
-			$this->plugins = new Plugin;
-			$this->plugins->triggerEvent("load");
-			
 
 			 // Replaces %date% with the date in the form yyyymmdd
- 			$newpath = preg_replace("/%date%/", @date('Ymd'), LOG_PATH);
- 			// Clears the logfile if LOG_APPEND is FALSE and if the file already exists
- 			if(!LOG_APPEND && file_exists($newpath))
- 			{
- 				if(unlink($newpath))
- 				{
- 					debug_message("Log cleared!");
- 				}
- 			}
-			 
+			$newpath = preg_replace("/%date%/", @date('Ymd'), LOG_PATH);
+			// Clears the logfile if LOG_APPEND is FALSE and if the file already exists
+			if(!LOG_APPEND && file_exists($newpath))
+			{
+				if(unlink($newpath))
+				{
+					debug_message("Log cleared!");
+				}
+			}
+			
 			// Print header
 			print_header();
 			
-			// Log bot in
-			$channels = explode(" ", BOT_CHANNELS);
-			$this->login($channels);
+			// Instantiate plugin object and trigger the load
+			$this->pluginHandler = new PluginHandler;
+			$this->pluginHandler->triggerEvent("load");
+			// When the loop is broken, we have been greeted
+			$this->pluginHandler->triggerEvent("connect");
 			
 			// Stores list of administrators
 			global $users;
@@ -89,41 +86,12 @@
 		}
 		
 		/**
-		 * Registers the bot on the server and joins specified channels.
-		 *
-		 * @access public
-		 * @param array $channels An array of channels to join directly on connect
-		 * @return void
-		 */
-		function login($channels)
-		{
-			send_data('USER', BOT_NICKNAME.' douglasstridsberg.com '.BOT_NICKNAME.' :'.BOT_NAME);
-			send_data('NICK', BOT_NICKNAME);
-			debug_message("Bot connected successfully!");
-			// Temporarily tap into the socket
-			global $socket;
-			while(!feof($socket))
-			{
-				// If "MOTD" is found the bot has been fully connected. Break the loop
-				if(fgets($socket) && strpos(fgets($socket), "MOTD"))
-				{
-					debug_message("Bot was greeted.");
-					break;
-				}
-			}
-			foreach($channels as $channel)
-			{
-				join_channel($channel);
-			}
-		}
-		
-		/**
 		 * This is the workhorse function, grabs the data from the server and displays on the browser if DEBUG_OUTPUT is true.
 		 *
-		 * @access public
+		 * @access private
 		 * @return void
 		 */
-		function main()
+		private function main()
 		{
 			// Fetch the socket
 			global $socket;
@@ -160,12 +128,12 @@
 					}
 					
 					// If the message is a command
-					if(@strtolower($this->parsedData['command'][0][0]) == "!")
+					if(@strtolower($this->parsedData['command'][0][0]) == COMMAND_PREFIX)
 					{
 						// Distinguish between channelmsg and privmsg - the latter needs 'username' as the $from parameter whilst the former needs to include information about the sender
 						if($this->parsedData['type'] == "CHANNEL")
 						{
-							$this->plugins->triggerEvent("command",
+							$this->pluginHandler->triggerEvent("command",
 								substr($this->parsedData['fullcommand'], 1),
 								$this->parsedData['type'],
 								$this->parsedData['username'],
@@ -174,7 +142,13 @@
 						}
 						elseif($this->parsedData['type'] == "PRIVATE")
 						{
-							$this->plugins->triggerEvent("command",
+							if(strtolower(substr($this->parsedData['command'][0], 1)) == "quit")
+							{
+								$this->pluginHandler->triggerEvent("disconnect");
+								$this->pluginHandler->plugins['ServerActions']->quit();
+								break;
+							}
+							$this->pluginHandler->triggerEvent("command",
 								substr($this->parsedData['fullcommand'], 1),
 								$this->parsedData['type'],
 								$this->parsedData['username'],

@@ -67,38 +67,6 @@
 	}
 	
 	/**
-	 * Joins a channel. Checks if the channel-name includes a #-sign
-	 *
-	 * @access public
-	 * @param string $channel The channels you wish the bot to join
-	 * @return string $channel The channelname that was joined
-	 */
-	function join_channel($channel)
-	{
-		$channel = to_channel($channel);
-		send_data("JOIN", $channel);
-		debug_message("Channel ".$channel." was joined!");
-		
-		return $channel;
-	}
-	
-	/**
-	 * Parts (leaves) a channel. Checks if the channel-name includes a #-sign.
-	 *
-	 * @access public
-	 * @param string $channel The channel you wish the bot to part
-	 * @return string $channel The channelname that was parted
-	 */
-	function part_channel($channel)
-	{
-		$channel = to_channel($channel);
-		send_data("PART", $channel);
-		debug_message("Channel ".$channel." was parted!");
-		
-		return $channel;
-	}
-	
-	/**
 	 * Sets the topic of the specified channel.
 	 * 
 	 * @access public

@@ -9,13 +9,12 @@
 	 * Handles plugins
 	 */
 
-	class Plugin
+	class PluginHandler
 	{
-		private $pluginNames = array();
-		private $plugins = array();
+		public $plugins = array();
 		
 		/**
-		 * Loads all plugins and appends them to arrays
+		 * Loads all plugins and appends them to array
 		 */
 		function __construct()
 		{
@@ -23,11 +22,8 @@
 			foreach(glob("core/plugins/*.php") as $pluginName)
 			{
 				include_once($pluginName);
-				$this->pluginNames[] = basename($pluginName, ".php");
-			}
-			foreach($this->pluginNames as $pluginName)
-			{
-				$this->plugins[] = new $pluginName;
+				$pluginName = basename($pluginName, ".php");
+				$this->plugins[$pluginName] = new $pluginName;
 			}
 		}
 		
@@ -35,7 +31,7 @@
 		 * Triggers an event notification based on what is in the $event array
 		 * 
 		 * @access public
-		 * @param string $type Type of event (load, connect, disconnect, message, command)
+		 * @param string $type Type of event (load, connect, disconnect, message, command, clicommand)
 		 * @param string $data (opt.) Incoming message or command together with any parameters (i.e. the whole string)
 		 * @param string $dataType (opt.) type of message or command (PRIVATE, CHANNEL)
 		 * @param string $from (opt.) sender of message or command
@@ -70,6 +66,7 @@
 					{
 							$plugin->onCommand($data, $dataType, $from, $channel, $authLevel);
 					}
+					break;
 			}
 		}
 		

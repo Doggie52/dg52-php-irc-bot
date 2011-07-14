@@ -80,7 +80,7 @@
 	 * @param string $cmd The command you wish to send
 	 * @param string $msg The parameters you wish to pass to the command (default: null)
 	 * @param string $rcvr The receiver of the message (default: null)
-	 * @return void
+	 * @return boolean Whether the data was sent successfully
 	 */
 	function send_data($cmd, $msg = null, $rcvr = null)
 	{
@@ -89,26 +89,35 @@
 		
 		if($msg == null)
 		{
-			fputs($socket, $cmd."\r\n");
-			if(DEBUG_OUTPUT)
+			if(fputs($socket, $cmd."\r\n"))
 			{
-				debug_message("Command ($cmd) was sent to the server.");
+				if(DEBUG_OUTPUT)
+				{
+					debug_message("Command ($cmd) was sent to the server.");
+				}
+				return TRUE;
 			}
 		}
 		elseif($cmd == "PRIVMSG")
 		{
-			fputs($socket, $cmd." ".$rcvr." :".$msg."\r\n");
-			if(DEBUG_OUTPUT)
+			if(fputs($socket, $cmd." ".$rcvr." :".$msg."\r\n"))
 			{
-				debug_message("Command ($cmd) with receiver ($rcvr) and message ($msg) was sent to the server.");
+				if(DEBUG_OUTPUT)
+				{
+					debug_message("Command ($cmd) with receiver ($rcvr) and message ($msg) was sent to the server.");
+				}
+				return TRUE;
 			}
 		}
 		else
 		{
-			fputs($socket, $cmd." ".$msg."\r\n");
-			if(DEBUG_OUTPUT)
+			if(fputs($socket, $cmd." ".$msg."\r\n"))
 			{
-				debug_message("Command ($cmd) with message ($msg) was sent to the server.");
+				if(DEBUG_OUTPUT)
+				{
+					debug_message("Command ($cmd) with message ($msg) was sent to the server.");
+				}
+				return TRUE;
 			}
 		}
 	}
@@ -143,6 +152,31 @@
 		$ex['authlevel'] 	= is_authenticated($ex['ident']);
 		
 		return $ex;
+	}
+	
+	/**
+	 * Removes an item from an array by its value
+	 * Inspired by http://dev-tips.com/featured/remove-an-item-from-an-array-by-value
+	 * 
+	 * @param string $value The value to remove
+	 * @param array $array The array to remove the value from
+	 * @return array $array The modified array
+	 */
+	function remove_item_by_value($value, $array)
+	{
+		if(!in_array($value, $array))
+		{
+			return $array;
+		}
+		
+		foreach($array as $key => $avalue)
+		{
+			if ($avalue == $value)
+			{
+				unset($array[$key]);
+			}
+		}
+		return $array;
 	}
 	
 	/**
@@ -283,22 +317,6 @@
 			$success = 0;
 		}
 		return $success;
-	}
-	
-	/**
-	 * Converts input to a proper channel-name if it isn't already
-	 *
-	 * @access public
-	 * @param string $channel The channelname to be converted
-	 * @return string $channel The converted channel
-	 */
-	function to_channel($channel)
-	{
-		if($channel[0] != "#")
-		{
-			$channel = "#".$channel;
-		}
-		return $channel;
 	}
 	
 	/**

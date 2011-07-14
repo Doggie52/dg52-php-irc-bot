@@ -2,7 +2,7 @@
 /**
  * HelloWorld plugin
  * 
- * Sample plugin to showcase simple "Hello World!"-functionality
+ * Sample plugin to showcase simple "Hello World!"-functionality.
  */
 
 	class HelloWorld extends aPlugin
@@ -13,19 +13,19 @@
 		public $PLUGIN_DESCRIPTION = "Outputs hello world at different times.";
 		public $PLUGIN_VERSION = "1.0";
 		
-		function onLoad()
+		public function onLoad()
 		{
 		}
 		
-		function onConnect()
+		public function onConnect()
 		{
 		}
 		
-		function onDisconnect()
+		public function onDisconnect()
 		{
 		}
 		
-		function onCommand($command, $type, $from, $channel, $authLevel)
+		public function onCommand($command, $type, $from, $channel, $authLevel)
 		{
 			$command = explode(" ", $command);
 			if(strtolower($command[0]) == "hello")

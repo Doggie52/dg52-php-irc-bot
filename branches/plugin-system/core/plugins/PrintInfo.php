@@ -2,7 +2,7 @@
 /**
  * Print Info
  * 
- * Prints information about the bot and the server it is running on to users
+ * Prints information about the bot and the server it is running on to users.
  */
 
 	class PrintInfo extends aPlugin
@@ -13,32 +13,32 @@
 		public $PLUGIN_DESCRIPTION = "Prints information about the bot and the server it is running on to users.";
 		public $PLUGIN_VERSION = "1.0";
 		
-		public $startTime;
+		private $startTime;
 		
-		function onLoad()
+		public function onLoad()
 		{
 			// Declare the starttime
 			$this->startTime = time();
-			debug_message("Timestamp was set to ".$this->startTime);
+			debug_message("Uptime timer started.");
 		}
 		
-		function onConnect()
+		public function onConnect()
 		{
 		}
 		
-		function onDisconnect()
+		public function onDisconnect()
 		{
 		}
 		
 		/**
 		 * Prints general information about the bot along with uptime to a user.
 		 * 
-		 * @access public
+		 * @access private
 		 * @param string $username The username the info should be sent to
 		 * @param string $starttime The start-time of the script in UNIX-timestamp format
 		 * @return void
 		 */
-		function sendInfo($username, $starttime)
+		private function sendInfo($username, $starttime)
 		{
 			$this->display("dG52's PHP IRC Bot r".get_latest_rev("http://dg52-php-irc-bot.googlecode.com/svn/trunk/"), $username);
 			// For UNIX-based systems, model and load can be $this->displayed
@@ -68,7 +68,7 @@
 			debug_message("Info was sent to ".$username."!");
 		}
 		
-		function onCommand($command, $type, $from, $channel, $authLevel)
+		public function onCommand($command, $type, $from, $channel, $authLevel)
 		{
 			$command = explode(" ", $command);
 			if(strtolower($command[0]) == "info")
