@@ -6,7 +6,7 @@
 	 * @email: doggie52@gmail.com
 	 * @url: www.douglasstridsberg.com
 	 *
-	 * Main class holding the main bot class and includes to other functions
+	 * Main class holding the main bot class and related functions
 	 */
 	
 	/**
@@ -63,7 +63,7 @@
 			}
 			
 			// Print header
-			print_header();
+			$this->print_header();
 			
 			// Instantiate plugin object and trigger the load
 			$this->pluginHandler = new PluginHandler;
@@ -97,6 +97,7 @@
 			global $socket;
 			// Fetch the CLI
 			global $cli;
+			
 			while(!feof($socket))
 			{
 				// If something has been typed
@@ -115,7 +116,7 @@
 					}
 					flush();
 					
-					$this->parsedData = parse_raw_command($this->rawData);
+					$this->parsedData = $this->parse_raw_command($this->rawData);
 					
 					if($this->parsedData[0] == "PING")
 					{
@@ -142,12 +143,14 @@
 						}
 						elseif($this->parsedData['type'] == "PRIVATE")
 						{
-							if(strtolower(substr($this->parsedData['command'][0], 1)) == "quit")
+							// Separate handling for the !quit command
+							if($this->parsedData['authlevel'] == 1 && strtolower(substr($this->parsedData['command'][0], 1)) == "quit")
 							{
 								$this->pluginHandler->triggerEvent("disconnect");
 								$this->pluginHandler->plugins['ServerActions']->quit();
 								break;
 							}
+							
 							$this->pluginHandler->triggerEvent("command",
 								substr($this->parsedData['fullcommand'], 1),
 								$this->parsedData['type'],
@@ -164,5 +167,160 @@
 				}
 			}
 		}
+		
+		/**
+		 * Gets the latest revision of an SVN repository with a general HTML output.
+		 * 
+		 * @access private
+		 * @param string $site The URI of the repository (with http://)
+		 * @return string $revision The revision number extracted
+		 */
+		private function get_latest_rev($site)
+		{
+			$raw = file_get_contents($site);
+			$regex = "/(Revision)(\\s+)(\\d+)(:)/is";
+			preg_match_all($regex, $raw, $match);
+			$revision = $match[3][0];
+			
+			return $revision;
+		}
+		
+		/**
+		 * Prints the bot's header with useful information and some nice ASCII text.
+		 *
+		 * @access private
+		 * @return void
+		 */
+		private function print_header()
+		{
+			$svnrev = $this->get_latest_rev("http://dg52-php-irc-bot.googlecode.com/svn/trunk/");
+			$info = "
+	     _  ___ ___ ___ 
+	  __| |/ __| __|_  )
+	 / _` | (_ |__ \/ / 
+	 \__,_|\___|___/___|
+	                    
+	  ___ _  _ ___   ___ ___  ___ 
+	 | _ \ || | _ \ |_ _| _ \/ __|
+	 |  _/ __ |  _/  | ||   / (__ 
+	 |_| |_||_|_|   |___|_|_\\___|
+	                              
+	  ___      _   
+	 | _ ) ___| |_ 
+	 | _ \/ _ \  _|
+	 |___/\___/\__|
+	 
+	 dG52 PHP IRC Bot
+	   Author: Douglas Stridsberg
+	   Email: doggie52@gmail.com
+	   URL: www.douglasstridsberg.com
+	   Latest (online) revision: r".$svnrev."
+	     (if you have an earlier revision than this, please update!)
+	 
+	 Any issues, questions or feedback should be redirected
+	 to the following URL.
+	 
+	 http://code.google.com/p/dg52-php-irc-bot
+	
+				\n";
+			if(GUI)
+			{
+				echo(nl2br($info));
+			}
+			else
+			{
+				echo($info);
+			}
+		}
+		
+		/**
+		 * Parses the raw commands sent by the server and splits them up into different parts, storing them in the $ex array for future use.
+		 *
+		 * @access private
+		 * @param string $data The raw data sent by the socket
+		 * @return array $ex The parsed raw command, split into an array
+		 */
+		private function parse_raw_command($data)
+		{
+			// Explodes the raw data into an initial array
+			$ex					= explode(" ", $data);
+			// Get length of everything before command including last space
+			$identlength		= strlen($ex[0]." ".(isset($ex[1]) ? $ex[1] : "")." ".(isset($ex[2]) ? $ex[2] : "")." ");
+			// Retain all that is in $data after $identlength characters with replaced chr(10)'s and chr(13)'s and minus the first ':'
+			$rawcommand			= substr($data, $identlength);
+			$ex['fullcommand']	= substr(str_replace(array(chr(10), chr(13)), '', $rawcommand), 1);
+			// Split the commandstring up into a second array with words
+			$ex['command']		= explode(" ", $ex['fullcommand']);
+			// The username!hostname of the sender (don't include the first ':' - start from 1)
+			$ex['ident']		= substr($ex[0], 1);
+			// Only the username of the sender (one step extra because only that before the ! wants to be parsed)
+			$hostlength			= strlen(strstr($ex[0], '!'));
+			$ex['username']		= substr($ex[0], 1, -$hostlength);
+			// The receiver of the sent message (either the channelname or the bots nickname)
+			$ex['receiver']		= (isset($ex[2]) ? $ex[2] : "");
+			// Interpret the type of message received ("PRIVATE" or "CHANNEL") depending on the receiver
+			$ex['type']			= $this->interpret_privmsg($ex['receiver']);
+			// Get whether the user is authenticated
+			$ex['authlevel'] 	= $this->is_authenticated($ex['ident']);
+			
+			return $ex;
+		}
+		
+		/**
+		 * Interprets the receiver of a PRIVMSG sent and returns whether it is one from a user (a private message) or one sent in the channel.
+		 * 
+		 * @access private
+		 * @param string $privmsg The message to be interpretted
+		 * @return void
+		 */
+		private function interpret_privmsg($privmsg)
+		{
+			// Regular expressions to match "#channel"
+			$regex = '/(#)((?:[a-z][a-z]+))/is';
+			
+			// If the receiver includes a channelname
+			if(preg_match($regex, $privmsg))
+			{
+				// ... it was sent to the channel
+				$message = "CHANNEL";
+				return $message;
+			}
+			// Or if the sent message's receiver is the bots nickname
+			elseif($privmsg == BOT_NICKNAME)
+			{
+				// ... it is a private message
+				$message = "PRIVATE";
+				return $message;
+			}
+		}
+		
+		/**
+		 * Checks if sender of message is in the list of authenticated users. (username!hostname)
+		 * 
+		 * @access private
+		 * @param string $ident The username!hostname of the user we want to check
+		 * @return boolean $authenticated TRUE for an authenticated user, FALSE for one which isn't
+		 */
+		private function is_authenticated($ident)
+		{
+			// Fetch the userlist array
+			global $users;
+			
+			// If the lower-case ident is found in the userlist array, return true
+			$ident = strtolower($ident);
+			if(in_array($ident, $users))
+			{
+				debug_message("User ($ident) is authenticated.");
+				$authenticated = true;
+			}
+			else
+			{
+			    debug_message("User ($ident) is not authenticated.");
+				$authenticated = false;
+			}
+			
+			return $authenticated;
+		}
+	
 	}
 ?>

@@ -67,48 +67,6 @@
 	}
 	
 	/**
-	 * Sets the topic of the specified channel.
-	 * 
-	 * @access public
-	 * @param string $channel The channel you wish to change topic of
-	 * @param string $topic The new topic to change to
-	 * @return void
-	 */
-	function set_topic($channel, $topic)
-	{
-		$channel = to_channel($channel);
-		send_data("TOPIC", $channel." :".$topic);
-		debug_message("Channel topic for ".$channel." was altered to \"".$topic."\"!");
-	}
-	
-	/**
-	 * Sets a certain mode on the specified user if the bot has the right to do this.
-	 *
-	 * @access public
-	 * @param array $ex The full command-array used to grab either the receiver or the username
-	 * @param bool $mode The desired mode
-	 * @return void
-	 */
-	function mode_user($ex, $mode)
-	{
-		$channel = to_channel($ex['command'][1]);
-		// If the username is not supplied assume it is identical to that which the PM originated from
-		if(!isset($ex['command'][2]))
-		{
-			$user = $ex['username'];
-		}
-		else
-		{
-			$user = $ex['command'][2];
-		}
-		
-		if($mode)
-		{
-			send_data("MODE", $channel." ".$mode." ".$user);
-		}
-	}
-	
-	/**
 	 * Query Google AJAX Search API. All credits to http://w-shadow.com/blog/2009/01/05/get-google-search-results-with-php-google-ajax-api-and-the-seo-perspective/.
 	 *
 	 * @todo Implement this function, checking if curl is enabled or not and test the function itself

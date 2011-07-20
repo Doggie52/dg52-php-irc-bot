@@ -2,7 +2,7 @@
 /**
  * Channel Actions
  * 
- * Enables joining and parting channels, as well as converting to channelnames. Also allows user to see currently connected channels.
+ * Enables joining and parting channels, setting topics as well as converting to channelnames. Also allows user to see currently connected channels.
  */
 
 	class ChannelActions extends aPlugin
@@ -17,10 +17,6 @@
 		 * The array of currently joined channels
 		 */
 		public $connectedChannels = array();
-		
-		function onLoad()
-		{
-		}
 		
 		/**
 		 * Connects the bot to all channels specified in the configuration
@@ -84,6 +80,36 @@
 		}
 		
 		/**
+		 * Sets the topic of the specified channel.
+		 * 
+		 * @access public
+		 * @param string $channel The channel you wish to change topic of
+		 * @param string $topic The new topic to change to
+		 * @return void
+		 */
+		public function setTopic($channel, $topic)
+		{
+			$channel = $this->toChannel($channel);
+			send_data("TOPIC", $channel." :".$topic);
+			debug_message("Channel topic for ".$channel." was altered to \"".$topic."\"!");
+		}
+		
+		/**
+		 * Sets a certain mode on the specified user if the bot has the right to do this.
+		 *
+		 * @access public
+		 * @param string $username The username of that to which to apply the command
+		 * @param string $channel The channel in which to apply the mode
+		 * @param string $mode The desired mode
+		 * @return void
+		 */
+		public function setUserMode($username, $channel, $mode)
+		{
+			$channel = $this->toChannel($channel);
+			send_data("MODE", $channel." ".$mode." ".$username);
+		}
+		
+		/**
 		 * Converts input to a proper channel-name if it isn't already
 		 *
 		 * @access public
@@ -101,30 +127,75 @@
 		
 		public function onCommand($command, $type, $from, $channel, $authLevel)
 		{
-			$command = explode(" ", $command);
-			if($type == "PRIVATE")
+			$commandArray = explode(" ", $command);
+			if($authLevel == 1 && $type == "PRIVATE")
 			{
-				if(strtolower($command[0]) == "join")
+				switch(strtolower($commandArray[0]))
 				{
-					if($this->joinChannel($command[1]))
-					{
-						$this->display("Channel ".$this->toChannel($command[1])." was joined!", $from);
-					}
+					case "join":
+						if($this->joinChannel($commandArray[1]))
+						{
+							$this->display("Channel ".$this->toChannel($commandArray[1])." was joined!", $from);
+						}
+						break;
+					case "part":
+						if($this->partChannel($commandArray[1]))
+						{
+							$this->display("Channel ".$this->toChannel($commandArray[1])." was parted!", $from);
+						}
+						break;
+					case "listchannels":
+						$this->display("Currently connected channels:", $from);
+						foreach($this->connectedChannels as $channelName)
+						{
+							$this->display("-> ".$channelName, $from);
+						}
+						break;
 				}
-				elseif(strtolower($command[0]) == "part")
+			}
+			
+			if($authLevel == 1)
+			{
+				switch(strtolower($commandArray[0]))
 				{
-					if($this->partChannel($command[1]))
-					{
-						$this->display("Channel ".$this->toChannel($command[1])." was parted!", $from);
-					}
-				}
-				elseif(strtolower($command[0]) == "listchannels")
-				{
-					$this->display("Currently connected channels:", $from);
-					foreach($this->connectedChannels as $channelName)
-					{
-						$this->display("-> ".$channelName, $from);
-					}
+					case "topic":
+						if($type == "PRIVATE")
+						{
+							$channelName = $this->toChannel($commandArray[1]);
+							$topic = substr($command, strlen($commandArray[0]." ".$commandArray[1]." "));
+							$this->setTopic($channelName, $topic);
+						}
+						elseif($type == "CHANNEL")
+						{
+							$channelName = $channel;
+							$topic = substr($command, strlen($commandArray[0]." "));
+							$this->setTopic($channelName, $topic);
+						}
+						break;
+					case "op":
+					case "deop":
+					case "voice":
+					case "devoice":
+						$username = $commandArray[1];
+						if($type == "PRIVATE")
+						{
+							$channel = $commandArray[2];
+						}
+						switch(strtolower($commandArray[0]))
+						{
+							case "op":
+								$this->setUserMode($username, $channel, "+o");
+								break;
+							case "deop":
+								$this->setUserMode($username, $channel, "-o");
+								break;
+							case "voice":
+								$this->setUserMode($username, $channel, "+v");
+								break;
+							case "devoice":
+								$this->setUserMode($username, $channel, "-v");
+								break;
+						}
 				}
 			}
 		}

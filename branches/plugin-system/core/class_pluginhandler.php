@@ -32,7 +32,7 @@
 		 * 
 		 * @access public
 		 * @param string $type Type of event (load, connect, disconnect, message, command, clicommand)
-		 * @param string $data (opt.) Incoming message or command together with any parameters (i.e. the whole string)
+		 * @param string $data (opt.) Incoming message or command together with any parameters (i.e. the whole string without the beginning command prefix)
 		 * @param string $dataType (opt.) type of message or command (PRIVATE, CHANNEL)
 		 * @param string $from (opt.) sender of message or command
 		 * @param string $channel (opt.) channel in which message or command was sent
@@ -46,25 +46,37 @@
 				case "load":
 					foreach($this->plugins as $plugin)
 					{
-							$plugin->onLoad();
+							if(method_exists($plugin, "onLoad"))
+							{
+								$plugin->onLoad();
+							}
 					}
 					break;
 				case "connect":
 					foreach($this->plugins as $plugin)
 					{
+						if(method_exists($plugin, "onConnect"))
+						{
 							$plugin->onConnect();
+						}		
 					}
 					break;
 				case "disconnect":
 					foreach($this->plugins as $plugin)
 					{
+						if(method_exists($plugin, "onDisconnect"))
+						{
 							$plugin->onDisconnect();
+						}
 					}
 					break;
 				case "command":
 					foreach($this->plugins as $plugin)
 					{
+						if(method_exists($plugin, "onCommand"))
+						{
 							$plugin->onCommand($data, $dataType, $from, $channel, $authLevel);
+						}
 					}
 					break;
 			}

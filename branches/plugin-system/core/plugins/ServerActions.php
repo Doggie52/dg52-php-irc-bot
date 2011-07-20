@@ -7,6 +7,7 @@
 
 	class ServerActions extends aPlugin
 	{
+		
 		public $PLUGIN_NAME = "Server Actions";
 		public $PLUGIN_ID = "ServerActions";
 		public $PLUGIN_AUTHOR = "Doggie52";
@@ -31,18 +32,6 @@
 					break;
 				}
 			}
-		}
-		
-		public function onConnect()
-		{
-		}
-		
-		public function onDisconnect()
-		{
-		}
-		
-		public function onCommand($command, $type, $from, $channel, $authLevel)
-		{
 		}
 	
 		public function quit()

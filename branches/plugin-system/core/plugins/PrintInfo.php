@@ -22,14 +22,6 @@
 			debug_message("Uptime timer started.");
 		}
 		
-		public function onConnect()
-		{
-		}
-		
-		public function onDisconnect()
-		{
-		}
-		
 		/**
 		 * Prints general information about the bot along with uptime to a user.
 		 * 
