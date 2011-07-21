@@ -84,25 +84,6 @@
 	}
 	
 	/**
-	 * (re)Loads the array of administrators
-	 *
-	 * @access public
-	 * @return array $users The array of administrators
-	 */
-	function reload_users()
-	{
-		// Open the users.inc file
-		$file = fopen(USERS_PATH, "r");
-		// Turn the hostnames into lowercase (does not compromise security, as hostnames are unique anyway)
-		$userlist = strtolower(fread($file, filesize(USERS_PATH)));
-		fclose($file);
-		// Split each line into separate entry in the returned array
-		$users = explode("\n", $userlist);
-		debug_message("The list of administrators was successfully loaded into the system!");
-		return $users;
-	}
-	
-	/**
 	 * Reloads the arrays associated with speech
 	 *
 	 * @access public
@@ -129,6 +110,23 @@
 		}
 		debug_message("The speech and definition arrays were successfully loaded into the system!");
 		return $response;
+	}
+	
+	/**
+	 * Gets the latest revision of an SVN repository with a general HTML output.
+	 * 
+	 * @access public
+	 * @param string $site The URI of the repository (with http://)
+	 * @return string $revision The revision number extracted
+	 */
+	function getLatestRev($site)
+	{
+		$raw = file_get_contents($site);
+		$regex = "/(Revision)(\\s+)(\\d+)(:)/is";
+		preg_match_all($regex, $raw, $match);
+		$revision = $match[3][0];
+		
+		return $revision;
 	}
 	
 	/**

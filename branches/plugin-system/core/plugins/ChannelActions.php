@@ -5,10 +5,9 @@
  * Enables joining and parting channels, setting topics as well as converting to channelnames. Also allows user to see currently connected channels.
  */
 
-	class ChannelActions extends aPlugin
+	class ChannelActions extends PluginEngine
 	{
 		public $PLUGIN_NAME = "Channel Actions";
-		public $PLUGIN_ID = "ChannelActions";
 		public $PLUGIN_AUTHOR = "Doggie52";
 		public $PLUGIN_DESCRIPTION = "Enables joining and parting channels.";
 		public $PLUGIN_VERSION = "1.0";
@@ -125,49 +124,49 @@
 			return $channel;
 		}
 		
-		public function onCommand($command, $type, $from, $channel, $authLevel)
+		public function onCommand($_DATA)
 		{
-			$commandArray = explode(" ", $command);
-			if($authLevel == 1 && $type == "PRIVATE")
+			$commandArray = explode(" ", $_DATA['fullCommand']);
+			if($_DATA['authLevel'] == 1 && $_DATA['messageType'] == "PRIVATE")
 			{
 				switch(strtolower($commandArray[0]))
 				{
 					case "join":
 						if($this->joinChannel($commandArray[1]))
 						{
-							$this->display("Channel ".$this->toChannel($commandArray[1])." was joined!", $from);
+							$this->display("Channel ".$this->toChannel($commandArray[1])." was joined!", $_DATA['sender']);
 						}
 						break;
 					case "part":
 						if($this->partChannel($commandArray[1]))
 						{
-							$this->display("Channel ".$this->toChannel($commandArray[1])." was parted!", $from);
+							$this->display("Channel ".$this->toChannel($commandArray[1])." was parted!", $_DATA['sender']);
 						}
 						break;
 					case "listchannels":
-						$this->display("Currently connected channels:", $from);
+						$this->display("Currently connected channels:", $_DATA['sender']);
 						foreach($this->connectedChannels as $channelName)
 						{
-							$this->display("-> ".$channelName, $from);
+							$this->display("-> ".$channelName, $_DATA['sender']);
 						}
 						break;
 				}
 			}
 			
-			if($authLevel == 1)
+			if($_DATA['authLevel'] == 1)
 			{
 				switch(strtolower($commandArray[0]))
 				{
 					case "topic":
-						if($type == "PRIVATE")
+						if($_DATA['messageType'] == "PRIVATE")
 						{
 							$channelName = $this->toChannel($commandArray[1]);
 							$topic = substr($command, strlen($commandArray[0]." ".$commandArray[1]." "));
 							$this->setTopic($channelName, $topic);
 						}
-						elseif($type == "CHANNEL")
+						elseif($_DATA['messageType'] == "CHANNEL")
 						{
-							$channelName = $channel;
+							$channelName = $_DATA['receiver'];
 							$topic = substr($command, strlen($commandArray[0]." "));
 							$this->setTopic($channelName, $topic);
 						}
@@ -177,23 +176,23 @@
 					case "voice":
 					case "devoice":
 						$username = $commandArray[1];
-						if($type == "PRIVATE")
+						if($_DATA['messageType'] == "PRIVATE")
 						{
 							$channel = $commandArray[2];
 						}
 						switch(strtolower($commandArray[0]))
 						{
 							case "op":
-								$this->setUserMode($username, $channel, "+o");
+								$this->setUserMode($_DATA['sender'], $_DATA['receiver'], "+o");
 								break;
 							case "deop":
-								$this->setUserMode($username, $channel, "-o");
+								$this->setUserMode($_DATA['sender'], $_DATA['receiver'], "-o");
 								break;
 							case "voice":
-								$this->setUserMode($username, $channel, "+v");
+								$this->setUserMode($_DATA['sender'], $_DATA['receiver'], "+v");
 								break;
 							case "devoice":
-								$this->setUserMode($username, $channel, "-v");
+								$this->setUserMode($_DATA['sender'], $_DATA['receiver'], "-v");
 								break;
 						}
 				}

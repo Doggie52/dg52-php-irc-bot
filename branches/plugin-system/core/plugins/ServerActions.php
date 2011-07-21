@@ -5,11 +5,10 @@
  * Logs the bot onto the server and provides disconnect-functionality.
  */
 
-	class ServerActions extends aPlugin
+	class ServerActions extends PluginEngine
 	{
 		
 		public $PLUGIN_NAME = "Server Actions";
-		public $PLUGIN_ID = "ServerActions";
 		public $PLUGIN_AUTHOR = "Doggie52";
 		public $PLUGIN_DESCRIPTION = "Logs the bot onto the server.";
 		public $PLUGIN_VERSION = "1.0";

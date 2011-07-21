@@ -5,10 +5,9 @@
  * Prints information about the bot and the server it is running on to users.
  */
 
-	class PrintInfo extends aPlugin
+	class PrintInfo extends PluginEngine
 	{
 		public $PLUGIN_NAME = "Print Info";
-		public $PLUGIN_ID = "PrintInfo";
 		public $PLUGIN_AUTHOR = "Doggie52";
 		public $PLUGIN_DESCRIPTION = "Prints information about the bot and the server it is running on to users.";
 		public $PLUGIN_VERSION = "1.0";
@@ -32,7 +31,7 @@
 		 */
 		private function sendInfo($username, $starttime)
 		{
-			$this->display("dG52's PHP IRC Bot r".get_latest_rev("http://dg52-php-irc-bot.googlecode.com/svn/trunk/"), $username);
+			$this->display("dG52's PHP IRC Bot r".getLatestRev("http://dg52-php-irc-bot.googlecode.com/svn/trunk/"), $username);
 			// For UNIX-based systems, model and load can be $this->displayed
 			if(PHP_OS != "WINNT" && PHP_OS != "WIN32")
 			{
@@ -60,12 +59,12 @@
 			debug_message("Info was sent to ".$username."!");
 		}
 		
-		public function onCommand($command, $type, $from, $channel, $authLevel)
+		public function onCommand($_DATA)
 		{
-			$command = explode(" ", $command);
+			$command = explode(" ", $_DATA['fullCommand']);
 			if(strtolower($command[0]) == "info")
 			{
-				$this->sendInfo($from, $this->startTime);
+				$this->sendInfo($_DATA['sender'], $this->startTime);
 			}
 		}
 	}

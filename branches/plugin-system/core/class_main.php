@@ -20,9 +20,6 @@
 		// This is going to hold all of the messages from both server and client
 		private $parsedData = array();
 		
-		// This is going to hold our responses
-		private $response;
-		
 		// This holds the plugin objects
 		private $plugins;
 		
@@ -63,20 +60,17 @@
 			}
 			
 			// Print header
-			$this->print_header();
+			$this->printHeader();
 			
-			// Instantiate plugin object and trigger the load
-			$this->pluginHandler = new PluginHandler;
-			$this->pluginHandler->triggerEvent("load");
+			pluginHandler::loadPlugins();
+			// Trigger plugin load
+			pluginHandler::triggerEvent("load");
 			// When the loop is broken, we have been greeted
-			$this->pluginHandler->triggerEvent("connect");
+			pluginHandler::triggerEvent("connect");
 			
 			// Stores list of administrators
 			global $users;
-			$users = reload_users();
-			
-			// Include responses
-			$this->response = reload_speech();
+			$users = $this->reloadUsers();
 			
 			// Initializes the main bot workhorse
 			$this->main();
@@ -116,7 +110,7 @@
 					}
 					flush();
 					
-					$this->parsedData = $this->parse_raw_command($this->rawData);
+					$this->parsedData = $this->parseRawCommand($this->rawData);
 					
 					if($this->parsedData[0] == "PING")
 					{
@@ -131,32 +125,18 @@
 					// If the message is a command
 					if(@strtolower($this->parsedData['command'][0][0]) == COMMAND_PREFIX)
 					{
-						// Distinguish between channelmsg and privmsg - the latter needs 'username' as the $from parameter whilst the former needs to include information about the sender
-						if($this->parsedData['type'] == "CHANNEL")
-						{
-							$this->pluginHandler->triggerEvent("command",
-								substr($this->parsedData['fullcommand'], 1),
-								$this->parsedData['type'],
-								$this->parsedData['username'],
-								$this->parsedData['receiver'],
-								$this->parsedData['authlevel']);
-						}
-						elseif($this->parsedData['type'] == "PRIVATE")
+						$this->parsedData['fullCommand'] = substr($this->parsedData['fullCommand'], 1);
+						pluginHandler::triggerEvent("command", $this->parsedData);
+						
+						if($this->parsedData['messageType'] == "PRIVATE")
 						{
 							// Separate handling for the !quit command
-							if($this->parsedData['authlevel'] == 1 && strtolower(substr($this->parsedData['command'][0], 1)) == "quit")
+							if($this->parsedData['authLevel'] == 1 && strtolower(substr($this->parsedData['command'][0], 1)) == "quit")
 							{
-								$this->pluginHandler->triggerEvent("disconnect");
-								$this->pluginHandler->plugins['ServerActions']->quit();
+								pluginHandler::triggerEvent("disconnect");
+								pluginHandler::$plugins['ServerActions']->quit();
 								break;
 							}
-							
-							$this->pluginHandler->triggerEvent("command",
-								substr($this->parsedData['fullcommand'], 1),
-								$this->parsedData['type'],
-								$this->parsedData['username'],
-								NULL,
-								$this->parsedData['authlevel']);
 						}
 					}
 					// If the message is a message
@@ -169,31 +149,14 @@
 		}
 		
 		/**
-		 * Gets the latest revision of an SVN repository with a general HTML output.
-		 * 
-		 * @access private
-		 * @param string $site The URI of the repository (with http://)
-		 * @return string $revision The revision number extracted
-		 */
-		private function get_latest_rev($site)
-		{
-			$raw = file_get_contents($site);
-			$regex = "/(Revision)(\\s+)(\\d+)(:)/is";
-			preg_match_all($regex, $raw, $match);
-			$revision = $match[3][0];
-			
-			return $revision;
-		}
-		
-		/**
 		 * Prints the bot's header with useful information and some nice ASCII text.
 		 *
 		 * @access private
 		 * @return void
 		 */
-		private function print_header()
+		private function printHeader()
 		{
-			$svnrev = $this->get_latest_rev("http://dg52-php-irc-bot.googlecode.com/svn/trunk/");
+			$svnrev = getLatestRev("http://dg52-php-irc-bot.googlecode.com/svn/trunk/");
 			$info = "
 	     _  ___ ___ ___ 
 	  __| |/ __| __|_  )
@@ -240,7 +203,7 @@
 		 * @param string $data The raw data sent by the socket
 		 * @return array $ex The parsed raw command, split into an array
 		 */
-		private function parse_raw_command($data)
+		private function parseRawCommand($data)
 		{
 			// Explodes the raw data into an initial array
 			$ex					= explode(" ", $data);
@@ -248,49 +211,68 @@
 			$identlength		= strlen($ex[0]." ".(isset($ex[1]) ? $ex[1] : "")." ".(isset($ex[2]) ? $ex[2] : "")." ");
 			// Retain all that is in $data after $identlength characters with replaced chr(10)'s and chr(13)'s and minus the first ':'
 			$rawcommand			= substr($data, $identlength);
-			$ex['fullcommand']	= substr(str_replace(array(chr(10), chr(13)), '', $rawcommand), 1);
+			$ex['fullCommand']	= substr(str_replace(array(chr(10), chr(13)), '', $rawcommand), 1);
 			// Split the commandstring up into a second array with words
-			$ex['command']		= explode(" ", $ex['fullcommand']);
+			$ex['command']		= explode(" ", $ex['fullCommand']);
 			// The username!hostname of the sender (don't include the first ':' - start from 1)
 			$ex['ident']		= substr($ex[0], 1);
 			// Only the username of the sender (one step extra because only that before the ! wants to be parsed)
 			$hostlength			= strlen(strstr($ex[0], '!'));
-			$ex['username']		= substr($ex[0], 1, -$hostlength);
-			// The receiver of the sent message (either the channelname or the bots nickname)
-			$ex['receiver']		= (isset($ex[2]) ? $ex[2] : "");
+			$ex['sender']		= substr($ex[0], 1, -$hostlength);
+			// The receiver of the sent message (either the channelname or the bot's nickname)
+			$ex['receiver']		= $ex[2];
 			// Interpret the type of message received ("PRIVATE" or "CHANNEL") depending on the receiver
-			$ex['type']			= $this->interpret_privmsg($ex['receiver']);
+			$ex['messageType']	= $this->interpretMessage($ex['receiver']);
 			// Get whether the user is authenticated
-			$ex['authlevel'] 	= $this->is_authenticated($ex['ident']);
+			$ex['authLevel'] 	= $this->isAuthenticated($ex['ident']);
 			
 			return $ex;
 		}
 		
 		/**
-		 * Interprets the receiver of a PRIVMSG sent and returns whether it is one from a user (a private message) or one sent in the channel.
+		 * (re)Loads the array of administrators
+		 *
+		 * @access private
+		 * @return array $users The array of administrators
+		 */
+		private function reloadUsers()
+		{
+			// Open the users.inc file
+			$file = fopen(USERS_PATH, "r");
+			// Turn the hostnames into lowercase (does not compromise security, as hostnames are unique anyway)
+			$userlist = strtolower(fread($file, filesize(USERS_PATH)));
+			fclose($file);
+			// Split each line into separate entry in the returned array
+			$users = explode("\n", $userlist);
+			debug_message("The list of administrators was successfully loaded into the system!");
+			return $users;
+		}
+		
+		/**
+		 * Interprets the receiver of a message sent and returns whether it is one from a user (a private message) or one sent in the channel.
 		 * 
 		 * @access private
-		 * @param string $privmsg The message to be interpretted
-		 * @return void
+		 * @param string $message The message to be interpretted
+		 * @return string $type The type of message sent ("PRIVATE" or "CHANNEL")
 		 */
-		private function interpret_privmsg($privmsg)
+		private function interpretMessage($message)
 		{
 			// Regular expressions to match "#channel"
 			$regex = '/(#)((?:[a-z][a-z]+))/is';
 			
 			// If the receiver includes a channelname
-			if(preg_match($regex, $privmsg))
+			if(preg_match($regex, $message))
 			{
 				// ... it was sent to the channel
-				$message = "CHANNEL";
-				return $message;
+				$type = "CHANNEL";
+				return $type;
 			}
 			// Or if the sent message's receiver is the bots nickname
-			elseif($privmsg == BOT_NICKNAME)
+			elseif($message == BOT_NICKNAME)
 			{
 				// ... it is a private message
-				$message = "PRIVATE";
-				return $message;
+				$type = "PRIVATE";
+				return $type;
 			}
 		}
 		
@@ -301,7 +283,7 @@
 		 * @param string $ident The username!hostname of the user we want to check
 		 * @return boolean $authenticated TRUE for an authenticated user, FALSE for one which isn't
 		 */
-		private function is_authenticated($ident)
+		private function isAuthenticated($ident)
 		{
 			// Fetch the userlist array
 			global $users;

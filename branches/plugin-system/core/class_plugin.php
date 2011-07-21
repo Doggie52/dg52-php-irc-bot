@@ -13,13 +13,13 @@
 	/**
 	 * Plugin interface
 	 */
-	abstract class aPlugin
+	abstract class PluginEngine
 	{
 	
 		/**
 		 * Variables
 		 */
-		public $PLUGIN_NAME, $PLUGIN_ID, $PLUGIN_AUTHOR, $PLUGIN_DESCRIPTION, $PLUGIN_VERSION;
+		public $PLUGIN_NAME, $PLUGIN_AUTHOR, $PLUGIN_DESCRIPTION, $PLUGIN_VERSION;
 		
 		/**
 		 * Displays a message to either the channel or a client
