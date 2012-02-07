@@ -29,7 +29,7 @@
 		 * @param string $starttime The start-time of the script in UNIX-timestamp format
 		 * @return void
 		 */
-		private function sendInfo($username, $starttime)
+		private function send_info($username, $starttime)
 		{
 			$this->display("dG52's PHP IRC Bot r".getLatestRev("http://dg52-php-irc-bot.googlecode.com/svn/trunk/"), $username);
 			// For UNIX-based systems, model and load can be $this->displayed
@@ -59,17 +59,17 @@
 			debug_message("Info was sent to ".$username."!");
 		}
 		
-		/*public function onCommand($_DATA)
+		public function command_info($data)
 		{
-			$command = explode(" ", $_DATA['fullCommand']);
-			if(strtolower($command[0]) == "info")
-			{
-				$this->sendInfo($_DATA['sender'], $this->startTime);
-			}
-		}*/
+			if($data->authLevel == 1)
+				$this->send_info($data->sender, $this->startTime);
+			else
+				$this->display("You do not have access to this command!", $data->sender);
+		}
 
 		public function __construct()
 		{
 			$this->register_action('connect', array('PrintInfo', 'init'));
+			$this->register_command('info', array('PrintInfo', 'command_info'));
 		}
 	}

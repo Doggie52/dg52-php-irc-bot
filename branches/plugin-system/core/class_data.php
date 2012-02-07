@@ -24,7 +24,7 @@
 		protected $sender;
 		protected $receiver;
 		protected $origin = 0;
-		protected $authLevel;
+		protected $authLevel = 0;
 
 		/**
 		 * Constants relating to type of data, instead of an enumeration

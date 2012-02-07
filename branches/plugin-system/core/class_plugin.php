@@ -32,7 +32,10 @@
 		{
 			// Does the hook exist?
 			if(!isset(PluginHandler::$hooks[$hook]))
+			{
+				debug_message("[PLUGIN] ".$callback[0].": Hook \"".$hook."\" does not exist!");
 				return;
+			}
 			
 			// Add callback to hook array
 			PluginHandler::$hooks[$hook][] = $callback;
@@ -46,10 +49,17 @@
 		 * @param array $callback [0]: name of the plugin's class, [1]: name of the function (callback) to register to the hook
 		 * @param string $documentation The usage documentation assigned to the command
 		 */
-		protected function register_command($command, $callback, $documentation)
+		protected function register_command($command, $callback, $documentation = null)
 		{
+			// Does the command already exist?
+			if(isset(PluginHandler::$commands[$command]))
+			{
+				debug_message("[PLUGIN] ".$callback[0].": Command \"".$command."\" already exists!");
+				return;
+			}
+			
 			// Add callback to command array
-			PluginHandler::$commands[] = $callback;
+			PluginHandler::$commands[$command] = $callback;
 		}
 		
 		/**

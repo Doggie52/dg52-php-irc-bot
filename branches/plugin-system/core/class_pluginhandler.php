@@ -40,7 +40,7 @@
 		/**
 		 * Loads all plugins and appends them to array
 		 */
-		static public function loadPlugins()
+		static public function load_plugins()
 		{
 			include("class_plugin.php");
 			foreach(glob("core/plugins/*.php") as $pluginName)
@@ -60,7 +60,7 @@
 		 * @param object $data (optional) The data object to pass to plugins
 		 * @return void
 		 */
-		static public function triggerHook($hook, $data = null)
+		static public function trigger_hook($hook, $data = null)
 		{
 			// Does the hook exist?
 			if(!isset(self::$hooks[$hook]))
@@ -69,6 +69,25 @@
 			// Fire the events
 			foreach(self::$hooks[$hook] as $callback)
 				call_user_func_array(array(self::$plugins[$callback[0]], $callback[1]), array($data));
+		}
+
+		/**
+		 * Runs a command
+		 * 
+		 * @access public
+		 * @param string $command Name of the command to fire
+		 * @param object $data The data object to pass to plugins
+		 * @return void
+		 */
+		static public function run_command($command, $data)
+		{
+			// Does the hook exist?
+			if(!isset(self::$commands[$command]))
+				return;
+			
+			// Fire the callback associated with the command
+			$callback = self::$commands[$command];
+			call_user_func_array(array(self::$plugins[$callback[0]], $callback[1]), array($data));
 		}
 		
 	}

@@ -33,17 +33,20 @@
 			}
 		}
 	
-		/*public function quit()
+		public function quit($data)
 		{
+			if($data->authLevel != 1)
+				return;
 			if(send_data("QUIT", ":".BOT_QUITMSG))
 			{
 				debug_message("Bot has disconnected and been turned off!");
 			}
-		}*/
+		}
 
 		public function __construct()
 		{
 			$this->register_action('load', array('ServerActions', 'register_bot'));
+			$this->register_command('quit', array('ServerActions', 'quit'));
 		}
 	}
 ?>

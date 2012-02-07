@@ -61,17 +61,17 @@
 			}
 			
 			// Print header
-			$this->printHeader();
+			$this->print_header();
 			
-			pluginHandler::loadPlugins();
+			pluginHandler::load_plugins();
 			// Trigger plugin load
-			pluginHandler::triggerHook('load');
+			pluginHandler::trigger_hook('load');
 			// When the loop is broken, we have been greeted
-			pluginHandler::triggerHook('connect');
+			pluginHandler::trigger_hook('connect');
 			
 			// Stores list of administrators
 			global $users;
-			$users = $this->reloadUsers();
+			$users = $this->reload_users();
 			
 			// Initializes the main bot workhorse
 			$this->main();
@@ -128,18 +128,17 @@
 					// If the message is a command
 					if($this->data->type == Data::COMMAND)
 					{
-						// trigger
+						PluginHandler::run_command($this->data->command, $this->data);
 					}
-					// If the message is a message
 					else
 					{
 						if($this->data->origin == Data::CHANNEL)
 						{
-							PluginHandler::triggerHook('channel_message', $this->data);
+							PluginHandler::trigger_hook('channel_message', $this->data);
 						}
 						elseif($this->data->origin == Data::PRIVMSG)
 						{
-							PluginHandler::triggerHook('private_message', $this->data);
+							PluginHandler::trigger_hook('private_message', $this->data);
 						}
 					}
 				}
@@ -152,7 +151,7 @@
 		 * @access private
 		 * @return void
 		 */
-		private function printHeader()
+		private function print_header()
 		{
 			$svnrev = getLatestRev("http://dg52-php-irc-bot.googlecode.com/svn/trunk/");
 			$info = "
@@ -200,17 +199,25 @@
 		 * @access private
 		 * @return array $users The array of administrators
 		 */
-		private function reloadUsers()
+		private function reload_users()
 		{
 			// Open the users.inc file
 			$file = fopen(USERS_PATH, "r");
 			// Turn the hostnames into lowercase (does not compromise security, as hostnames are unique anyway)
-			$userlist = strtolower(fread($file, filesize(USERS_PATH)));
+			$userlist = strtolower(@fread($file, filesize(USERS_PATH)));
 			fclose($file);
-			// Split each line into separate entry in the returned array
-			$users = explode("\n", $userlist);
-			debug_message("The list of administrators was successfully loaded into the system!");
-			return $users;
+			if($userlist)
+			{
+				// Split each line into separate entry in the returned array
+				$users = explode("\n", $userlist);
+				debug_message("The list of administrators was successfully loaded into the system!");
+				return $users;
+			}
+			else
+			{
+				debug_message("Something went wrong when loading the list of administrators.");
+				return false;
+			}
 		}
 	
 	}
