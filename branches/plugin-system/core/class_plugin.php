@@ -71,7 +71,21 @@
 		 */
 		protected function display($message, $to)
 		{
-			send_data("PRIVMSG", $message, $to);
+			$this->send_data("PRIVMSG", $message, $to);
+		}
+
+		/**
+		 * Sends data to the server. Important that basic structure of sent message is kept the same, otherwise it will fail.
+		 * 
+		 * @access protected
+		 * @param string $cmd The command you wish to send
+		 * @param string $msg The parameters you wish to pass to the command (default: null)
+		 * @param string $rcvr The receiver of the message (default: null)
+		 * @return boolean Whether the data was sent successfully
+		 */
+		protected function send_data($cmd, $msg = null, $rcvr = null)
+		{
+			send_data($cmd, $msg, $rcvr);
 		}
 		
 	}

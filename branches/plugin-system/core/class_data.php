@@ -20,6 +20,7 @@
 		protected $fullLine;
 		protected $type = 0;
 		protected $command;
+		protected $commandArgs;
 		protected $ident;
 		protected $sender;
 		protected $receiver;
@@ -65,7 +66,7 @@
 		 */
 		public function __construct($rawdata)
 		{
-			$rawdata_array			= explode(" ", $rawdata);
+			$rawdata_array		= explode(" ", $rawdata);
 
 			// Special case if the sent command is a ping
 			if($rawdata_array[0] == "PING")
@@ -82,6 +83,7 @@
 				$this->type		= self::COMMAND;
 				$_temp_expl		= explode(" ", $this->fullLine);
 				$this->command	= substr($_temp_expl[0], 1);
+				$this->commandArgs = array_slice($_temp_expl, 1);
 			}
 
 			// The username!hostname of the sender (don't include the first ':' - start from 1)

@@ -16,65 +16,91 @@
 		 * The array of currently joined channels
 		 */
 		public $connectedChannels = array();
+
+		public function __construct()
+		{
+			$this->register_action('connect', array('ChannelActions', 'join_initial_channels'));
+			$this->register_action('disconnect', array('ChannelActions', 'part_all_channels'));
+
+			$this->register_command('join', array('ChannelActions', 'join_channel'));
+			$this->register_command('part', array('ChannelActions', 'part_channel'));
+			$this->register_command('topic', array('ChannelActions', 'set_topic'));
+			$this->register_command('op', array('ChannelActions', 'set_user_mode'));
+			$this->register_command('deop', array('ChannelActions', 'set_user_mode'));
+			$this->register_command('voice', array('ChannelActions', 'set_user_mode'));
+			$this->register_command('devoice', array('ChannelActions', 'set_user_mode'));
+		}
 		
 		/**
 		 * Connects the bot to all channels specified in the configuration
 		 */
-		public function joinInitialChannels()
+		public function join_initial_channels()
 		{
 			$initialChannels = explode(" ", BOT_CHANNELS);
 			foreach($initialChannels as $channelName)
 			{
-				$this->joinChannel($channelName);
+				$this->join_channel('', $channelName);
 			}
 		}
 		
 		/**
 		 * Part all channels
 		 */
-		public function partAllChannels()
+		public function part_all_channels()
 		{
 			foreach($this->connectedChannels as $channelName)
 			{
-				$this->partChannel($channelName);
+				$this->part_channel('', $channelName);
 			}
 		}
 		
 		/**
 		 * Joins a channel. Checks if the channel-name includes a #-sign
 		 *
+		 * @param string $channel (optional) The name of the channel, if called directly
 		 * @access public
-		 * @param string $channel The channels you wish the bot to join
-		 * @return boolean Whether the joining was successful or not
 		 */
-		public function joinChannel($channel)
+		public function join_channel($data, $channel)
 		{
-			$channel = $this->toChannel($channel);
-			if(send_data("JOIN", $channel))
+			if(is_object($data) && @$data->authLevel != 1)
+				return;
+
+			if(!isset($channel))
+				$channel = $this->to_channel($data->commandArgs[0]);
+			else
+				$channel = $this->to_channel($channel);
+			
+			if($this->send_data("JOIN", $channel))
 			{
 				debug_message("Channel ".$channel." was joined!");
 				// Add joined channel to array
 				$this->connectedChannels[] = $channel;
-				return TRUE;
+				return;
 			}
 		}
 		
 		/**
 		 * Parts (leaves) a channel. Checks if the channel-name includes a #-sign.
 		 *
+		 * @param string $channel (optional) The name of the channel, if called directly
 		 * @access public
-		 * @param string $channel The channel you wish the bot to part
-		 * @return boolean Whether the parting was successful or not
 		 */
-		public function partChannel($channel)
+		public function part_channel($data, $channel)
 		{
-			$channel = $this->toChannel($channel);
-			if(send_data("PART", $channel))
+			if(isset($data) && @$data->authLevel != 1)
+				return;
+			
+			if(!isset($channel))
+				$channel = $this->to_channel($data->commandArgs[0]);
+			else
+				$channel = $this->to_channel($channel);
+			
+			if($this->send_data("PART", $channel))
 			{
 				debug_message("Channel ".$channel." was parted!");
 				// Rid the array of the parted channel
 				$this->connectedChannels = remove_item_by_value($channel, $this->connectedChannels);
-				return TRUE;
+				return;
 			}
 		}
 		
@@ -82,30 +108,61 @@
 		 * Sets the topic of the specified channel.
 		 * 
 		 * @access public
-		 * @param string $channel The channel you wish to change topic of
-		 * @param string $topic The new topic to change to
-		 * @return void
 		 */
-		public function setTopic($channel, $topic)
+		public function set_topic($data)
 		{
-			$channel = $this->toChannel($channel);
-			send_data("TOPIC", $channel." :".$topic);
+			if($data->authLevel != 1)
+				return;
+			
+			if($data->origin == Data::PRIVMSG)
+			{
+				$channel = $this->to_channel($data->commandArgs[0]);
+				$topic = substr($data->fullLine, strlen(COMMAND_PREFIX.$data->command." ".$data->commandArgs[0]." "));
+			}
+			elseif($data->origin == Data::CHANNEL)
+			{
+				$channel = $data->receiver;
+				$topic = substr($data->fullLine, strlen(COMMAND_PREFIX.$data->command." "));
+			}
+
+			$channel = $this->to_channel($channel);
+			$this->send_data("TOPIC", $channel." :".$topic);
 			debug_message("Channel topic for ".$channel." was altered to \"".$topic."\"!");
 		}
 		
 		/**
-		 * Sets a certain mode on the specified user if the bot has the right to do this.
+		 * Sets a certain mode on the specified user if the bot has the right to do this
+		 * For now, only allows setting modes from contact in a channel
 		 *
 		 * @access public
-		 * @param string $username The username of that to which to apply the command
-		 * @param string $channel The channel in which to apply the mode
-		 * @param string $mode The desired mode
-		 * @return void
 		 */
-		public function setUserMode($username, $channel, $mode)
+		public function set_user_mode($data)
 		{
-			$channel = $this->toChannel($channel);
-			send_data("MODE", $channel." ".$mode." ".$username);
+			if($data->authLevel != 1)
+				return;
+			
+			if($data->origin == Data::CHANNEL)
+			{
+				switch($data->command)
+				{
+					case "op":
+						$mode = "+o";
+						break;
+					case "deop":
+						$mode = "-o";
+						break;
+					case "voice":
+						$mode = "+v";
+						break;
+					case "devoice":
+						$mode = "-v";
+						break;
+				}
+
+				$channel = $this->to_channel($data->receiver);
+				$username = $data->commandArgs[0];
+				send_data("MODE", $channel." ".$mode." ".$username);
+			}
 		}
 		
 		/**
@@ -115,94 +172,13 @@
 		 * @param string $channel The channelname to be converted
 		 * @return string $channel The converted channel
 		 */
-		public function toChannel($channel)
+		public function to_channel($channel)
 		{
 			if($channel[0] != "#")
 			{
 				$channel = "#".$channel;
 			}
 			return $channel;
-		}
-		
-		/*public function onCommand($_DATA)
-		{
-			$commandArray = explode(" ", $_DATA['fullCommand']);
-			if($_DATA['authLevel'] == 1 && $_DATA['messageType'] == "PRIVATE")
-			{
-				switch(strtolower($commandArray[0]))
-				{
-					case "join":
-						if($this->joinChannel($commandArray[1]))
-						{
-							$this->display("Channel ".$this->toChannel($commandArray[1])." was joined!", $_DATA['sender']);
-						}
-						break;
-					case "part":
-						if($this->partChannel($commandArray[1]))
-						{
-							$this->display("Channel ".$this->toChannel($commandArray[1])." was parted!", $_DATA['sender']);
-						}
-						break;
-					case "listchannels":
-						$this->display("Currently connected channels:", $_DATA['sender']);
-						foreach($this->connectedChannels as $channelName)
-						{
-							$this->display("-> ".$channelName, $_DATA['sender']);
-						}
-						break;
-				}
-			}
-			
-			if($_DATA['authLevel'] == 1)
-			{
-				switch(strtolower($commandArray[0]))
-				{
-					case "topic":
-						if($_DATA['messageType'] == "PRIVATE")
-						{
-							$channelName = $this->toChannel($commandArray[1]);
-							$topic = substr($command, strlen($commandArray[0]." ".$commandArray[1]." "));
-							$this->setTopic($channelName, $topic);
-						}
-						elseif($_DATA['messageType'] == "CHANNEL")
-						{
-							$channelName = $_DATA['receiver'];
-							$topic = substr($command, strlen($commandArray[0]." "));
-							$this->setTopic($channelName, $topic);
-						}
-						break;
-					case "op":
-					case "deop":
-					case "voice":
-					case "devoice":
-						$username = $commandArray[1];
-						if($_DATA['messageType'] == "PRIVATE")
-						{
-							$channel = $commandArray[2];
-						}
-						switch(strtolower($commandArray[0]))
-						{
-							case "op":
-								$this->setUserMode($_DATA['sender'], $_DATA['receiver'], "+o");
-								break;
-							case "deop":
-								$this->setUserMode($_DATA['sender'], $_DATA['receiver'], "-o");
-								break;
-							case "voice":
-								$this->setUserMode($_DATA['sender'], $_DATA['receiver'], "+v");
-								break;
-							case "devoice":
-								$this->setUserMode($_DATA['sender'], $_DATA['receiver'], "-v");
-								break;
-						}
-				}
-			}
-		}*/
-
-		public function __construct()
-		{
-			$this->register_action('connect', array('ChannelActions', 'joinInitialChannels'));
-			$this->register_action('disconnect', array('ChannelActions', 'partAllChannels'));
 		}
 	}
 
