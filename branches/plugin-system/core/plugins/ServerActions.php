@@ -16,7 +16,7 @@
 		/**
 		 * Registers the bot on the server.
 		 */
-		public function onLoad()
+		public function register_bot()
 		{
 			send_data('USER', BOT_NICKNAME.' douglasstridsberg.com '.BOT_NICKNAME.' :'.BOT_NAME);
 			send_data('NICK', BOT_NICKNAME);
@@ -33,12 +33,17 @@
 			}
 		}
 	
-		public function quit()
+		/*public function quit()
 		{
 			if(send_data("QUIT", ":".BOT_QUITMSG))
 			{
 				debug_message("Bot has disconnected and been turned off!");
 			}
+		}*/
+
+		public function __construct()
+		{
+			$this->register_action('load', array('ServerActions', 'register_bot'));
 		}
 	}
 ?>

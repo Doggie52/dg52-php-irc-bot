@@ -11,34 +11,39 @@
 		public $PLUGIN_AUTHOR = "Doggie52";
 		public $PLUGIN_DESCRIPTION = "Outputs hello world at different times.";
 		public $PLUGIN_VERSION = "1.0";
+
+		private $matches = array(
+							'hello',
+							'hi',
+							'hey',
+							'howdy',
+							'yo'
+			);
 		
-		public function onLoad()
+		public function __construct()
 		{
+			// Register our function to both private and channel messages
+			$this->register_action('channel_message', array('HelloWorld', 'hello'));
+			$this->register_action('private_message', array('HelloWorld', 'hello'));
 		}
-		
-		public function onConnect()
+
+		public function hello($data)
 		{
-		}
-		
-		public function onDisconnect()
-		{
-		}
-		
-		public function onCommand($_DATA)
-		{
-			$command = explode(" ", $_DATA['fullCommand']);
-			if(strtolower($command[0]) == "hello")
+			// Since what we are looking for is not a command, we need to explode the full line
+			$fullLine = explode(" ", $data->fullLine);
+
+			// If the first word matches any of our matches
+			if(in_array(strtolower($fullLine[0]), $this->matches))
 			{
-				if($_DATA['messageType'] == "PRIVATE")
+				if($data->origin == Data::PRIVMSG)
 				{
-					$this->display("Hello world! You just sent me a PM.", $_DATA['sender']);
+					$this->display("Hello world! You just sent me a PM.", $data->sender);
 				}
-				elseif($_DATA['messageType'] == "CHANNEL")
+				elseif($data->origin == Data::CHANNEL)
 				{
-					$this->display("Hello world! You just sent me this via a channel.", $_DATA['sender']);
+					$this->display("Hello world! You just sent me this via a channel.", $data->sender);
 				}
 			}
-		}
-		
+		}		
 	}
 ?>

@@ -14,7 +14,7 @@
 		
 		private $startTime;
 		
-		public function onLoad()
+		public function init()
 		{
 			// Declare the starttime
 			$this->startTime = time();
@@ -59,12 +59,17 @@
 			debug_message("Info was sent to ".$username."!");
 		}
 		
-		public function onCommand($_DATA)
+		/*public function onCommand($_DATA)
 		{
 			$command = explode(" ", $_DATA['fullCommand']);
 			if(strtolower($command[0]) == "info")
 			{
 				$this->sendInfo($_DATA['sender'], $this->startTime);
 			}
+		}*/
+
+		public function __construct()
+		{
+			$this->register_action('connect', array('PrintInfo', 'init'));
 		}
 	}

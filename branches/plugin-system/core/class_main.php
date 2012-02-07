@@ -17,8 +17,8 @@
 		// This is going to hold the data received from the socket
 		private $rawData;
 		
-		// This is going to hold all of the messages from both server and client
-		private $parsedData = array();
+		// This is going to hold all the current data object from the server
+		private $data;
 		
 		// This holds the plugin objects
 		private $plugins;
@@ -46,6 +46,7 @@
 			// Include functions
 			include("core/class_func.php");
 			include("core/class_user.php");
+			include("core/class_data.php");
 			include("core/class_pluginhandler.php");
 
 			 // Replaces %date% with the date in the form yyyymmdd
@@ -64,9 +65,9 @@
 			
 			pluginHandler::loadPlugins();
 			// Trigger plugin load
-			pluginHandler::triggerEvent("load");
+			pluginHandler::triggerHook('load');
 			// When the loop is broken, we have been greeted
-			pluginHandler::triggerEvent("connect");
+			pluginHandler::triggerHook('connect');
 			
 			// Stores list of administrators
 			global $users;
@@ -106,16 +107,18 @@
 					// If the debug output is turned on, spew out all data received from server
 					if(DEBUG_OUTPUT)
 					{
-						echo nl2br($this->rawData);
+						echo $this->rawData;
 					}
 					flush();
 					
-					$this->parsedData = $this->parseRawCommand($this->rawData);
-					
-					if($this->parsedData[0] == "PING")
+					$this->data = new Data($this->rawData);
+
+					if($this->data->type == Data::PING)
 					{
+						// Explode raw data to get server
+						$_temp_expl = explode(" ", $this->rawData);
 						// Plays ping-pong with the server to stay connected
-						send_data("PONG", $this->parsedData[1]);
+						send_data("PONG", $_temp_expl[1]);
 						if(!SUPPRESS_PING)
 						{
 							debug_message("PONG was sent.");
@@ -123,26 +126,21 @@
 					}
 					
 					// If the message is a command
-					if(@strtolower($this->parsedData['command'][0][0]) == COMMAND_PREFIX)
+					if($this->data->type == Data::COMMAND)
 					{
-						$this->parsedData['fullCommand'] = substr($this->parsedData['fullCommand'], 1);
-						pluginHandler::triggerEvent("command", $this->parsedData);
-						
-						if($this->parsedData['messageType'] == "PRIVATE")
-						{
-							// Separate handling for the !quit command
-							if($this->parsedData['authLevel'] == 1 && strtolower(substr($this->parsedData['command'][0], 1)) == "quit")
-							{
-								pluginHandler::triggerEvent("disconnect");
-								pluginHandler::$plugins['ServerActions']->quit();
-								break;
-							}
-						}
+						// trigger
 					}
 					// If the message is a message
 					else
 					{
-						
+						if($this->data->origin == Data::CHANNEL)
+						{
+							PluginHandler::triggerHook('channel_message', $this->data);
+						}
+						elseif($this->data->origin == Data::PRIVMSG)
+						{
+							PluginHandler::triggerHook('private_message', $this->data);
+						}
 					}
 				}
 			}
@@ -197,39 +195,6 @@
 		}
 		
 		/**
-		 * Parses the raw commands sent by the server and splits them up into different parts, storing them in the $ex array for future use.
-		 *
-		 * @access private
-		 * @param string $data The raw data sent by the socket
-		 * @return array $ex The parsed raw command, split into an array
-		 */
-		private function parseRawCommand($data)
-		{
-			// Explodes the raw data into an initial array
-			$ex					= explode(" ", $data);
-			// Get length of everything before command including last space
-			$identlength		= strlen($ex[0]." ".(isset($ex[1]) ? $ex[1] : "")." ".(isset($ex[2]) ? $ex[2] : "")." ");
-			// Retain all that is in $data after $identlength characters with replaced chr(10)'s and chr(13)'s and minus the first ':'
-			$rawcommand			= substr($data, $identlength);
-			$ex['fullCommand']	= substr(str_replace(array(chr(10), chr(13)), '', $rawcommand), 1);
-			// Split the commandstring up into a second array with words
-			$ex['command']		= explode(" ", $ex['fullCommand']);
-			// The username!hostname of the sender (don't include the first ':' - start from 1)
-			$ex['ident']		= substr($ex[0], 1);
-			// Only the username of the sender (one step extra because only that before the ! wants to be parsed)
-			$hostlength			= strlen(strstr($ex[0], '!'));
-			$ex['sender']		= substr($ex[0], 1, -$hostlength);
-			// The receiver of the sent message (either the channelname or the bot's nickname)
-			$ex['receiver']		= $ex[2];
-			// Interpret the type of message received ("PRIVATE" or "CHANNEL") depending on the receiver
-			$ex['messageType']	= $this->interpretMessage($ex['receiver']);
-			// Get whether the user is authenticated
-			$ex['authLevel'] 	= $this->isAuthenticated($ex['ident']);
-			
-			return $ex;
-		}
-		
-		/**
 		 * (re)Loads the array of administrators
 		 *
 		 * @access private
@@ -246,62 +211,6 @@
 			$users = explode("\n", $userlist);
 			debug_message("The list of administrators was successfully loaded into the system!");
 			return $users;
-		}
-		
-		/**
-		 * Interprets the receiver of a message sent and returns whether it is one from a user (a private message) or one sent in the channel.
-		 * 
-		 * @access private
-		 * @param string $message The message to be interpretted
-		 * @return string $type The type of message sent ("PRIVATE" or "CHANNEL")
-		 */
-		private function interpretMessage($message)
-		{
-			// Regular expressions to match "#channel"
-			$regex = '/(#)((?:[a-z][a-z]+))/is';
-			
-			// If the receiver includes a channelname
-			if(preg_match($regex, $message))
-			{
-				// ... it was sent to the channel
-				$type = "CHANNEL";
-				return $type;
-			}
-			// Or if the sent message's receiver is the bots nickname
-			elseif($message == BOT_NICKNAME)
-			{
-				// ... it is a private message
-				$type = "PRIVATE";
-				return $type;
-			}
-		}
-		
-		/**
-		 * Checks if sender of message is in the list of authenticated users. (username!hostname)
-		 * 
-		 * @access private
-		 * @param string $ident The username!hostname of the user we want to check
-		 * @return boolean $authenticated TRUE for an authenticated user, FALSE for one which isn't
-		 */
-		private function isAuthenticated($ident)
-		{
-			// Fetch the userlist array
-			global $users;
-			
-			// If the lower-case ident is found in the userlist array, return true
-			$ident = strtolower($ident);
-			if(in_array($ident, $users))
-			{
-				debug_message("User ($ident) is authenticated.");
-				$authenticated = true;
-			}
-			else
-			{
-			    debug_message("User ($ident) is not authenticated.");
-				$authenticated = false;
-			}
-			
-			return $authenticated;
 		}
 	
 	}

@@ -6,15 +6,31 @@
 	 * @email: doggie52@gmail.com
 	 * @url: www.douglasstridsberg.com
 	 *
-	 * Handles plugins
+	 * Handles plugins.
 	 */
 
 	class PluginHandler
 	{
 		/**
-		 * A static list of plugins, available to access by any plugin without having to instantiate object
+		 * A static list of plugin objects, available to access by any plugin without having to instantiate object
 		 */
 		static public $plugins = array();
+
+		/**
+		 * A static list of plugin hooks with an array each to stored the callbacks
+		 */
+		static public $hooks = array(
+								'load' => array(),				// called when bot has loaded
+								'connect' => array(),			// called when bot has successfully connected
+								'disconnect' => array(),		// called when bot has disconnected
+								'private_message' => array(),	// called when bot receives a private message
+								'channel_message' => array(),	// called when the channel the bot is in receivs a message
+			);
+		
+		/**
+		 * A static list of the commands registered by all plugins
+		 */
+		static public $commands = array();
 		
 		private function __construct()
 		{
@@ -32,7 +48,7 @@
 				include_once($pluginName);
 				// Get the plugin name without the .php
 				$pluginName = basename($pluginName, ".php");
-				PluginHandler::$plugins[$pluginName] = new $pluginName;
+				self::$plugins[$pluginName] = new $pluginName;
 			}
 		}
 		
@@ -40,56 +56,19 @@
 		 * Triggers an event notification based on parameters
 		 * 
 		 * @access public
-		 * @param string $type Type of event (load, connect, disconnect, message, command, clicommand)
-		 * @param array $_DATA (opt.) Array of incoming data
-		 * 				$_DATA['fullCommand'] The full command line without the beginning prefix
-		 * 				$_DATA['messageType'] Type of message or command ("PRIVATE" or "CHANNEL")
-		 * 				$_DATA['sender'] Sender of message or command
-		 * 				$_DATA['receiver'] Either the channel where the message was sent or the bot's nickname
-		 * 				$_DATA['authLevel'] Whether the sender is an administrator or not (1 or 0)
+		 * @param string $hook Name of the hook to fire
+		 * @param object $data (optional) The data object to pass to plugins
 		 * @return void
 		 */
-		static public function triggerEvent($type, $_DATA = array())
+		static public function triggerHook($hook, $data = null)
 		{
-			switch($type)
-			{
-				case "load":
-					foreach(PluginHandler::$plugins as $plugin)
-					{
-						if(method_exists($plugin, "onLoad"))
-						{
-							$plugin->onLoad();
-						}
-					}
-					break;
-				case "connect":
-					foreach(PluginHandler::$plugins as $plugin)
-					{
-						if(method_exists($plugin, "onConnect"))
-						{
-							$plugin->onConnect();
-						}		
-					}
-					break;
-				case "disconnect":
-					foreach(PluginHandler::$plugins as $plugin)
-					{
-						if(method_exists($plugin, "onDisconnect"))
-						{
-							$plugin->onDisconnect();
-						}
-					}
-					break;
-				case "command":
-					foreach(PluginHandler::$plugins as $plugin)
-					{
-						if(method_exists($plugin, "onCommand"))
-						{
-							$plugin->onCommand($_DATA);
-						}
-					}
-					break;
-			}
+			// Does the hook exist?
+			if(!isset(self::$hooks[$hook]))
+				return;
+			
+			// Fire the events
+			foreach(self::$hooks[$hook] as $callback)
+				call_user_func_array(array(self::$plugins[$callback[0]], $callback[1]), array($data));
 		}
 		
 	}

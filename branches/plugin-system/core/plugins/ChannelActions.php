@@ -20,7 +20,7 @@
 		/**
 		 * Connects the bot to all channels specified in the configuration
 		 */
-		public function onConnect()
+		public function joinInitialChannels()
 		{
 			$initialChannels = explode(" ", BOT_CHANNELS);
 			foreach($initialChannels as $channelName)
@@ -32,7 +32,7 @@
 		/**
 		 * Part all channels
 		 */
-		public function onDisconnect()
+		public function partAllChannels()
 		{
 			foreach($this->connectedChannels as $channelName)
 			{
@@ -124,7 +124,7 @@
 			return $channel;
 		}
 		
-		public function onCommand($_DATA)
+		/*public function onCommand($_DATA)
 		{
 			$commandArray = explode(" ", $_DATA['fullCommand']);
 			if($_DATA['authLevel'] == 1 && $_DATA['messageType'] == "PRIVATE")
@@ -197,6 +197,12 @@
 						}
 				}
 			}
+		}*/
+
+		public function __construct()
+		{
+			$this->register_action('connect', array('ChannelActions', 'joinInitialChannels'));
+			$this->register_action('disconnect', array('ChannelActions', 'partAllChannels'));
 		}
 	}
 
