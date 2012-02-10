@@ -47,6 +47,7 @@
 			include("core/class_func.php");
 			include("core/class_user.php");
 			include("core/class_data.php");
+			include("core/class_message.php");
 			include("core/class_pluginhandler.php");
 
 			 // Replaces %date% with the date in the form yyyymmdd
@@ -107,7 +108,7 @@
 					// If the debug output is turned on, spew out all data received from server
 					if(DEBUG_OUTPUT)
 					{
-						echo $this->rawData;
+						debug_message("DEBUG OUTPUT: ".trim($this->rawData));
 					}
 					flush();
 					
@@ -118,7 +119,7 @@
 						// Explode raw data to get server
 						$_temp_expl = explode(" ", $this->rawData);
 						// Plays ping-pong with the server to stay connected
-						send_data("PONG", $_temp_expl[1]);
+						$pong = new Message("PONG", $_temp_expl[1]);
 						if(!SUPPRESS_PING)
 						{
 							debug_message("PONG was sent.");
@@ -153,7 +154,7 @@
 		 */
 		private function print_header()
 		{
-			$svnrev = getLatestRev("http://dg52-php-irc-bot.googlecode.com/svn/trunk/");
+			$svnrev = get_latest_rev("http://dg52-php-irc-bot.googlecode.com/svn/trunk/");
 			$info = "
 	     _  ___ ___ ___ 
 	  __| |/ __| __|_  )

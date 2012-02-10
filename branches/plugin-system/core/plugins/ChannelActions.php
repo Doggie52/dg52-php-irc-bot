@@ -70,7 +70,7 @@
 			else
 				$channel = $this->to_channel($channel);
 			
-			if($this->send_data("JOIN", $channel))
+			if($_join = new Message("JOIN", $channel))
 			{
 				debug_message("Channel ".$channel." was joined!");
 				// Add joined channel to array
@@ -95,7 +95,7 @@
 			else
 				$channel = $this->to_channel($channel);
 			
-			if($this->send_data("PART", $channel))
+			if($_part = new Message("PART", $channel))
 			{
 				debug_message("Channel ".$channel." was parted!");
 				// Rid the array of the parted channel
@@ -126,7 +126,7 @@
 			}
 
 			$channel = $this->to_channel($channel);
-			$this->send_data("TOPIC", $channel." :".$topic);
+			$_msg = new Message("TOPIC", $channel." :".$topic);
 			debug_message("Channel topic for ".$channel." was altered to \"".$topic."\"!");
 		}
 		
@@ -161,7 +161,7 @@
 
 				$channel = $this->to_channel($data->receiver);
 				$username = $data->commandArgs[0];
-				send_data("MODE", $channel." ".$mode." ".$username);
+				$_msg = new Message("MODE", $channel." ".$mode." ".$username);
 			}
 		}
 		

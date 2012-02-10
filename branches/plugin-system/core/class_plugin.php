@@ -60,34 +60,7 @@
 			
 			// Add callback to command array
 			PluginHandler::$commands[$command] = $callback;
-		}
-		
-		/**
-		 * Displays a message to either the channel or a client
-		 * 
-		 * @access protected
-		 * @param string $message The message to display
-		 * @param string $to The client or channel to send the message to
-		 */
-		protected function display($message, $to)
-		{
-			$this->send_data("PRIVMSG", $message, $to);
-		}
-
-		/**
-		 * Sends data to the server. Important that basic structure of sent message is kept the same, otherwise it will fail.
-		 * 
-		 * @access protected
-		 * @param string $cmd The command you wish to send
-		 * @param string $msg The parameters you wish to pass to the command (default: null)
-		 * @param string $rcvr The receiver of the message (default: null)
-		 * @return boolean Whether the data was sent successfully
-		 */
-		protected function send_data($cmd, $msg = null, $rcvr = null)
-		{
-			send_data($cmd, $msg, $rcvr);
-		}
-		
+		}		
 	}
 
 ?>

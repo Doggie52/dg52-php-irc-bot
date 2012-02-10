@@ -10,55 +10,6 @@
 	 */
 	
 	/**
-	 * Sends data to the server. Important that basic structure of sent message is kept the same, otherwise it will fail.
-	 * 
-	 * @access public
-	 * @param string $cmd The command you wish to send
-	 * @param string $msg The parameters you wish to pass to the command (default: null)
-	 * @param string $rcvr The receiver of the message (default: null)
-	 * @return boolean Whether the data was sent successfully
-	 */
-	function send_data($cmd, $msg = null, $rcvr = null)
-	{
-		// Fetch the socket
-		global $socket;
-		
-		if($msg == null)
-		{
-			if(fputs($socket, $cmd."\r\n"))
-			{
-				if(DEBUG_OUTPUT)
-				{
-					debug_message("Command ($cmd) was sent to the server.");
-				}
-				return TRUE;
-			}
-		}
-		elseif($cmd == "PRIVMSG")
-		{
-			if(fputs($socket, $cmd." ".$rcvr." :".$msg."\r\n"))
-			{
-				if(DEBUG_OUTPUT)
-				{
-					debug_message("Command ($cmd) with receiver ($rcvr) and message ($msg) was sent to the server.");
-				}
-				return TRUE;
-			}
-		}
-		else
-		{
-			if(fputs($socket, $cmd." ".$msg."\r\n"))
-			{
-				if(DEBUG_OUTPUT)
-				{
-					debug_message("Command ($cmd) with message ($msg) was sent to the server.");
-				}
-				return TRUE;
-			}
-		}
-	}
-	
-	/**
 	 * Removes an item from an array by its value
 	 * Inspired by http://dev-tips.com/featured/remove-an-item-from-an-array-by-value
 	 * 
@@ -119,7 +70,7 @@
 	 * @param string $site The URI of the repository (with http://)
 	 * @return string $revision The revision number extracted
 	 */
-	function getLatestRev($site)
+	function get_latest_rev($site)
 	{
 		$raw = file_get_contents($site);
 		$regex = "/(Revision)(\\s+)(\\d+)(:)/is";

@@ -18,8 +18,8 @@
 		 */
 		public function register_bot()
 		{
-			send_data('USER', BOT_NICKNAME.' douglasstridsberg.com '.BOT_NICKNAME.' :'.BOT_NAME);
-			send_data('NICK', BOT_NICKNAME);
+			$_cmd = new Message('USER', BOT_NICKNAME.' douglasstridsberg.com '.BOT_NICKNAME.' :'.BOT_NAME);
+			$_cmd = new Message('NICK', BOT_NICKNAME);
 			// Temporarily tap into the socket
 			global $socket;
 			while(!feof($socket))
@@ -37,7 +37,7 @@
 		{
 			if($data->authLevel != 1)
 				return;
-			if(send_data("QUIT", ":".BOT_QUITMSG))
+			if($_cmd = new Message("QUIT", ":".BOT_QUITMSG))
 			{
 				debug_message("Bot has disconnected and been turned off!");
 			}

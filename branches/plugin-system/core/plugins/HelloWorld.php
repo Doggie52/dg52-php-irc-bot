@@ -37,11 +37,11 @@
 			{
 				if($data->origin == Data::PRIVMSG)
 				{
-					$this->display("Hello world! You just sent me a PM.", $data->sender);
+					$_msg = new Message("PRIVMSG", "Hello world! You just sent me a PM.", $data->sender);
 				}
 				elseif($data->origin == Data::CHANNEL)
 				{
-					$this->display("Hello world! You just sent me this via a channel.", $data->sender);
+					$_msg = new Message("PRIVMSG", "Hello world! You just sent me this via a channel.", $data->sender);
 				}
 			}
 		}		

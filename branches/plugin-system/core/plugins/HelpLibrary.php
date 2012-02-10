@@ -12,11 +12,23 @@
 		public $PLUGIN_AUTHOR = "Doggie52";
 		public $PLUGIN_DESCRIPTION = "Displays help about functions.";
 		public $PLUGIN_VERSION = "1.0";
+
+		/**
+		 * A local variable to hold a copy of the code documentation
+		 */
+		private $commandDocumentation;
+
+		public function __construct()
+		{
+			$this->register_action('load', array('HelpLibrary', 'init'));
+		}
 		
 		/**
 		 * Copies the available commands and their documentation to the plugin
 		 */
-		private $commandDocumentation = PluginHandler::$commands;
-
+		public function init()
+		{
+			$this->commandDocumentation = PluginHandler::$commands;
+		}
 	}
 ?>

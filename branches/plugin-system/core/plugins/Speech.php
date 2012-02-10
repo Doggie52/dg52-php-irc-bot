@@ -21,7 +21,14 @@
 		/**
 		 * List of random responses the bot can respond with.
 		 */
-		private $randomResponses = array(
+		private $randomResponses;
+
+		/**
+		 * Populates the random responses
+		 */
+		public function __construct()
+		{
+			$this->randomResponses = array(
 				"Oh! Someone mentioned my name!",
 				"Woah! I am getting attention!",
 				"Yes, that's me - what do you want :) ?",
@@ -38,10 +45,6 @@
 				"Have no fear, for I am here!",
 				"Have no fear, for ".BOT_NICKNAME." is here!",
 			);
-
-		public function __construct()
-		{
-			
 		}
 		
 		/**

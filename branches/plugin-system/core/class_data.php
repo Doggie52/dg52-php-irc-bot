@@ -94,7 +94,7 @@
 			$this->sender		= substr($rawdata_array[0], 1, -$hostlength);
 
 			// The receiver of the sent message (either the channelname or the bot's nickname)
-			$this->receiver		= $rawdata_array[2];
+			$this->receiver		= (isset($rawdata_array[2]) ? $rawdata_array[2] : BOT_NICKNAME);
 
 			// Interpret the origin of the message received ("PRIVATE" or "CHANNEL") depending on the receiver
 			$this->origin		= $this->interpretReceiver($this->receiver);
@@ -129,6 +129,10 @@
 				$type = self::PRIVMSG;
 				return $type;
 			}
+			else
+			{
+				return 0;
+			}
 		}
 
 		/**
@@ -145,6 +149,7 @@
 			
 			// If the lower-case ident is found in the userlist array, return true
 			$ident = strtolower($ident);
+
 			if(in_array($ident, $users))
 			{
 				debug_message("User ($ident) is authenticated.");
