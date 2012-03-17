@@ -117,46 +117,6 @@
 	}
 	
 	/**
-	 * Formats the text according to an array of different styles
-	 * 
-	 * @access public
-	 * @param mixed $styles The styles to format the text with (choose between bold, italic or underline)
-	 * @param string $message The message to format
-	 * @return string $message The formatted message
-	 */
-	function format_text($styles, $message)
-	{
-		// If the input is not an array, explode it into one
-		if(!is_array($styles))
-		{
-			$styles = explode(" ", $styles);
-		}
-		
-		if(in_array("bold", $styles))
-		{
-			// Send STX for bold
-			$message = chr(2).$message;
-		}
-		
-		if(in_array("italic", $styles))
-		{
-			// Send GS for italic
-			$message = chr(29).$message;
-		}
-		
-		if(in_array("underline", $styles))
-		{
-			// Send US for underline
-			$message = chr(31).$message;
-		}
-		
-		// Send SI for end of message
-		$message = $message.chr(15);
-		
-		return $message;
-	}
-	
-	/**
 	 * Prints a debug-message with a time-stamp.
 	 *
 	 * @access public

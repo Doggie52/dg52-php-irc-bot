@@ -31,6 +31,22 @@
 		 * A static list of the commands registered by all plugins
 		 */
 		static public $commands = array();
+
+		/**
+		 * A static list of the commands together with their documentation
+		 *
+		 * Structure:
+		 * array( 'command name' => array(
+		 * 								'auth_level' => 0/1,
+		 * 								'access_type' => 'pm'/'channel'/'both'
+		 * 								'documentation' => 'single line'/array(
+		 * 																	'multiple',
+		 * 																	'lines'
+		 * 																	)
+		 * 								)
+		 * )
+		 */
+		static public $documentation = array();
 		
 		private function __construct()
 		{

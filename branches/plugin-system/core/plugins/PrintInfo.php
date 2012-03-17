@@ -31,31 +31,31 @@
 		 */
 		private function send_info($username, $starttime)
 		{
-			$_msg = new Message("PRIVMSG", "dG52's PHP IRC Bot r".get_latest_rev("http://dg52-php-irc-bot.googlecode.com/svn/trunk/"), $username);
+			$_msg = new Message("PRIVMSG", "*dG52's PHP IRC Bot* r".get_latest_rev("http://dg52-php-irc-bot.googlecode.com/svn/trunk/"), $username);
 			// For UNIX-based systems, model and load can be $this->displayed
 			if(PHP_OS != "WINNT" && PHP_OS != "WIN32")
 			{
-				$_msg = new Message("PRIVMSG", "  Server OS: ".PHP_OS." (".php_uname().")", $username);
+				$_msg = new Message("PRIVMSG", "  +Server OS:+ ".PHP_OS." (".php_uname().")", $username);
 				$hwmodel = substr(@exec('sysctl hw.model'), 9);
-				$_msg = new Message("PRIVMSG", "  Server CPU model: ".$hwmodel, $username);
+				$_msg = new Message("PRIVMSG", "  +Server CPU model:+ ".$hwmodel, $username);
 				$uptime = @exec('uptime');
 				if($c = preg_match_all('/averages?: ([0-9\.]+),[\s]+([0-9\.]+),[\s]+([0-9\.]+)/', $uptime, $matches) > 0)
 				{
-					$_msg = new Message("PRIVMSG", "  Average server load (past 1 minute): ".$matches[1][0], $username);
-					$_msg = new Message("PRIVMSG", "  Average server load (past 5 minutes): ".$matches[2][0], $username);
-					$_msg = new Message("PRIVMSG", "  Average server load (past 15 minutes): ".$matches[3][0], $username);
+					$_msg = new Message("PRIVMSG", "  +Average server load (past 1 minute):+ ".$matches[1][0], $username);
+					$_msg = new Message("PRIVMSG", "  +Average server load (past 5 minutes):+ ".$matches[2][0], $username);
+					$_msg = new Message("PRIVMSG", "  +Average server load (past 15 minutes):+ ".$matches[3][0], $username);
 				}
 			}
 			else
 			{
-				$_msg = new Message("PRIVMSG", "  Server OS: ".strtolower(PHP_OS), $username);
+				$_msg = new Message("PRIVMSG", "  +Server OS:+ ".strtolower(PHP_OS), $username);
 			}
 			$currtime = time();
 			$seconds = $currtime - $starttime;
 			$minutes = floor($seconds / 60);
 			$hours = floor($seconds / 3600);
 			$seconds = $seconds;
-			$_msg = new Message("PRIVMSG", "  Bot uptime: ".$hours." hours ".$minutes." minutes ".$seconds." seconds.", $username);
+			$_msg = new Message("PRIVMSG", "  +Bot uptime:+ ".$hours." hours ".$minutes." minutes ".$seconds." seconds.", $username);
 			debug_message("Info was sent to ".$username."!");
 		}
 		
