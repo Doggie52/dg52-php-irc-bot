@@ -36,7 +36,7 @@
 		/**
 		 * Constants relating to origin of message, instead of an enumeration
 		 */
-		const PRIVMSG = 1;
+		const PM = 1;
 		const CHANNEL = 2;
 
 		/**
@@ -126,7 +126,7 @@
 			elseif($receiver == BOT_NICKNAME)
 			{
 				// ... it is a private message
-				$type = self::PRIVMSG;
+				$type = self::PM;
 				return $type;
 			}
 			else

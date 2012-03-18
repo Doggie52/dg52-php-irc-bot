@@ -137,7 +137,7 @@
 						{
 							PluginHandler::trigger_hook('channel_message', $this->data);
 						}
-						elseif($this->data->origin == Data::PRIVMSG)
+						elseif($this->data->origin == Data::PM)
 						{
 							PluginHandler::trigger_hook('private_message', $this->data);
 						}

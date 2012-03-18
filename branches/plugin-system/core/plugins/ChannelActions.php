@@ -29,6 +29,7 @@
 			$this->register_command('deop', array('ChannelActions', 'set_user_mode'));
 			$this->register_command('voice', array('ChannelActions', 'set_user_mode'));
 			$this->register_command('devoice', array('ChannelActions', 'set_user_mode'));
+			$this->register_command('invite', array('ChannelActions', 'invite_user'));
 		}
 		
 		/**
@@ -114,7 +115,7 @@
 			if($data->authLevel != 1)
 				return;
 			
-			if($data->origin == Data::PRIVMSG)
+			if($data->origin == Data::PM)
 			{
 				$channel = $this->to_channel($data->commandArgs[0]);
 				$topic = substr($data->fullLine, strlen(COMMAND_PREFIX.$data->command." ".$data->commandArgs[0]." "));
@@ -163,6 +164,34 @@
 				$username = $data->commandArgs[0];
 				$_msg = new Message("MODE", $channel." ".$mode." ".$username);
 			}
+		}
+
+		/**
+		 * Invites a user to a specified channel
+		 */
+		public function invite_user($data)
+		{
+			if($data->authLevel != 1)
+				return;
+
+			if(!isset($data->commandArgs[0]))
+				return;
+
+			// The person to invite is the first argument
+			$invitee = $data->commandArgs[0];
+
+			// If it comes from a PM, assume the channel is included as the second argument
+			if($data->origin == Data::PM)
+			{
+				$target_channel = $this->to_channel($data->commandArgs[1]);
+			}
+			elseif($data->origin == Data::CHANNEL)
+			{
+				$target_channel = $this->to_channel($data->receiver);
+			}
+
+			$_msg = new Message("INVITE", $invitee." ".$target_channel);
+			$_msg = new Message("PRIVMSG", "User ".$invitee." was invited to ".$target_channel."!", $data->sender);
 		}
 		
 		/**

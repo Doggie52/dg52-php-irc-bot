@@ -13,3 +13,5 @@
 		public $PLUGIN_VERSION = "1.0";
 
 	}
+
+?>

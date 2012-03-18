@@ -35,7 +35,7 @@
 			// If the first word matches any of our matches
 			if(in_array(strtolower($fullLine[0]), $this->matches))
 			{
-				if($data->origin == Data::PRIVMSG)
+				if($data->origin == Data::PM)
 				{
 					$_msg = new Message("PRIVMSG", "Hello world! You just sent me a PM.", $data->sender);
 				}

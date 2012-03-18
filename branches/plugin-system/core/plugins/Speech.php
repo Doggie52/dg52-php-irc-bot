@@ -24,7 +24,7 @@
 		private $randomResponses;
 
 		/**
-		 * Populates the random responses
+		 * Populates the random responses and register the plugin's commands and actions
 		 */
 		public function __construct()
 		{
@@ -45,10 +45,15 @@
 				"Have no fear, for I am here!",
 				"Have no fear, for ".BOT_NICKNAME." is here!",
 			);
+
+			$this->register_action('channel_message', array('Speech', 'random_respond'));
+			$this->register_command('me', array('Speech', 'emote'));
 		}
 		
 		/**
 		 * Allows a user to make the bot say something
+		 *
+		 * @todo Actually find a use for this functionality
 		 */
 		public function say($data)
 		{
@@ -57,10 +62,22 @@
 
 		/**
 		 * Allows a user to make the bot emote something (i.e. /me emote here)
+		 * 
+		 * @todo Getting this to work..
 		 */
 		public function emote($data)
 		{
-			
+			// Only check channel
+			if($data->origin == Data::CHANNEL)
+			{
+				$emote = substr($data->fullLine, 4);
+
+				// If any emote was given
+				if(strlen($emote) != 0)
+				{
+					$_msg = new Message("PRIVMSG", "/me ".$emote, $data->receiver);
+				}
+			}
 		}
 
 		/**
@@ -68,7 +85,19 @@
 		 */
 		public function random_respond($data)
 		{
-			
+			// Only check channel
+			if($data->origin == Data::CHANNEL)
+			{
+				// If the bot's nickname is found somewhere, send a random response
+				if(stripos($data->fullLine, BOT_NICKNAME) !== FALSE)
+				{
+					$random_int = mt_rand(0, count($this->randomResponses)-1);
+
+					$phrase = str_replace('%username%', $data->sender, $this->randomResponses[$random_int]);
+
+					$_msg = new Message("PRIVMSG", $phrase, $data->receiver);
+				}
+			}
 		}
 
 	}
