@@ -144,30 +144,17 @@
 		 */
 		function markup_text($message)
 		{
-			// Matches for anything, then the markup character (denoted with %), then the text to be marked up, the ending markup character (%), then anything
-			$templ_regex = '/.*?(\\%)(.*?)(\\%).*?/is';
+			$markups = array(
+						'*' => chr(2),		// bold (STX)
+						'__' => chr(31),		// underlined (US)
+						'+' => chr(29),		// italic (GS)
+						'|' => chr(15) 		// the ending character (SI)
+				);
 
-			foreach(array('*' => /*STX*/ chr(2), '_' => /*US*/ chr(31), '+' => /*GS*/ chr(29)) as $char => $irc_markup)
+			// Loop throuh all markups and replace when necessary
+			foreach($markups as $char => $markup)
 			{
-				// Prepare the regex
-				$regex = str_replace('%', $char, $templ_regex);
-
-				if($matches = preg_match_all($regex, $message, $matches))
-				{
-					// Change first markup character to $irc_markup
-					$pos = strpos($message, $char);
-					if ($pos !== false)
-					{
-						$message = substr_replace($message, $irc_markup, $pos, strlen($char));
-					}
-
-					// Rid ourselves of the markup characters and end the marking up
-					$pos = strpos($message, $char);
-					if ($pos !== false)
-					{
-						$message = substr_replace($message, /*SI*/ chr(15), $pos, strlen($char));
-					}
-				}
+				$message = str_replace($char, $markup, $message);
 			}
 			
 			return $message;

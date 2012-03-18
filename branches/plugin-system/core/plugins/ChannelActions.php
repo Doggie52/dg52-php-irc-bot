@@ -25,7 +25,7 @@
 			$this->register_command('join', array('ChannelActions', 'join_channel'));
 			$this->register_documentation('join', array('auth_level' => 1,
 														'access_type' => 'both',
-														'documentation' => array("*Usage:* !join / !j <channel>",
+														'documentation' => array("*Usage:| !join / !j <channel>",
 																				"Joins <channel>.",
 																				"Hash-sign can be omitted.")
 														));
@@ -33,7 +33,7 @@
 			$this->register_command('part', array('ChannelActions', 'part_channel'));
 			$this->register_documentation('part', array('auth_level' => 1,
 														'access_type' => 'both',
-														'documentation' => array("*Usage:* !part / !p <channel>",
+														'documentation' => array("*Usage:| !part / !p <channel>",
 																				"Parts <channel>.",
 																				"Hash-sign can be omitted.")
 														));
@@ -41,7 +41,7 @@
 			$this->register_command('topic', array('ChannelActions', 'set_topic'));
 			$this->register_documentation('topic', array('auth_level' => 1,
 														'access_type' => 'both',
-														'documentation' => array("*Usage:* !topic <channel> <topic>",
+														'documentation' => array("*Usage:| !topic <channel> <topic>",
 																				"Sets the topic of <channel> to <topic>.",
 																				"Will only take effect if bot has sufficient privileges.",
 																				"Hash-sign can be omitted.")
@@ -50,7 +50,7 @@
 			$this->register_command('op', array('ChannelActions', 'set_user_mode'));
 			$this->register_documentation('op', array('auth_level' => 1,
 														'access_type' => 'both',
-														'documentation' => array("*Usage:* !op <channel> <username>",
+														'documentation' => array("*Usage:| !op <channel> <username>",
 																				"Gives <username> operator status in <channel>.",
 																				"Will only take effect if bot has sufficient privileges.",
 																				"Hash-sign in <channel> as well as <username> can be omitted.",
@@ -60,7 +60,7 @@
 			$this->register_command('deop', array('ChannelActions', 'set_user_mode'));
 			$this->register_documentation('deop', array('auth_level' => 1,
 														'access_type' => 'both',
-														'documentation' => array("*Usage:* !deop <channel> <username>",
+														'documentation' => array("*Usage:| !deop <channel> <username>",
 																				"Removes <username>'s operator status in <channel>.",
 																				"Will only take effect if bot has sufficient privileges.",
 																				"Hash-sign can be omitted.",
@@ -70,7 +70,7 @@
 			$this->register_command('voice', array('ChannelActions', 'set_user_mode'));
 			$this->register_documentation('voice', array('auth_level' => 1,
 														'access_type' => 'both',
-														'documentation' => array("*Usage:* !voice <channel> <username>",
+														'documentation' => array("*Usage:| !voice <channel> <username>",
 																				"Voice's <username> in <channel>.",
 																				"Will only take effect if bot has sufficient privileges.",
 																				"Hash-sign can be omitted.",
@@ -80,7 +80,7 @@
 			$this->register_command('devoice', array('ChannelActions', 'set_user_mode'));
 			$this->register_documentation('devoice', array('auth_level' => 1,
 														'access_type' => 'both',
-														'documentation' => array("*Usage:* !devoice <channel> <username>",
+														'documentation' => array("*Usage:| !devoice <channel> <username>",
 																				"Removes <username> voice status in <channel>.",
 																				"Will only take effect if bot has sufficient privileges.",
 																				"Hash-sign can be omitted.",
@@ -90,7 +90,7 @@
 			$this->register_command('invite', array('ChannelActions', 'invite_user'));
 			$this->register_documentation('invite', array('auth_level' => 1,
 														'access_type' => 'both',
-														'documentation' => array("*Usage:* !invite / !i <username> <channel>",
+														'documentation' => array("*Usage:| !invite / !i <username> <channel>",
 																				"Invites <username> to <channel>.",
 																				"Will only take effect if bot has sufficient privileges.",
 																				"Hash-sign can be omitted.")

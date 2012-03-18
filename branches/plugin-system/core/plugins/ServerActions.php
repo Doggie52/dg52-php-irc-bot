@@ -50,7 +50,7 @@
 			$this->register_command('quit', array('ServerActions', 'quit'));
 			$this->register_documentation('quit', array('auth_level' => 1,
 														'access_type' => 'both',
-														'documentation' => array("*Usage:* !quit / !q",
+														'documentation' => array("*Usage:| !quit / !q",
 																				"Quits the server.")
 														));
 		}

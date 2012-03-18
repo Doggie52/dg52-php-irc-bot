@@ -30,7 +30,7 @@
 			$this->register_command('google', array('GoogleSearch', 'do_search'));
 			$this->register_documentation('google', array('auth_level' => 0,
 														'access_type' => 'both',
-														'documentation' => array("*Usage:* !google <query>",
+														'documentation' => array("*Usage:| !google <query>",
 																				"Queries Google search for <query> and returns the results.")
 														));
 		}
@@ -60,7 +60,7 @@
 			{
 				if($i <= $this->resultLimit)
 				{
-					$lines[] = "#".$i." *".$result->titleNoFormatting."* - +".$result->url."+";
+					$lines[] = "#".$i." *".$result->titleNoFormatting."* - __".$result->url."__";
 					$i++;
 				}
 			}
@@ -68,13 +68,13 @@
 			// Distinguish between PM and channel
 			if($data->origin == Data::PM)
 			{
-				$_msg = new Message("PRIVMSG", "Results for query \"".$query."\":", $data->sender);
+				$_msg = new Message("PRIVMSG", "Results for +".$query."+:", $data->sender);
 				foreach($lines as $line)
 					$_msg = new Message("PRIVMSG", $line, $data->sender);
 			}
 			elseif($data->origin == Data::CHANNEL)
 			{
-				$_msg = new Message("PRIVMSG", "Results for query \"".$query."\":", $data->receiver);
+				$_msg = new Message("PRIVMSG", "Results for +".$query."+:", $data->receiver);
 				foreach($lines as $line)
 					$_msg = new Message("PRIVMSG", $line, $data->receiver);
 			}

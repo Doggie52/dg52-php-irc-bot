@@ -29,7 +29,7 @@
 			$this->register_command('youtube', array('YouTubeSearch', 'do_search'));
 			$this->register_documentation('youtube', array('auth_level' => 0,
 														'access_type' => 'both',
-														'documentation' => array("*Usage:* !youtube <query> OR !yt <query>",
+														'documentation' => array("*Usage:| !youtube <query> OR !yt <query>",
 																				"Queries YouTube search for <query> and returns the results.")
 														));
 		}
@@ -56,20 +56,20 @@
 			$i = 1;
 			foreach($results as $result)
 			{
-				$lines[] = "#".$i." *".$result->title->{'$t'}."* - +".$result->link[0]->href."+";
+				$lines[] = "#".$i." *".$result->title->{'$t'}."* - __".$result->link[0]->href."__";
 				$i++;
 			}
 
 			// Distinguish between PM and channel
 			if($data->origin == Data::PM)
 			{
-				$_msg = new Message("PRIVMSG", "Results for query \"".$query."\":", $data->sender);
+				$_msg = new Message("PRIVMSG", "Results for +".$query."+:", $data->sender);
 				foreach($lines as $line)
 					$_msg = new Message("PRIVMSG", $line, $data->sender);
 			}
 			elseif($data->origin == Data::CHANNEL)
 			{
-				$_msg = new Message("PRIVMSG", "Results for query \"".$query."\":", $data->receiver);
+				$_msg = new Message("PRIVMSG", "Results for +".$query."+:", $data->receiver);
 				foreach($lines as $line)
 					$_msg = new Message("PRIVMSG", $line, $data->receiver);
 			}

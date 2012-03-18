@@ -51,7 +51,7 @@
 			$this->register_command('me', array('Speech', 'emote'));
 			$this->register_documentation('me', array('auth_level' => 1,
 														'access_type' => 'channel',
-														'documentation' => array("*Usage:* !me <text>",
+														'documentation' => array("*Usage:| !me <text>",
 																				"Makes the bot emote <text>.")
 														));
 		}
@@ -68,8 +68,6 @@
 
 		/**
 		 * Allows a user to make the bot emote something (i.e. /me emote here)
-		 * 
-		 * @todo Getting this to work..
 		 */
 		public function emote($data)
 		{
@@ -81,7 +79,8 @@
 				// If any emote was given
 				if(strlen($emote) != 0)
 				{
-					$_msg = new Message("PRIVMSG", "/me ".$emote, $data->receiver);
+					// SOH character to indicate and end action
+					$_msg = new Message("PRIVMSG", chr(1)."ACTION ".$emote.chr(1), $data->receiver);
 				}
 			}
 		}

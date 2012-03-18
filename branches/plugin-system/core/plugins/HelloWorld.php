@@ -37,12 +37,18 @@
 			{
 				if($data->origin == Data::PM)
 				{
-					$_msg = new Message("PRIVMSG", "Hello world! You just sent me a PM.", $data->sender);
+					$_msg = new Message("PRIVMSG", "Hello world! You just sent this via PM.", $data->sender);
 				}
 				elseif($data->origin == Data::CHANNEL)
 				{
 					$_msg = new Message("PRIVMSG", "Hello world! You just sent me this via a channel.", $data->sender);
 				}
+
+				// Send test output
+				$_msg = new Message("PRIVMSG", "*Bold|. +Italic|. __Underscore|. ", $data->sender);
+				$_msg = new Message("PRIVMSG", "*Bold|. *+BoldItalic|. *__BoldUnderscore|. ", $data->sender);
+				$_msg = new Message("PRIVMSG", "+Italic|. +__ItalicUnderscore|. ", $data->sender);
+				$_msg = new Message("PRIVMSG", "__Underscore|. *+__BoldItalicUnderscore|", $data->sender);
 			}
 		}		
 	}
