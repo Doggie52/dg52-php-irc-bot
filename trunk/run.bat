@@ -1,0 +1,2 @@
+cls
+php index.php
