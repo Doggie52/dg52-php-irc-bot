@@ -1,4 +1,0 @@
-#!/bin/bash
-# Runs the bot in the PHP CLI tool for *nix systems
-clear
-php index.php
