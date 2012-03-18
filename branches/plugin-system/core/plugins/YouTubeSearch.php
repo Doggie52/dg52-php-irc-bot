@@ -1,20 +1,18 @@
 <?php
 /**
- * GoogleSearch plugin
+ * YouTubeSearch plugin
  * 
- * Allows the user to do a basic Google search via channel and PM
- *
- * @todo Respond to mentions of 'google' in channel chat, with instructions on how to use the command
+ * Allows the user to do a basic YouTube search via channel and PM
  */
 
-	class GoogleSearch extends PluginEngine
+	class YouTubeSearch extends PluginEngine
 	{
 		/**
 		 * Mandatory plugin properties
 		 */
-		public $PLUGIN_NAME = "Google Search";
+		public $PLUGIN_NAME = "YouTube Search";
 		public $PLUGIN_AUTHOR = "Doggie52";
-		public $PLUGIN_DESCRIPTION = "Allows the user to perform Google searches.";
+		public $PLUGIN_DESCRIPTION = "Allows the user to perform YouTube searches.";
 		public $PLUGIN_VERSION = "1.0";
 
 		/**
@@ -27,7 +25,8 @@
 		 */
 		public function __construct()
 		{
-			$this->register_command('google', array('GoogleSearch', 'do_search'));
+			$this->register_command('yt', array('YouTubeSearch', 'do_search'));
+			$this->register_command('youtube', array('YouTubeSearch', 'do_search'));
 		}
 
 		/**
@@ -41,23 +40,19 @@
 			// Checks whether cURL is loaded [temporarily disabled due to API not functioning]
 			if(in_array('curl', get_loaded_extensions()))
 			{
-				$results = $this->google_search_api(array('q' => $query));
+				$results = $this->youtube_search_api(array('q' => $query));
 			}
 			elseif(false)
 			{
 				$this->debug_message("cURL is not supported.");
-				// $results = $this->google_search_html($query);
 			}
 
 			// Store every result up to resultLimit in separate lines to be sent to the client
 			$i = 1;
 			foreach($results as $result)
 			{
-				if($i <= $this->resultLimit)
-				{
-					$lines[] = "#".$i." *".$result->titleNoFormatting."* - +".$result->url."+";
-					$i++;
-				}
+				$lines[] = "#".$i." *".$result->title->{'$t'}."* - +".$result->link[0]->href."+";
+				$i++;
 			}
 
 			// Distinguish between PM and channel
@@ -76,7 +71,7 @@
 		}
 
 		/**
-		 * Query Google AJAX Search API. All credits to http://w-shadow.com/blog/2009/01/05/get-google-search-results-with-php-google-ajax-api-and-the-seo-perspective/.
+		 * Query YouTube Search API
 		 *
 		 *
 		 * @access private
@@ -84,14 +79,23 @@
 		 * @param string $referer Referer to use in the HTTP header (must be valid).
 		 * @return object or NULL on failure
 		 */
-		private function google_search_api($args, $referer = 'http://localhost/')
+		private function youtube_search_api($args, $referer = 'http://localhost/')
 		{
-			$url = "https://ajax.googleapis.com/ajax/services/search/web";
+			$url = "https://gdata.youtube.com/feeds/api/videos";
 
 			// Sets necessary arguments
-			if(!array_key_exists('v', $args))
+			if(!array_key_exists('alt', $args))
 			{
-				$args['v'] = '1.0';
+				$args['alt'] = 'json';
+			}
+			if(!array_key_exists('max-results', $args))
+			{
+				$args['max-results'] = $this->resultLimit;
+			}
+			// Only return what's necessary
+			if(!array_key_exists('fields', $args))
+			{
+				$args['fields'] = 'entry(title,link[@rel=\'alternate\'])';
 			}
 
 			$url .= '?'.http_build_query($args, '', '&');
@@ -106,59 +110,59 @@
 
 			// Decode the response
 			$results = json_decode($body);
-			$results = $results->responseData->results;
+			$results = $results->feed->entry;
+
+			print_r($results);
 
 			return $results;
 		}
 
 		/**
-		 * Query a regular Google search page and extract results from it.
-		 *
-		 * @todo Get regex patterns working again
+		 * [UNFINISHED] Query a regular YouTube search page and extract results from it.
 		 *
 		 * @access private
 		 * @param string $query The search-query
 		 * @param int $numresults The number of results to fetch (default: 3)
 		 * @return mixed Either an array with the results or NULL if there are no results
 		 */
-		private function google_search_html($query, $numresults = 3)
+		private function youtube_search_html($query, $numresults = 3)
 		{
-			$off_site = "http://www.google.com/search?q=".urlencode($query)."&ie=UTF-8&oe=UTF-8";
+			$off_site = "http://www.youtube.com/results?search_query=".urlencode($query)."&ie=UTF-8&oe=UTF-8";
 			$buf = file_get_contents($off_site) or die("Unable to grab contents.");
 			// Get rid of highlights and linebreaks along with other tags
 			$buf = str_replace("<em>", "", $buf);
 			$buf = str_replace("</em>", "", $buf);
 			$buf = str_replace("<b>", "", $buf);
 			$buf = str_replace("</b>", "", $buf);
-			$buf = str_replace("<nobr>", "", $buf);
-			$buf = str_replace("</nobr>", "", $buf);
-			$buf = str_replace("<div class=\"f\">", "", $buf);
-			$buf = str_replace("</div>", " ", $buf);
-			// Define patterns [URL and title are not working, URL gives additional data and title just doesn't match]
-			$urlpattern = "/(?:<h3 class=\"r\"><a href=\")(.*?)(?:\")/i";
-			$titlepattern = "/(?:<h3 class=\"r\"><a href=\")(?:.*?)(?:\" class=l>)(.*?)(?:<\/a>)/i";
-			$descriptionpattern = "/(?:<div class=\"s\">)(.*?)(?:<br>)/i";
+			// YouTube likes whitespaces - regex does not
+			$buf = str_replace("\t", "", $buf);
+			$buf = str_replace("\n", "", $buf);
+			// Define patterns
+			$videopattern = "/(?:<div class=\"result-item-main-content\">)(?:.*?)(?:href=\")(.*?)(?:\")(?:.*?)(?:dir=\"ltr\")(?:.*?)(?:\")(.*?)(?:\")/i";
+			// $titlepattern = "/(?:<div class=\"video-long-title\">)(?:.*?)(?:title=\")(.*?)(?:\")/i"; -- no longer valid
+			$descriptionpattern = "/(?:class=\"video-description\">)(.*?)(?:<\/div>)/i";
 			// Match the raw HTML with the patterns
-			preg_match_all($urlpattern, $buf, $urls);
-			preg_match_all($titlepattern, $buf, $titles);
+			// $videos: [1] is the URL, [2] is the title
+			preg_match_all($urlpattern, $buf, $videos);
+			// preg_match_all($titlepattern, $buf, $titles);
 			preg_match_all($descriptionpattern, $buf, $descriptions);
 			
 			// Find the results, if there are any
-			if($urls && $titles)
+			if($videos)
 			{
 				// Initiate counter for amount of search results found
 				$i = 1;
-				foreach($urls[1] as $url)
+				foreach($videos[1] as $url)
 				{
 					if($i <= $numresults)
 					{
 						$result[$i]['id'] = $i;
-						$result[$i]['url'] = html_entity_decode(htmlspecialchars_decode($url, ENT_QUOTES), ENT_QUOTES);
+						$result[$i]['url'] = "http://www.youtube.com".html_entity_decode(htmlspecialchars_decode($url, ENT_QUOTES), ENT_QUOTES);
 						$i++;
 					}
 				}
 				$i = 1;
-				foreach($titles[1] as $title)
+				foreach($videos[2] as $title)
 				{
 					if($i <= $numresults)
 					{

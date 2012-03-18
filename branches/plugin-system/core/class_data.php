@@ -157,7 +157,6 @@
 			}
 			else
 			{
-			    debug_message("User ($ident) is not authenticated.");
 				$authenticated = false;
 			}
 			
