@@ -80,7 +80,7 @@
 			}
 
 			// Makes sure $ocumentation is the correct structure
-			if(empty($documentation['auth_level']) || empty($documentation['access_type']) || empty($documentation['documentation']))
+			if(!isset($documentation['auth_level']) || !isset($documentation['access_type']) || empty($documentation['documentation']))
 			{
 				debug_message("The correct documentation structure is needed.");
 

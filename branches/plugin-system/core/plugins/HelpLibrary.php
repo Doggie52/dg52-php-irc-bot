@@ -46,6 +46,7 @@
 		public function list_all_commands($data)
 		{
 			$_msg = new Message("PRIVMSG", "*ALL COMMANDS*", $data->sender);
+			$line = '';
 			switch($data->authLevel)
 			{
 				case 1:
@@ -54,69 +55,36 @@
 					{
 						// Only show commands where auth level is needed
 						if($documentation['auth_level'] != 1)
-							break;
+							continue;
 
-						// If this is a single-line documentation
-						if(!is_array($documentation['documentation']))
-						{
-							$line = "*".strtoupper($documentation['access_type']).":* ";
-							$line .= "+".$command."+ ";
-							$line .= "- ".$documentation['documentation'];
-
-							$_msg = new Message("PRIVMSG", $line, $data->sender);
-						}
-						else
-						{
-							$line = "*".strtoupper($documentation['access_type']).":* ";
-							$line .= "+".$command."+ ";
-							// Print first line
-							$line .= "- ".$documentation['documentation'][0];
-							
-							$_msg = new Message("PRIVMSG", $line, $data->sender);
-
-							// For every next line, i.e. starting at entry 1
-							for($i = 1; $i <= count($documentation['documentation']); $i++)
-							{
-								$_msg = new Message("PRIVMSG", $documentation['documentation'][$i], $data->sender);
-							}
-						}
+						// List the commands in a string
+						$line .= $command.", ";
 					}
+
+					$line = substr($line, 0, -2);
+
+					$_msg = new Message("PRIVMSG", $line, $data->sender);
 					// No break here, to enable authenticated users to see all commands
 				case 0:
+					$line = '';
 					$_msg = new Message("PRIVMSG", "+No access level needed+", $data->sender);
 					foreach($this->commandDocumentation as $command => $documentation)
 					{
 						// Only show commands where auth level isn't needed
 						if($documentation['auth_level'] != 0)
-							break;
+							continue;
 
-						// If this is a single-line documentation
-						if(!is_array($documentation['documentation']))
-						{
-							$line = "*".strtoupper($documentation['access_type']).":* ";
-							$line .= "+".$command."+ ";
-							$line .= "- ".$documentation['documentation'];
-
-							$_msg = new Message("PRIVMSG", $line, $data->sender);
-						}
-						else
-						{
-							$line = "*".strtoupper($documentation['access_type']).":* ";
-							$line .= "+".$command."+ ";
-							// Print first line
-							$line .= "- ".$documentation['documentation'][0];
-							
-							$_msg = new Message("PRIVMSG", $line, $data->sender);
-
-							// For every next line, i.e. starting at entry 1
-							for($i = 1; $i <= count($documentation['documentation']); $i++)
-							{
-								$_msg = new Message("PRIVMSG", $documentation['documentation'][$i], $data->sender);
-							}
-						}
+						// List the commands in a string
+						$line .= $command.", ";
 					}
+
+					$line = substr($line, 0, -2);
+
+					$_msg = new Message("PRIVMSG", $line, $data->sender);
 					break;
 			}
+
+			$_msg = new Message("PRIVMSG", "+For more information, type !help <command>.+", $data->sender);
 		}
 
 		/**
@@ -173,7 +141,7 @@
 		public function store_documentation()
 		{
 			$this->commandDocumentation = PluginHandler::$documentation;
-			sort($this->commandDocumentation);
+			ksort($this->commandDocumentation);
 		}
 	}
 ?>

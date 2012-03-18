@@ -27,6 +27,11 @@
 		{
 			$this->register_command('yt', array('YouTubeSearch', 'do_search'));
 			$this->register_command('youtube', array('YouTubeSearch', 'do_search'));
+			$this->register_documentation('youtube', array('auth_level' => 0,
+														'access_type' => 'both',
+														'documentation' => array("*Usage:* !youtube <query> OR !yt <query>",
+																				"Queries YouTube search for <query> and returns the results.")
+														));
 		}
 
 		/**

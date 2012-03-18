@@ -25,7 +25,7 @@
 			while(!feof($socket))
 			{
 				// If "MOTD" is found the bot has been fully connected. Break the loop
-				if(fgets($socket) && strpos(fgets($socket), "MOTD"))
+				if(fgets($socket) && strpos(fgets($socket), "MOTD") !== FALSE)
 				{
 					debug_message("Bot was greeted.");
 					break;
@@ -46,7 +46,13 @@
 		public function __construct()
 		{
 			$this->register_action('load', array('ServerActions', 'register_bot'));
+
 			$this->register_command('quit', array('ServerActions', 'quit'));
+			$this->register_documentation('quit', array('auth_level' => 1,
+														'access_type' => 'both',
+														'documentation' => array("*Usage:* !quit / !q",
+																				"Quits the server.")
+														));
 		}
 	}
 ?>

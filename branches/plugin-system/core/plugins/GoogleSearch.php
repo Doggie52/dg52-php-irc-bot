@@ -28,6 +28,11 @@
 		public function __construct()
 		{
 			$this->register_command('google', array('GoogleSearch', 'do_search'));
+			$this->register_documentation('google', array('auth_level' => 0,
+														'access_type' => 'both',
+														'documentation' => array("*Usage:* !google <query>",
+																				"Queries Google search for <query> and returns the results.")
+														));
 		}
 
 		/**

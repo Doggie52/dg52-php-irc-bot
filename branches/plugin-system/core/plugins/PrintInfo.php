@@ -70,6 +70,12 @@
 		public function __construct()
 		{
 			$this->register_action('connect', array('PrintInfo', 'init'));
+
 			$this->register_command('info', array('PrintInfo', 'command_info'));
+			$this->register_documentation('info', array('auth_level' => 1,
+														'access_type' => 'both',
+														'documentation' => array("*Usage:* !info",
+																				"Prints information about the bot such as uptime and server hardware (if running on a UNIX system).")
+														));
 		}
 	}

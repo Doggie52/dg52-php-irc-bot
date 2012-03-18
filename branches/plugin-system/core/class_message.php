@@ -60,9 +60,9 @@
 				{
 					if(DEBUG_OUTPUT)
 					{
-						debug_message("Command (".$this->command.") was sent to the server.");
+						debug_message("Command \"".$this->command."\" was sent to the server.");
 					}
-					return TRUE;
+					return true;
 				}
 			}
 			// If it is a private message
@@ -72,9 +72,9 @@
 				{
 					if(DEBUG_OUTPUT)
 					{
-						debug_message("Command (".$this->command.") with receiver (".$this->receiver.") and message (".$this->body.") was sent to the server.");
+						debug_message("Command \"".$this->command."\" with receiver \"".$this->receiver."\" and message \"".$this->body."\" was sent to the server.");
 					}
-					return TRUE;
+					return true;
 				}
 			}
 			// If it is any other kind of message
@@ -84,9 +84,9 @@
 				{
 					if(DEBUG_OUTPUT)
 					{
-						debug_message("Command (".$this->command.") with message (".$this->body.") was sent to the server.");
+						debug_message("Command \"".$this->command."\" with message \"".$this->body."\" was sent to the server.");
 					}
-					return TRUE;
+					return true;
 				}
 			}
 		}

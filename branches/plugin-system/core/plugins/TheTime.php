@@ -26,6 +26,11 @@
 		public function __construct()
 		{
 			$this->register_command('thetime', array('TheTime', 'the_time'));
+			$this->register_documentation('thetime', array('auth_level' => 0,
+														'access_type' => 'channel',
+														'documentation' => array("*Usage:* !thetime",
+																				"Displays the current server time and the respective timezone.")
+														));
 		}
 
 		public function the_time($data)

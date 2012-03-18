@@ -47,7 +47,13 @@
 			);
 
 			$this->register_action('channel_message', array('Speech', 'random_respond'));
+
 			$this->register_command('me', array('Speech', 'emote'));
+			$this->register_documentation('me', array('auth_level' => 1,
+														'access_type' => 'channel',
+														'documentation' => array("*Usage:* !me <text>",
+																				"Makes the bot emote <text>.")
+														));
 		}
 		
 		/**
