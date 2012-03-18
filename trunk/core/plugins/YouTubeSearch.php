@@ -117,8 +117,6 @@
 			$results = json_decode($body);
 			$results = $results->feed->entry;
 
-			print_r($results);
-
 			return $results;
 		}
 
