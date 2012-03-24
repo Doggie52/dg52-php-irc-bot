@@ -9,25 +9,14 @@
 	 * Main public executable wrapper
 	 *
 	 * TODO:
-	 * 		- *ONGOING* Documentation for bot-commands
 	 *		- Documentation for class
-	 *		- *PARTIALLY DONE* Structure the class, perhaps outsource some features of main()
 	 *		- Make use of usleep() to minimize CPU load
-	 *		- *DONE* Log all actions in a log-file
-	 *		- *DONE* Ability to reload speech array
-	 *		- *DONE* Ability to add speech on-the-fly
-	 *		- *DONE* Ability to format sent PMs
 	 *		- Users and channel abilities
-	 *			- *DONE* Ability to voice and de-voice (+v / -v)
-	 *			- *DONE* Ability to set channel topic
 	 *			- Ability to /whois a user and get response in a PM
-	 *			- *DONE* Ability to invite a user
 	 *			- Ability to add bot admin on-the-fly
 	 *		- Bot abilities
-	 *			- *DONE* Ability to use /me
-	 *			- *DONE* Ability to refer to a username when responding
 	 *			- Ability to use /notice
-	 *			- *NOT WORKING* Ability to change nickname for the session
+	 *			- Ability to change nickname for the session
 	 */	
 	
 	/**
