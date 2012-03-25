@@ -43,12 +43,13 @@
 			stream_set_blocking($socket, 0);
 			stream_set_blocking($cli, 0);
 			
-			// Include functions
+			// Include class definitions
 			include("core/class_func.php");
 			include("core/class_user.php");
 			include("core/class_data.php");
 			include("core/class_message.php");
 			include("core/class_pluginhandler.php");
+			include("core/cache/class_cache.php");
 
 			 // Replaces %date% with the date in the form yyyymmdd
 			$newpath = preg_replace("/%date%/", @date('Ymd'), LOG_PATH);
