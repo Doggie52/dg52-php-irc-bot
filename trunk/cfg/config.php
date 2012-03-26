@@ -24,6 +24,11 @@
 	define("BOT_QUITMSG", 		"i am real pro");				// The message the bot will transmit when disconnecting from the server
 	define("BOT_CHANNELS", 		"#doggie52");					// Array of channels to join on connect. Values must be separated by a space
 	define("COMMAND_PREFIX",	"!");							// The prefix that identifies a command
+
+	/**
+	 * Caching settings
+	 */
+	define("DISK_CACHE_PATH",	"cache");						// The path, relative to the root directory, of where to store cache files
 	
 	/**
 	 * Output configuration - whatever is shown will be logged as well
