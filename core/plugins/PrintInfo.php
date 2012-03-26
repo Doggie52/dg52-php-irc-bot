@@ -32,12 +32,28 @@
 		private function send_info($username, $starttime)
 		{
 			$_msg = new Message("PRIVMSG", "*dG52's PHP IRC Bot| r".get_latest_rev("http://dg52-php-irc-bot.googlecode.com/svn/trunk/"), $username);
-			// For UNIX-based systems, model and load can be $this->displayed
+			
+			// For UNIX-based systems, model and load can be fetched
 			if(PHP_OS != "WINNT" && PHP_OS != "WIN32")
 			{
-				$_msg = new Message("PRIVMSG", "  +Server OS:| ".PHP_OS." (".php_uname().")", $username);
-				$hwmodel = substr(@exec('sysctl hw.model'), 9);
-				$_msg = new Message("PRIVMSG", "  +Server CPU model:| ".$hwmodel, $username);
+				// Prepare caching
+				$cache = DiskCache::getInstance();
+
+				// If there is no cache yet
+				if(!isset($cache->system_info))
+				{
+					$system['OS'] = PHP_OS." (".php_uname().")";
+					$system['CPU'] = substr(@exec('sysctl hw.model'), 9);
+
+					$cache->system_info = $system;
+				}
+				else
+				{
+					$system = $cache->system_info;
+				}
+
+				$_msg = new Message("PRIVMSG", "  +Server OS:| ".$system['OS'], $username);
+				$_msg = new Message("PRIVMSG", "  +Server CPU model:| ".$system['CPU'], $username);
 				$uptime = @exec('uptime');
 				if($c = preg_match_all('/averages?: ([0-9\.]+),[\s]+([0-9\.]+),[\s]+([0-9\.]+)/', $uptime, $matches) > 0)
 				{
@@ -50,12 +66,15 @@
 			{
 				$_msg = new Message("PRIVMSG", "  +Server OS:| ".strtolower(PHP_OS), $username);
 			}
+
 			$currtime = time();
 			$seconds = $currtime - $starttime;
 			$minutes = floor($seconds / 60);
 			$hours = floor($seconds / 3600);
 			$seconds = $seconds;
+
 			$_msg = new Message("PRIVMSG", "  +Bot uptime:| ".$hours." hours ".$minutes." minutes ".$seconds." seconds.", $username);
+			
 			debug_message("Info was sent to ".$username."!");
 		}
 		

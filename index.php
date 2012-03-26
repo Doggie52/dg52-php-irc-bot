@@ -47,7 +47,7 @@
 					<title>dG52 PHP IRC Bot - Console Window</title>
 					<style type="text/css">
 						#console {
-							font-family: "Courier New";
+							font-family: "Courier New", monospace;
 							font-size: 10px;
 						}
 					</style>

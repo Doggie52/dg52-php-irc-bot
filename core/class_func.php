@@ -72,7 +72,18 @@
 	 */
 	function get_latest_rev($site)
 	{
-		$raw = file_get_contents($site);
+		// Initialize caching
+		$cache = DiskCache::getInstance();
+
+		// Have we cached it?
+		if(isset($cache->svn_repo))
+			$raw = $cache->svn_repo;
+		else
+		{
+			$raw = file_get_contents($site);
+			$cache->svn_repo = $raw;
+		}
+
 		$regex = "/(Revision)(\\s+)(\\d+)(:)/is";
 		preg_match_all($regex, $raw, $match);
 		$revision = $match[3][0];
