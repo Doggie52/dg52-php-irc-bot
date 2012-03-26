@@ -10,7 +10,7 @@
 		
 		public $PLUGIN_NAME = "Server Actions";
 		public $PLUGIN_AUTHOR = "Doggie52";
-		public $PLUGIN_DESCRIPTION = "Logs the bot onto the server.";
+		public $PLUGIN_DESCRIPTION = "Logs the bot onto the server and provides disconnect functionality.";
 		public $PLUGIN_VERSION = "1.0";
 	
 		/**
@@ -20,12 +20,13 @@
 		{
 			$_cmd = new Message('USER', BOT_NICKNAME.' douglasstridsberg.com '.BOT_NICKNAME.' :'.BOT_NAME);
 			$_cmd = new Message('NICK', BOT_NICKNAME);
+
 			// Temporarily tap into the socket
 			global $socket;
 			while(!feof($socket))
 			{
-				// If "MOTD" is found the bot has been fully connected. Break the loop
-				if(fgets($socket) && strpos(fgets($socket), "MOTD") !== FALSE)
+				// If '001' is sent, the bot has connected
+				if(($line = fgets($socket)) && strpos($line, ' 001 ') !== false)
 				{
 					debug_message("Bot was greeted.");
 					break;
@@ -37,6 +38,7 @@
 		{
 			if($data->authLevel != 1)
 				return;
+			
 			if($_cmd = new Message("QUIT", ":".BOT_QUITMSG))
 			{
 				debug_message("Bot has disconnected and been turned off!");

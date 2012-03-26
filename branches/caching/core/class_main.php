@@ -51,6 +51,13 @@
 			include("core/class_pluginhandler.php");
 			include("core/cache/class_cache.php");
 
+			// Print header
+			$this->print_header();
+
+			// Stores list of administrators
+			global $users;
+			$users = $this->reload_users();
+
 			 // Replaces %date% with the date in the form yyyymmdd
 			$newpath = preg_replace("/%date%/", @date('Ymd'), LOG_PATH);
 			// Clears the logfile if LOG_APPEND is FALSE and if the file already exists
@@ -62,18 +69,11 @@
 				}
 			}
 			
-			// Print header
-			$this->print_header();
-			
 			pluginHandler::load_plugins();
 			// Trigger plugin load
 			pluginHandler::trigger_hook('load');
 			// When the loop is broken, we have been greeted
 			pluginHandler::trigger_hook('connect');
-			
-			// Stores list of administrators
-			global $users;
-			$users = $this->reload_users();
 			
 			// Initializes the main bot workhorse
 			$this->main();
