@@ -51,6 +51,9 @@
 			include("core/class_pluginhandler.php");
 			include("core/cache/class_cache.php");
 
+			// Set default cache path
+			DiskCache::$cacheDir = DISK_CACHE_PATH;
+
 			// Print header
 			$this->print_header();
 
