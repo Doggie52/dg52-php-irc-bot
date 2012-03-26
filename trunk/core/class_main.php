@@ -43,12 +43,20 @@
 			stream_set_blocking($socket, 0);
 			stream_set_blocking($cli, 0);
 			
-			// Include functions
+			// Include class definitions
 			include("core/class_func.php");
 			include("core/class_user.php");
 			include("core/class_data.php");
 			include("core/class_message.php");
 			include("core/class_pluginhandler.php");
+			include("core/cache/class_cache.php");
+
+			// Print header
+			$this->print_header();
+
+			// Stores list of administrators
+			global $users;
+			$users = $this->reload_users();
 
 			 // Replaces %date% with the date in the form yyyymmdd
 			$newpath = preg_replace("/%date%/", @date('Ymd'), LOG_PATH);
@@ -61,18 +69,11 @@
 				}
 			}
 			
-			// Print header
-			$this->print_header();
-			
 			pluginHandler::load_plugins();
 			// Trigger plugin load
 			pluginHandler::trigger_hook('load');
 			// When the loop is broken, we have been greeted
 			pluginHandler::trigger_hook('connect');
-			
-			// Stores list of administrators
-			global $users;
-			$users = $this->reload_users();
 			
 			// Initializes the main bot workhorse
 			$this->main();

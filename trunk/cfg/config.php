@@ -12,7 +12,7 @@
 	/**
 	 * Server configuration
 	 */
-	define("SERVER_IP", 		"irc.servercentral.net");		// The IP of the server the bot will connect to
+	define("SERVER_IP", 		"irc.freenode.net");			// The IP of the server the bot will connect to
 	define("SERVER_PORT", 		'6667');						// The port of the above server
 	
 	/**

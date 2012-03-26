@@ -21,6 +21,7 @@
 		 * Properties
 		 */
 		private $resultLimit = 3;
+		private $cache;
 
 		/** 
 		 * Constructor
@@ -33,6 +34,9 @@
 														'documentation' => array("*Usage:| !google <query>",
 																				"Queries Google search for <query> and returns the results.")
 														));
+
+			// Initialize cache object
+			$this->cache = DiskCache::getInstance();
 		}
 
 		/**
@@ -43,16 +47,14 @@
 			// Get the query
 			$query = substr($data->fullLine, strlen('!'.$data->command.' '));
 
-			// Checks whether cURL is loaded [temporarily disabled due to API not functioning]
+			// Checks whether cURL is loaded
 			if(in_array('curl', get_loaded_extensions()))
 			{
-				$results = $this->google_search_api(array('q' => $query));
+				if(!($results = $this->google_search_api(array('q' => $query))))
+					return false;
 			}
-			elseif(false)
-			{
+			else
 				$this->debug_message("cURL is not supported.");
-				// $results = $this->google_search_html($query);
-			}
 
 			// Store every result up to resultLimit in separate lines to be sent to the client
 			$i = 1;
@@ -91,6 +93,10 @@
 		 */
 		private function google_search_api($args, $referer = 'http://localhost/')
 		{
+			// Is this cached?
+			if(isset($this->cache->{'google_search__'.$args['q']}))
+				return $this->cache->{'google_search__'.$args['q']};
+
 			$url = "https://ajax.googleapis.com/ajax/services/search/web";
 
 			// Sets necessary arguments
@@ -111,9 +117,19 @@
 
 			// Decode the response
 			$results = json_decode($body);
-			$results = $results->responseData->results;
 
-			return $results;
+			// Was the search successful?
+			if(is_object($results->responseData))
+			{
+				$results = $results->responseData->results;
+
+				// Cache it!
+				$this->cache->{'google_search__'.$args['q']} = $results;
+
+				return $results;
+			}
+			else
+				return false;
 		}
 
 		/**
