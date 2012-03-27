@@ -82,8 +82,6 @@
 		{
 			if($data->authLevel == 1)
 				$this->send_info($data->sender, $this->startTime);
-			else
-				$_msg = new Message("PRIVMSG", "You do not have access to this command!", $data->sender);
 		}
 
 		public function __construct()
