@@ -19,6 +19,7 @@
 		 */
 		protected $fullLine;
 		protected $type = 0;
+		protected $replyCode = 0;
 		protected $command;
 		protected $commandArgs;
 		protected $ident;
@@ -38,6 +39,12 @@
 		 */
 		const PM = 1;
 		const CHANNEL = 2;
+
+		/**
+		 * Constants relating to numeric reply code sent from the server
+		 */
+		const RPL_WELCOME = 001;
+		const RPL_ENDOFMOTD = 376;
 
 		/**
 		 * Magic __get function to allow other parts of the bot to access the properties
@@ -71,6 +78,10 @@
 			// Special case if the sent command is a ping
 			if($rawdata_array[0] == "PING")
 				$this->type = self::PING;
+
+			// Does this include a numeric, 3 digit reply code?
+			if(strlen($rawdata_array[1]) == 3 && is_numeric($rawdata_array[1]))
+				$this->replyCode = $rawdata_array[1];
 
 			// Get length of everything before command including last space
 			$identlength		= strlen($rawdata_array[0]." ".(isset($rawdata_array[1]) ? $rawdata_array[1] : "")." ".(isset($rawdata_array[2]) ? $rawdata_array[2] : "")." ");

@@ -48,7 +48,7 @@
 				$_msg = new Message("PRIVMSG", "*Bold|. +Italic|. __Underscore|. ", $data->sender);
 				$_msg = new Message("PRIVMSG", "*Bold|. *+BoldItalic|. *__BoldUnderscore|. ", $data->sender);
 				$_msg = new Message("PRIVMSG", "+Italic|. +__ItalicUnderscore|. ", $data->sender);
-				$_msg = new Message("PRIVMSG", "__Underscore|. *+__BoldItalicUnderscore|", $data->sender);
+				$_msg = new Message("PRIVMSG", "__Underscore|. *+__BoldItalicUnderscore|.", $data->sender);
 			}
 		}		
 	}

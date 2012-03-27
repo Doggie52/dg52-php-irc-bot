@@ -25,8 +25,9 @@
 			global $socket;
 			while(!feof($socket))
 			{
-				// If '001' is sent, the bot has connected
-				if(($line = fgets($socket)) && strpos($line, ' 001 ') !== false)
+				// If '376' is sent, the bot has connected and received the last MOTD line
+				// This has a potentital of not working with all IRCDs, in that case one should look for RPL_WELCOME
+				if(($line = fgets($socket)) && strpos($line, ' '.Data::RPL_ENDOFMOTD.' ') !== false)
 				{
 					debug_message("Bot was greeted.");
 					break;
