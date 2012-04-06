@@ -32,7 +32,7 @@
 					// If the debug output is turned on, spew out all data received from server
 					if(DEBUG_OUTPUT)
 					{
-						debug_message("DEBUG OUTPUT: ".trim($this->rawData));
+						debug_message("DEBUG OUTPUT: ".trim($line));
 					}
 					
 					// If '376' is sent, the bot has connected and received the last MOTD line
