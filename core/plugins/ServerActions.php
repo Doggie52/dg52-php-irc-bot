@@ -3,6 +3,8 @@
  * Server Actions
  * 
  * Logs the bot onto the server and provides disconnect-functionality.
+ *
+ * @todo Implement error codes so we can see why the bot won't connect.
  */
 
 	class ServerActions extends PluginEngine
@@ -25,12 +27,21 @@
 			global $socket;
 			while(!feof($socket))
 			{
-				// If '376' is sent, the bot has connected and received the last MOTD line
-				// This has a potentital of not working with all IRCDs, in that case one should look for RPL_WELCOME
-				if(($line = fgets($socket)) && strpos($line, ' '.Data::RPL_ENDOFMOTD.' ') !== false)
+				if(($line = fgets($socket)))
 				{
-					debug_message("Bot was greeted.");
-					break;
+					// If the debug output is turned on, spew out all data received from server
+					if(DEBUG_OUTPUT)
+					{
+						debug_message("DEBUG OUTPUT: ".trim($this->rawData));
+					}
+					
+					// If '376' is sent, the bot has connected and received the last MOTD line
+					// This has a potentital of not working with all IRCDs, in that case one should look for RPL_WELCOME
+					if(strpos($line, ' '.Data::RPL_ENDOFMOTD.' ') !== false)
+					{
+						debug_message("Bot was greeted.");
+						break;
+					}
 				}
 			}
 		}
