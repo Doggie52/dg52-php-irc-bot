@@ -118,17 +118,8 @@
 					
 					$this->data = new Data($this->rawData);
 
-					if($this->data->type == Data::PING)
-					{
-						// Explode raw data to get server
-						$_temp_expl = explode(" ", $this->rawData);
-						// Plays ping-pong with the server to stay connected
-						$pong = new Message("PONG", $_temp_expl[1]);
-						if(!SUPPRESS_PING)
-						{
-							debug_message("PONG was sent.");
-						}
-					}
+					// Ping?
+					PluginHandler::$plugins['ServerActions']->ping($this->data, $this->rawData);
 					
 					// If the message is a command
 					if($this->data->type == Data::COMMAND)
@@ -147,6 +138,10 @@
 						}
 					}
 				}
+
+				// Sleeps the bot to conserve CPU power
+				if(SLEEP_MSEC > 0)
+					usleep(SLEEP_MSEC);
 			}
 		}
 		
