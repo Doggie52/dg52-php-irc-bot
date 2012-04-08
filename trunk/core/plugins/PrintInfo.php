@@ -80,8 +80,7 @@
 		
 		public function command_info($data)
 		{
-			if($data->authLevel == 1)
-				$this->send_info($data->sender, $this->startTime);
+			$this->send_info($data->sender, $this->startTime);
 		}
 
 		public function __construct()

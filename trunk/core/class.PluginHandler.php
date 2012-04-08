@@ -12,7 +12,7 @@
 	class PluginHandler
 	{
 		/**
-		 * A static list of plugin objects, available to access by any plugin without having to instantiate object
+		 * A static list of plugin objects, available to access by any plugin
 		 */
 		static public $plugins = array();
 
@@ -29,6 +29,12 @@
 		
 		/**
 		 * A static list of the commands registered by all plugins
+		 *
+		 * Structure:
+		 * array( 'command name' => array(
+		 * 								'plugin name',
+		 * 								'command function name'
+		 * 								)
 		 */
 		static public $commands = array();
 
@@ -58,7 +64,7 @@
 		 */
 		static public function load_plugins()
 		{
-			include("class.Plugin.php");
+			include("class.PluginEngine.php");
 			foreach(glob("core/plugins/*.php") as $pluginName)
 			{
 				include_once($pluginName);
@@ -93,13 +99,20 @@
 		 * @access public
 		 * @param string $command Name of the command to fire
 		 * @param object $data The data object to pass to plugins
-		 * @return void
+		 * @return bool Whether or not the command was run successfully
 		 */
 		static public function run_command($command, $data)
 		{
 			// Does the hook exist?
 			if(!isset(self::$commands[$command]))
-				return;
+				return false;
+
+			// Does the user have the necessary privileges?
+			if(self::$documentation[$command]['auth_level'] > $data->authLevel)
+			{
+				$_msg = new Message("PRIVMSG", "You do not have sufficient privileges to run +{$command}|!", $data->sender);
+				return false;
+			}
 			
 			// Fire the callback associated with the command
 			$callback = self::$commands[$command];

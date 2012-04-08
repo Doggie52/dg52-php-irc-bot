@@ -36,7 +36,7 @@
 					}
 
 					// Check for pings sent before bot has connected
-					$this->ping(new Data($line), $line);
+					$this->pong(new Data($line), $line);
 					
 					// If '376' is sent, the bot has connected and received the last MOTD line
 					// This has a potentital of not working with all IRCDs, in that case one should look for RPL_WELCOME
@@ -51,16 +51,12 @@
 	
 		public function quit($data)
 		{
-			if($data->authLevel != 1)
-				return;
-			
-			if($_cmd = new Message("QUIT", ":".BOT_QUITMSG))
-			{
-				debug_message("Bot has disconnected and been turned off!");
-			}
+			$_cmd = new Message("QUIT", ":".BOT_QUITMSG);
+
+			debug_message("Bot has disconnected and been turned off!");
 		}
 
-		public function ping($data, $rawdata)
+		public function pong($data, $rawdata)
 		{
 			if($data->type == Data::PING)
 			{

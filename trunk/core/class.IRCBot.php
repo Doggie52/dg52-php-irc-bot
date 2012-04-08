@@ -105,6 +105,9 @@
 				{
 					echo "CLI INPUT: ".$cliinput;
 				}*/
+
+				// Begin output buffering
+				ob_start();
 				
 				// If there is something new in the socket (prevents over-use of resources)
 				if($this->rawData = fgets($socket))
@@ -119,25 +122,22 @@
 					$this->data = new Data($this->rawData);
 
 					// Ping?
-					PluginHandler::$plugins['ServerActions']->ping($this->data, $this->rawData);
+					PluginHandler::$plugins['ServerActions']->pong($this->data, $this->rawData);
 					
 					// If the message is a command
 					if($this->data->type == Data::COMMAND)
-					{
 						PluginHandler::run_command($this->data->command, $this->data);
-					}
 					else
 					{
 						if($this->data->origin == Data::CHANNEL)
-						{
 							PluginHandler::trigger_hook('channel_message', $this->data);
-						}
 						elseif($this->data->origin == Data::PM)
-						{
 							PluginHandler::trigger_hook('private_message', $this->data);
-						}
 					}
 				}
+
+				// End output buffering
+				ob_end_flush();
 
 				// Sleeps the bot to conserve CPU power
 				if(SLEEP_MSEC > 0)
