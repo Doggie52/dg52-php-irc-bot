@@ -126,11 +126,8 @@
 		 * @param string $channel (optional) The name of the channel, if called directly
 		 * @access public
 		 */
-		public function join_channel($data, $channel)
+		public function join_channel($data, $channel = null)
 		{
-			if(is_object($data) && $data->authLevel != 1)
-				return;
-
 			if(!isset($channel))
 				$channel = $this->to_channel($data->commandArgs[0]);
 			else
@@ -151,11 +148,8 @@
 		 * @param string $channel (optional) The name of the channel, if called directly
 		 * @access public
 		 */
-		public function part_channel($data, $channel)
+		public function part_channel($data, $channel = null)
 		{
-			if(is_object($data) && $data->authLevel != 1)
-				return;
-			
 			if(!isset($channel))
 				$channel = $this->to_channel($data->commandArgs[0]);
 			else
@@ -177,9 +171,6 @@
 		 */
 		public function set_topic($data)
 		{
-			if($data->authLevel != 1)
-				return;
-			
 			if($data->origin == Data::PM)
 			{
 				$channel = $this->to_channel($data->commandArgs[0]);
@@ -204,9 +195,6 @@
 		 */
 		public function set_user_mode($data)
 		{
-			if($data->authLevel != 1)
-				return;
-			
 			if($data->origin == Data::CHANNEL)
 			{
 				switch($data->command)
@@ -236,9 +224,6 @@
 		 */
 		public function invite_user($data)
 		{
-			if($data->authLevel != 1)
-				return;
-
 			if(!isset($data->commandArgs[0]))
 				return;
 

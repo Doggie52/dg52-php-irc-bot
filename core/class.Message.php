@@ -146,7 +146,7 @@
 		{
 			$markups = array(
 						'*' => chr(2),		// bold (STX)
-						'__' => chr(31),		// underlined (US)
+						'__' => chr(31),	// underlined (US)
 						'+' => chr(29),		// italic (GS)
 						'|' => chr(15) 		// the ending character (SI)
 				);

@@ -22,6 +22,11 @@
 		{
 			$this->register_action('load', array('HelpLibrary', 'store_documentation'));
 			$this->register_command('help', array('HelpLibrary', 'help'));
+			$this->register_documentation('help', array('auth_level' => 0,
+														'access_type' => 'both',
+														'documentation' => array("*Usage:| !help <command>",
+															"Shows help for <command>.")
+			));
 		}
 
 		/**
