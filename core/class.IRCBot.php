@@ -44,11 +44,11 @@
 			stream_set_blocking($cli, 0);
 			
 			// Include class definitions
-			include("core/class_func.php");
-			include("core/class_user.php");
-			include("core/class_data.php");
-			include("core/class_message.php");
-			include("core/class_pluginhandler.php");
+			include("core/func.Functions.php");
+			include("core/func.User.php");
+			include("core/class.Data.php");
+			include("core/class.Message.php");
+			include("core/class.PluginHandler.php");
 			include("core/cache/class_cache.php");
 
 			// Set default cache path

@@ -58,7 +58,7 @@
 		 */
 		static public function load_plugins()
 		{
-			include("class_plugin.php");
+			include("class.Plugin.php");
 			foreach(glob("core/plugins/*.php") as $pluginName)
 			{
 				include_once($pluginName);

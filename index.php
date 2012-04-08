@@ -33,7 +33,7 @@
 	// Some configuration is needed
 	include("cfg/config.php");
 	// The main class definitions are also useful ;)
-	include("core/class_main.php");
+	include("core/class.IRCBot.php");
 	
 	/**
 	 * Optional GUI
