@@ -80,7 +80,7 @@
 				$this->type = self::PING;
 
 			// Does this include a numeric, 3 digit reply code?
-			if(strlen($rawdata_array[1]) == 3 && is_numeric($rawdata_array[1]))
+			if(isset($rawdata_array[1]) && strlen($rawdata_array[1]) == 3 && is_numeric($rawdata_array[1]))
 				$this->replyCode = $rawdata_array[1];
 
 			// Get length of everything before command including last space
