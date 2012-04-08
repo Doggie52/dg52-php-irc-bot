@@ -53,7 +53,10 @@
 					return false;
 			}
 			else
+			{
 				$this->debug_message("cURL is not supported.");
+				return false;
+			}
 
 			// Store every result up to resultLimit in separate lines to be sent to the client
 			$i = 1;
