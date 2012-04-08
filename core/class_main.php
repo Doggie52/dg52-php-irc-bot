@@ -61,7 +61,7 @@
 			global $users;
 			$users = $this->reload_users();
 
-			 // Replaces %date% with the date in the form yyyymmdd
+			// Replaces %date% with the date in the form yyyymmdd
 			$newpath = preg_replace("/%date%/", @date('Ymd'), LOG_PATH);
 			// Clears the logfile if LOG_APPEND is FALSE and if the file already exists
 			if(!LOG_APPEND && file_exists($newpath))
@@ -100,11 +100,11 @@
 			
 			while(!feof($socket))
 			{
-				// If something has been typed
+				/* Disabling due to Windows socket inconsistency
 				if($cliinput = fgets($cli))
 				{
 					echo "CLI INPUT: ".$cliinput;
-				}
+				}*/
 				
 				// If there is something new in the socket (prevents over-use of resources)
 				if($this->rawData = fgets($socket))

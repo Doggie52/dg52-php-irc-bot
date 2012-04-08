@@ -2,7 +2,9 @@
 /**
  * YouTubeSearch plugin
  * 
- * Allows the user to do a basic YouTube search via channel and PM
+ * Allows the user to do a basic YouTube search via channel and PM.
+ *
+ * REQUIRES: PHP cURL extension
  */
 
 	class YouTubeSearch extends PluginEngine
@@ -88,7 +90,7 @@
 		 * @access private
 		 * @param array $args URL arguments. For most endpoints only "q" (query) is required.
 		 * @param string $referer Referer to use in the HTTP header (must be valid).
-		 * @return object or NULL on failure
+		 * @return object $results Result object or NULL on failure
 		 */
 		private function youtube_search_api($args, $referer = 'http://localhost/')
 		{
@@ -120,6 +122,8 @@
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 			// Note that the referer *must* be set
 			curl_setopt($ch, CURLOPT_REFERER, $referer);
+			// Fixes lack of response on Windows machines
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
 			$body = curl_exec($ch);
 			curl_close($ch);
 
