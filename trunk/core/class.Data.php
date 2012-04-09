@@ -6,48 +6,106 @@
 	 * @email: doggie52@gmail.com
 	 * @url: www.douglasstridsberg.com
 	 *
-	 * Data class holding the data sent from the server
+	 * Data class holding the data sent from the server.
 	 */
 
 	/**
-	 * Data class
+	 * Data class.
 	 */
 	class Data
 	{
 		/**
-		 * Properties of the data
+		 * Holds the entire text sent by the server or user (but without the ident).
+		 *
+		 * @var string
 		 */
 		protected $fullLine;
+
+		/**
+		 * Type of data, if set to something it will be either a PING or a command.
+		 *
+		 * @var int
+		 */
 		protected $type = 0;
+
+		/**
+		 * Numeric reply code sent from the server, if set.
+		 *
+		 * @var int
+		 */
 		protected $replyCode = 0;
+
+		/**
+		 * The command sent by a user.
+		 *
+		 * @var string
+		 */
 		protected $command;
+
+		/**
+		 * Array of arguments to the above command.
+		 *
+		 * @var array
+		 */
 		protected $commandArgs;
+
+		/**
+		 * The ident of the user sending the message.
+		 *
+		 * @var string
+		 */
 		protected $ident;
+
+		/**
+		 * The nickname of the user sending the command.
+		 *
+		 * @var string
+		 */
 		protected $sender;
+
+		/**
+		 * The receiver of the message, either the channel name of the bot's name.
+		 *
+		 * @var string
+		 */
 		protected $receiver;
+
+		/**
+		 * The origin of the message (either channel or PM).
+		 *
+		 * @var int
+		 */
 		protected $origin = 0;
+
+		/**
+		 * The authentication level of the user sending the message.
+		 *
+		 * @var int
+		 */
 		protected $authLevel = 0;
 
 		/**
-		 * Constants relating to type of data, instead of an enumeration
+		 * Constants relating to type of data, instead of an enumeration.
 		 */
 		const PING = 1;
 		const COMMAND = 2;
 
 		/**
-		 * Constants relating to origin of message, instead of an enumeration
+		 * Constants relating to origin of message, instead of an enumeration.
 		 */
 		const PM = 1;
 		const CHANNEL = 2;
 
 		/**
-		 * Constants relating to numeric reply code sent from the server
+		 * Constants relating to numeric reply code sent from the server.
 		 */
 		const RPL_WELCOME = 001;
 		const RPL_ENDOFMOTD = 376;
 
 		/**
-		 * Magic __get function to allow other parts of the bot to access the properties
+		 * __get()
+		 *
+		 * @abstract Magic __get function to allow other parts of the bot to access the properties.
 		 */
 		public function __get( $property )
 		{
@@ -67,9 +125,11 @@
 		}
 
 		/**
-		 * Constructor, which is passed the raw line fed into the socket
+		 * __construct()
 		 *
-		 * @param string $rawdata The raw line fed into the socket
+		 * @abstract Constructor, which is passed the raw line fed into the socket.
+		 *
+		 * @param string $rawdata The raw line fed into the socket.
 		 */
 		public function __construct( $rawdata )
 		{
@@ -114,11 +174,14 @@
 		}
 
 		/**
-		 * Interprets the receiver of a message sent and returns whether it is one from a user (a private message) or one sent in the channel.
+		 * interpretReceiver()
+		 *
+		 *
+		 * @abstract Interprets the receiver of a message sent and returns whether it is one from a user (a private message) or one sent in the channel.
 		 *
 		 * @access private
-		 * @param string $receiver The receiver to be interpretted
-		 * @return string $type The type of message sent ("PRIVATE" or "CHANNEL")
+		 * @param string $receiver The receiver to be interpretted.
+		 * @return int $type The type of message sent ("PRIVATE" or "CHANNEL").
 		 */
 		private function interpretReceiver( $receiver )
 		{
@@ -145,11 +208,13 @@
 		}
 
 		/**
-		 * Checks if sender of message is in the list of authenticated users. (username!hostname)
+		 * isAuthenticated()
+		 *
+		 * @abstract Checks if sender of message is in the list of authenticated users. (username!hostname)
 		 *
 		 * @access private
-		 * @param string $ident The username!hostname of the user we want to check
-		 * @return boolean $authenticated TRUE for an authenticated user, FALSE for one which isn't
+		 * @param string $ident The username!hostname of the user we want to check.
+		 * @return int $level 1 for an authenticated user, 0 for one which isn't.
 		 */
 		private function isAuthenticated( $ident )
 		{
@@ -161,14 +226,14 @@
 
 			if ( in_array( $ident, $users ) ) {
 				debug_message( "User ($ident) is authenticated." );
-				$authenticated = true;
+				$level = 1;
 			}
 			else
 			{
-				$authenticated = false;
+				$level = 0;
 			}
 
-			return $authenticated;
+			return $level;
 		}
 	}
 

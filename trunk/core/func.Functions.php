@@ -10,12 +10,14 @@
 	 */
 
 	/**
-	 * Removes an item from an array by its value
-	 * Inspired by http://dev-tips.com/featured/remove-an-item-from-an-array-by-value
+	 * remove_item_by_value()
 	 *
-	 * @param string $value The value to remove
-	 * @param array $array The array to remove the value from
-	 * @return array $array The modified array
+	 * @abstract Removes an item from an array by its value.
+	 * Inspired by http://dev-tips.com/featured/remove-an-item-from-an-array-by-value.
+	 *
+	 * @param string $value The value to remove.
+	 * @param array $array The array to remove the value from.
+	 * @return array $array The modified array.
 	 */
 	function remove_item_by_value( $value, $array )
 	{
@@ -33,10 +35,11 @@
 	}
 
 	/**
-	 * Reloads the arrays associated with speech
+	 * reload_speech()
 	 *
-	 * @access public
-	 * @return array $response The response-array
+	 * @abstract Reloads the arrays associated with speech.
+	 *
+	 * @return array $response The response-array.
 	 */
 	function reload_speech()
 	{
@@ -61,11 +64,12 @@
 	}
 
 	/**
-	 * Gets the latest revision of an SVN repository with a general HTML output.
+	 * get_latest_rev()
 	 *
-	 * @access public
-	 * @param string $site The URI of the repository (with http://)
-	 * @return string $revision The revision number extracted
+	 * @abstract Gets the latest revision of an SVN repository with a general HTML output.
+	 *
+	 * @param string $site The URI of the repository (with http://).
+	 * @return string $revision The revision number extracted.
 	 */
 	function get_latest_rev( $site )
 	{
@@ -89,12 +93,13 @@
 	}
 
 	/**
-	 * Writes to the list of keywords and their definitions
+	 * write_definition()
 	 *
-	 * @access public
-	 * @param string $line The line to write to the file
-	 * @param array $commandarray The array of commands and their respective help entries
-	 * @return bool $successs Whether the write was successful or not
+	 * @abstract Writes to the list of keywords and their definitions.
+	 *
+	 * @param string $line The line to write to the file.
+	 * @param array $commandarray The array of commands and their respective help entries.
+	 * @return bool $successs Whether the write was successful or not.
 	 */
 	function write_definition( $line, $commandarray )
 	{
@@ -121,11 +126,11 @@
 	}
 
 	/**
-	 * Prints a debug-message with a time-stamp.
+	 * debug_message()
 	 *
-	 * @access public
-	 * @param string $message The message to be printed
-	 * @return void
+	 * @abstract Prints a debug-message with a time-stamp.
+	 *
+	 * @param string $message The message to be printed.
 	 */
 	function debug_message( $message )
 	{
