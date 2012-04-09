@@ -1,10 +1,10 @@
 <?php
-/**
- * HelpLibrary plugin
- * 
- * Displays help about available functions to different users.
- * The plugin is unfinished for now, the plan is to build a system that shows users the commands available to them. In the end, this plugin will replace "speech.php"
- */
+	/**
+	 * HelpLibrary plugin
+	 *
+	 * Displays help about available functions to different users.
+	 * The plugin is unfinished for now, the plan is to build a system that shows users the commands available to them. In the end, this plugin will replace "speech.php"
+	 */
 
 	class HelpLibrary extends PluginEngine
 	{
@@ -23,9 +23,9 @@
 			$this->register_action('load', array('HelpLibrary', 'store_documentation'));
 			$this->register_command('help', array('HelpLibrary', 'help'));
 			$this->register_documentation('help', array('auth_level' => 0,
-														'access_type' => 'both',
-														'documentation' => array("*Usage:| !help <command>",
-															"Shows help for <command>.")
+				'access_type' => 'both',
+				'documentation' => array("*Usage:| !help <command>",
+					"Shows help for <command>.")
 			));
 		}
 
@@ -35,8 +35,7 @@
 		public function help($data)
 		{
 			// If no specific function has been specified
-			if(!isset($data->commandArgs[0]))
-			{
+			if(!isset($data->commandArgs[0])) {
 				$this->list_all_commands($data);
 			}
 			else
@@ -63,13 +62,13 @@
 							continue;
 
 						// List the commands in a string
-						$line .= $command.", ";
+						$line .= $command . ", ";
 					}
 
 					$line = substr($line, 0, -2);
 
 					$_msg = new Message("PRIVMSG", $line, $data->sender);
-					// No break here, to enable authenticated users to see all commands
+				// No break here, to enable authenticated users to see all commands
 				case 0:
 					$line = '';
 					$_msg = new Message("PRIVMSG", "+No access level needed+", $data->sender);
@@ -80,7 +79,7 @@
 							continue;
 
 						// List the commands in a string
-						$line .= $command.", ";
+						$line .= $command . ", ";
 					}
 
 					$line = substr($line, 0, -2);
@@ -101,35 +100,32 @@
 			$command = $data->commandArgs[0];
 
 			// Checks if command is available
-			if(empty($this->commandDocumentation[$command]))
-			{
+			if(empty($this->commandDocumentation[$command])) {
 				$_msg = new Message("PRIVMSG", "The command was not found!", $data->sender);
 				return;
 			}
 
 			// Checks if command is available for the user's authentication level
-			if($this->commandDocumentation[$command]['auth_level'] > $data->authLevel)
-			{
+			if($this->commandDocumentation[$command]['auth_level'] > $data->authLevel) {
 				$_msg = new Message("PRIVMSG", "This command is not available for you!", $data->sender);
 				return;
 			}
 
 			// The command documentation is now ready to be displayed, check if it is a single-line one
-			if(!is_array($this->commandDocumentation[$command]['documentation']))
-			{
-				$line = "*".strtoupper($this->commandDocumentation[$command]['access_type']).":* ";
-				$line .= "+".$command."+ ";
-				$line .= "- ".$this->commandDocumentation[$command]['documentation'];
+			if(!is_array($this->commandDocumentation[$command]['documentation'])) {
+				$line = "*" . strtoupper($this->commandDocumentation[$command]['access_type']) . ":* ";
+				$line .= "+" . $command . "+ ";
+				$line .= "- " . $this->commandDocumentation[$command]['documentation'];
 
 				$_msg = new Message("PRIVMSG", $line, $data->sender);
 			}
 			else
 			{
-				$line = "*".strtoupper($this->commandDocumentation[$command]['access_type']).":* ";
-				$line .= "+".$command."+ ";
+				$line = "*" . strtoupper($this->commandDocumentation[$command]['access_type']) . ":* ";
+				$line .= "+" . $command . "+ ";
 				// Print first line
-				$line .= "- ".$this->commandDocumentation[$command]['documentation'][0];
-				
+				$line .= "- " . $this->commandDocumentation[$command]['documentation'][0];
+
 				$_msg = new Message("PRIVMSG", $line, $data->sender);
 
 				// For every next line, i.e. starting at entry 1
@@ -139,7 +135,7 @@
 				}
 			}
 		}
-		
+
 		/**
 		 * Copies the available commands and their documentation to the plugin, sorting it by the command name
 		 */
@@ -149,4 +145,5 @@
 			ksort($this->commandDocumentation);
 		}
 	}
+
 ?>

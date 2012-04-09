@@ -1,9 +1,9 @@
 <?php
-/**
- * Dictionary plugin
- * 
- * Allows users to store and display custom definitions of words within the bot
- */
+	/**
+	 * Dictionary plugin
+	 *
+	 * Allows users to store and display custom definitions of words within the bot
+	 */
 
 	class Dictionary extends PluginEngine
 	{
@@ -21,4 +21,5 @@
 						"If 'list' is used, a list of the defined keywords is sent to the user."),
 		*/
 	}
+
 ?>

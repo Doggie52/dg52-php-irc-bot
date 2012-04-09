@@ -1,9 +1,9 @@
 <?php
-/**
- * PluginInfo plugin
- * 
- * Allows the user to display information such as version, author, description etc. about all loaded plugins.
- */
+	/**
+	 * PluginInfo plugin
+	 *
+	 * Allows the user to display information such as version, author, description etc. about all loaded plugins.
+	 */
 
 	class PluginInfo extends PluginEngine
 	{
