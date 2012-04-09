@@ -15,7 +15,7 @@
 	 */
 	abstract class PluginEngine
 	{
-	
+
 		/**
 		 * Variables
 		 */
@@ -31,12 +31,11 @@
 		protected function register_action($hook, $callback)
 		{
 			// Does the hook exist?
-			if(!isset(PluginHandler::$hooks[$hook]))
-			{
-				debug_message("[PLUGIN] ".$callback[0].": Hook \"".$hook."\" does not exist!");
+			if(!isset(PluginHandler::$hooks[$hook])) {
+				debug_message("[PLUGIN] " . $callback[0] . ": Hook \"" . $hook . "\" does not exist!");
 				return;
 			}
-			
+
 			// Add callback to hook array
 			PluginHandler::$hooks[$hook][] = $callback;
 		}
@@ -52,12 +51,11 @@
 		protected function register_command($command, $callback, $documentation = null)
 		{
 			// Does the command already exist?
-			if(isset(PluginHandler::$commands[$command]))
-			{
-				debug_message("[PLUGIN] ".$callback[0].": Command \"".$command."\" already exists!");
+			if(isset(PluginHandler::$commands[$command])) {
+				debug_message("[PLUGIN] " . $callback[0] . ": Command \"" . $command . "\" already exists!");
 				return;
 			}
-			
+
 			// Add callback to command array
 			PluginHandler::$commands[$command] = $callback;
 		}
@@ -72,25 +70,22 @@
 		static function register_documentation($command, $documentation)
 		{
 			// Checks for empty arguments
-			if(empty($command) || empty($documentation))
-			{
+			if(empty($command) || empty($documentation)) {
 				debug_message("Both arguments need to be filled in.");
 
 				return;
 			}
 
 			// Makes sure $ocumentation is the correct structure
-			if(!isset($documentation['auth_level']) || !isset($documentation['access_type']) || empty($documentation['documentation']))
-			{
+			if(!isset($documentation['auth_level']) || !isset($documentation['access_type']) || empty($documentation['documentation'])) {
 				debug_message("The correct documentation structure is needed.");
 
 				return;
 			}
 
 			// Checks for already existing documentation
-			if(!empty(PluginHandler::$documentation[$command]))
-			{
-				debug_message("Documentation for the command \"".$command."\" already exists.");
+			if(!empty(PluginHandler::$documentation[$command])) {
+				debug_message("Documentation for the command \"" . $command . "\" already exists.");
 
 				return;
 			}
@@ -108,7 +103,7 @@
 		 */
 		protected function debug_message($msg)
 		{
-			debug_message("[PLUGIN] ".$msg);
+			debug_message("[PLUGIN] " . $msg);
 		}
 
 	}

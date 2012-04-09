@@ -1,9 +1,9 @@
 <?php
-/**
- * Channel Actions
- * 
- * Enables joining and parting channels, setting topics as well as converting to channelnames. Also allows user to see currently connected channels.
- */
+	/**
+	 * Channel Actions
+	 *
+	 * Enables joining and parting channels, setting topics as well as converting to channelnames. Also allows user to see currently connected channels.
+	 */
 
 	class ChannelActions extends PluginEngine
 	{
@@ -11,7 +11,7 @@
 		public $PLUGIN_AUTHOR = "Doggie52";
 		public $PLUGIN_DESCRIPTION = "Enables joining and parting channels.";
 		public $PLUGIN_VERSION = "1.0";
-		
+
 		/**
 		 * The array of currently joined channels
 		 */
@@ -24,79 +24,79 @@
 
 			$this->register_command('join', array('ChannelActions', 'join_channel'));
 			$this->register_documentation('join', array('auth_level' => 1,
-														'access_type' => 'both',
-														'documentation' => array("*Usage:| !join / !j <channel>",
-																				"Joins <channel>.",
-																				"Hash-sign can be omitted.")
-														));
+				'access_type' => 'both',
+				'documentation' => array("*Usage:| !join / !j <channel>",
+					"Joins <channel>.",
+					"Hash-sign can be omitted.")
+			));
 
 			$this->register_command('part', array('ChannelActions', 'part_channel'));
 			$this->register_documentation('part', array('auth_level' => 1,
-														'access_type' => 'both',
-														'documentation' => array("*Usage:| !part / !p <channel>",
-																				"Parts <channel>.",
-																				"Hash-sign can be omitted.")
-														));
+				'access_type' => 'both',
+				'documentation' => array("*Usage:| !part / !p <channel>",
+					"Parts <channel>.",
+					"Hash-sign can be omitted.")
+			));
 
 			$this->register_command('topic', array('ChannelActions', 'set_topic'));
 			$this->register_documentation('topic', array('auth_level' => 1,
-														'access_type' => 'both',
-														'documentation' => array("*Usage:| !topic <channel> <topic>",
-																				"Sets the topic of <channel> to <topic>.",
-																				"Will only take effect if bot has sufficient privileges.",
-																				"Hash-sign can be omitted.")
-														));
+				'access_type' => 'both',
+				'documentation' => array("*Usage:| !topic <channel> <topic>",
+					"Sets the topic of <channel> to <topic>.",
+					"Will only take effect if bot has sufficient privileges.",
+					"Hash-sign can be omitted.")
+			));
 
 			$this->register_command('op', array('ChannelActions', 'set_user_mode'));
 			$this->register_documentation('op', array('auth_level' => 1,
-														'access_type' => 'both',
-														'documentation' => array("*Usage:| !op <channel> <username>",
-																				"Gives <username> operator status in <channel>.",
-																				"Will only take effect if bot has sufficient privileges.",
-																				"Hash-sign in <channel> as well as <username> can be omitted.",
-																				"If the latter is omitted, the sender of the PM is assumed to be <username>.")
-														));
+				'access_type' => 'both',
+				'documentation' => array("*Usage:| !op <channel> <username>",
+					"Gives <username> operator status in <channel>.",
+					"Will only take effect if bot has sufficient privileges.",
+					"Hash-sign in <channel> as well as <username> can be omitted.",
+					"If the latter is omitted, the sender of the PM is assumed to be <username>.")
+			));
 
 			$this->register_command('deop', array('ChannelActions', 'set_user_mode'));
 			$this->register_documentation('deop', array('auth_level' => 1,
-														'access_type' => 'both',
-														'documentation' => array("*Usage:| !deop <channel> <username>",
-																				"Removes <username>'s operator status in <channel>.",
-																				"Will only take effect if bot has sufficient privileges.",
-																				"Hash-sign can be omitted.",
-																				"If the latter is omitted, the sender of the PM is assumed to be <username>.")
-														));
+				'access_type' => 'both',
+				'documentation' => array("*Usage:| !deop <channel> <username>",
+					"Removes <username>'s operator status in <channel>.",
+					"Will only take effect if bot has sufficient privileges.",
+					"Hash-sign can be omitted.",
+					"If the latter is omitted, the sender of the PM is assumed to be <username>.")
+			));
 
 			$this->register_command('voice', array('ChannelActions', 'set_user_mode'));
 			$this->register_documentation('voice', array('auth_level' => 1,
-														'access_type' => 'both',
-														'documentation' => array("*Usage:| !voice <channel> <username>",
-																				"Voice's <username> in <channel>.",
-																				"Will only take effect if bot has sufficient privileges.",
-																				"Hash-sign can be omitted.",
-																				"If the latter is omitted, the sender of the PM is assumed to be <username>.")
-														));
+				'access_type' => 'both',
+				'documentation' => array("*Usage:| !voice <channel> <username>",
+					"Voice's <username> in <channel>.",
+					"Will only take effect if bot has sufficient privileges.",
+					"Hash-sign can be omitted.",
+					"If the latter is omitted, the sender of the PM is assumed to be <username>.")
+			));
 
 			$this->register_command('devoice', array('ChannelActions', 'set_user_mode'));
 			$this->register_documentation('devoice', array('auth_level' => 1,
-														'access_type' => 'both',
-														'documentation' => array("*Usage:| !devoice <channel> <username>",
-																				"Removes <username> voice status in <channel>.",
-																				"Will only take effect if bot has sufficient privileges.",
-																				"Hash-sign can be omitted.",
-																				"If the latter is omitted, the sender of the PM is assumed to be <username>.")
-														));
+				'access_type' => 'both',
+				'documentation' => array("*Usage:| !devoice <channel> <username>",
+					"Removes <username> voice status in <channel>.",
+					"Will only take effect if bot has sufficient privileges.",
+					"Hash-sign can be omitted.",
+					"If the latter is omitted, the sender of the PM is assumed to be <username>.")
+			));
 
 			$this->register_command('invite', array('ChannelActions', 'invite_user'));
 			$this->register_documentation('invite', array('auth_level' => 1,
-														'access_type' => 'both',
-														'documentation' => array("*Usage:| !invite / !i <username> <channel>",
-																				"Invites <username> to <channel>.",
-																				"Will only take effect if bot has sufficient privileges.",
-																				"Hash-sign can be omitted.")
-														));
+				'access_type' => 'both',
+				'documentation' => array("*Usage:| !invite / !i <username> <channel>",
+					"Invites <username> to <channel>.",
+					"Will only take effect if bot has sufficient privileges.",
+					"Hash-sign can be omitted.")
+			));
 		}
-		
+
 		/**
 		 * Connects the bot to all channels specified in the configuration
 		 */
@@ -108,7 +108,7 @@
 				$this->join_channel('', $channelName);
 			}
 		}
-		
+
 		/**
 		 * Part all channels
 		 */
@@ -119,7 +119,7 @@
 				$this->part_channel('', $channelName);
 			}
 		}
-		
+
 		/**
 		 * Joins a channel. Checks if the channel-name includes a #-sign
 		 *
@@ -132,16 +132,15 @@
 				$channel = $this->to_channel($data->commandArgs[0]);
 			else
 				$channel = $this->to_channel($channel);
-			
-			if($_join = new Message("JOIN", $channel))
-			{
-				debug_message("Channel ".$channel." was joined!");
+
+			if($_join = new Message("JOIN", $channel)) {
+				debug_message("Channel " . $channel . " was joined!");
 				// Add joined channel to array
 				$this->connectedChannels[] = $channel;
 				return;
 			}
 		}
-		
+
 		/**
 		 * Parts (leaves) a channel. Checks if the channel-name includes a #-sign.
 		 *
@@ -154,39 +153,37 @@
 				$channel = $this->to_channel($data->commandArgs[0]);
 			else
 				$channel = $this->to_channel($channel);
-			
-			if($_part = new Message("PART", $channel))
-			{
-				debug_message("Channel ".$channel." was parted!");
+
+			if($_part = new Message("PART", $channel)) {
+				debug_message("Channel " . $channel . " was parted!");
 				// Rid the array of the parted channel
 				$this->connectedChannels = remove_item_by_value($channel, $this->connectedChannels);
 				return;
 			}
 		}
-		
+
 		/**
 		 * Sets the topic of the specified channel.
-		 * 
+		 *
 		 * @access public
 		 */
 		public function set_topic($data)
 		{
-			if($data->origin == Data::PM)
-			{
+			if($data->origin == Data::PM) {
 				$channel = $this->to_channel($data->commandArgs[0]);
-				$topic = substr($data->fullLine, strlen(COMMAND_PREFIX.$data->command." ".$data->commandArgs[0]." "));
+				$topic = substr($data->fullLine, strlen(COMMAND_PREFIX . $data->command . " " . $data->commandArgs[0] . " "));
 			}
 			elseif($data->origin == Data::CHANNEL)
 			{
 				$channel = $data->receiver;
-				$topic = substr($data->fullLine, strlen(COMMAND_PREFIX.$data->command." "));
+				$topic = substr($data->fullLine, strlen(COMMAND_PREFIX . $data->command . " "));
 			}
 
 			$channel = $this->to_channel($channel);
-			$_msg = new Message("TOPIC", $channel." :".$topic);
-			debug_message("Channel topic for ".$channel." was altered to \"".$topic."\"!");
+			$_msg = new Message("TOPIC", $channel . " :" . $topic);
+			debug_message("Channel topic for " . $channel . " was altered to \"" . $topic . "\"!");
 		}
-		
+
 		/**
 		 * Sets a certain mode on the specified user if the bot has the right to do this
 		 * For now, only allows setting modes from contact in a channel
@@ -195,8 +192,7 @@
 		 */
 		public function set_user_mode($data)
 		{
-			if($data->origin == Data::CHANNEL)
-			{
+			if($data->origin == Data::CHANNEL) {
 				switch($data->command)
 				{
 					case "op":
@@ -215,7 +211,7 @@
 
 				$channel = $this->to_channel($data->receiver);
 				$username = $data->commandArgs[0];
-				$_msg = new Message("MODE", $channel." ".$mode." ".$username);
+				$_msg = new Message("MODE", $channel . " " . $mode . " " . $username);
 			}
 		}
 
@@ -231,8 +227,7 @@
 			$invitee = $data->commandArgs[0];
 
 			// If it comes from a PM, assume the channel is included as the second argument
-			if($data->origin == Data::PM)
-			{
+			if($data->origin == Data::PM) {
 				$target_channel = $this->to_channel($data->commandArgs[1]);
 			}
 			elseif($data->origin == Data::CHANNEL)
@@ -240,10 +235,10 @@
 				$target_channel = $this->to_channel($data->receiver);
 			}
 
-			$_msg = new Message("INVITE", $invitee." ".$target_channel);
-			$_msg = new Message("PRIVMSG", "User ".$invitee." was invited to ".$target_channel."!", $data->sender);
+			$_msg = new Message("INVITE", $invitee . " " . $target_channel);
+			$_msg = new Message("PRIVMSG", "User " . $invitee . " was invited to " . $target_channel . "!", $data->sender);
 		}
-		
+
 		/**
 		 * Converts input to a proper channel-name if it isn't already
 		 *
@@ -253,9 +248,8 @@
 		 */
 		public function to_channel($channel)
 		{
-			if($channel[0] != "#")
-			{
-				$channel = "#".$channel;
+			if($channel[0] != "#") {
+				$channel = "#" . $channel;
 			}
 			return $channel;
 		}

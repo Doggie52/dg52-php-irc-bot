@@ -17,8 +17,8 @@
 	 *		- Bot abilities
 	 *			- Ability to use /notice
 	 *			- Ability to change nickname for the session
-	 */	
-	
+	 */
+
 	/**
 	 * Pre-start checklist
 	 */
@@ -26,7 +26,7 @@
 	set_time_limit(0);
 	// Let's hide those errors, shall we? No need for debug right now
 	ini_set('display_errors', 'on');
-	
+
 	/**
 	 * Main includes
 	 */
@@ -34,13 +34,12 @@
 	include("cfg/config.php");
 	// The main class definitions are also useful ;)
 	include("core/class.IRCBot.php");
-	
+
 	/**
 	 * Optional GUI
 	 */
 	// Are we in need of a GUI?
-	if(GUI)
-	{
+	if(GUI) {
 		echo '
 			<html>
 				<head>
@@ -55,15 +54,14 @@
 				<body>
 					<div id="console">';
 	}
-	
+
 	/**
 	 * Main bot initialization!
 	 */
 	$bot = new IRCBot();
-	
+
 	// When the bot finally completes its endless cycle we want to clean up the GUI
-	if(GUI)
-	{
+	if(GUI) {
 		echo'
 					</div>
 				</body>

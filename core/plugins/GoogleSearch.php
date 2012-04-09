@@ -1,13 +1,13 @@
 <?php
-/**
- * GoogleSearch plugin
- * 
- * Allows the user to do a basic Google search via channel and PM
- *
- * REQUIRES: PHP cURL extension
- *
- * @todo Respond to mentions of 'google' in channel chat, with instructions on how to use the command
- */
+	/**
+	 * GoogleSearch plugin
+	 *
+	 * Allows the user to do a basic Google search via channel and PM
+	 *
+	 * REQUIRES: PHP cURL extension
+	 *
+	 * @todo Respond to mentions of 'google' in channel chat, with instructions on how to use the command
+	 */
 
 	class GoogleSearch extends PluginEngine
 	{
@@ -25,17 +25,17 @@
 		private $resultLimit = 3;
 		private $cache;
 
-		/** 
+		/**
 		 * Constructor
 		 */
 		public function __construct()
 		{
 			$this->register_command('google', array('GoogleSearch', 'do_search'));
 			$this->register_documentation('google', array('auth_level' => 0,
-														'access_type' => 'both',
-														'documentation' => array("*Usage:| !google <query>",
-																				"Queries Google search for <query> and returns the results.")
-														));
+				'access_type' => 'both',
+				'documentation' => array("*Usage:| !google <query>",
+					"Queries Google search for <query> and returns the results.")
+			));
 
 			// Initialize cache object
 			$this->cache = DiskCache::getInstance();
@@ -47,11 +47,10 @@
 		public function do_search($data)
 		{
 			// Get the query
-			$query = substr($data->fullLine, strlen('!'.$data->command.' '));
+			$query = substr($data->fullLine, strlen('!' . $data->command . ' '));
 
 			// Checks whether cURL is loaded
-			if(in_array('curl', get_loaded_extensions()))
-			{
+			if(in_array('curl', get_loaded_extensions())) {
 				if(!($results = $this->google_search_api(array('q' => $query))))
 					return false;
 			}
@@ -65,23 +64,21 @@
 			$i = 1;
 			foreach($results as $result)
 			{
-				if($i <= $this->resultLimit)
-				{
-					$lines[] = "#".$i." *".$result->titleNoFormatting."* - __".$result->url."__";
+				if($i <= $this->resultLimit) {
+					$lines[] = "#" . $i . " *" . $result->titleNoFormatting . "* - __" . $result->url . "__";
 					$i++;
 				}
 			}
 
 			// Distinguish between PM and channel
-			if($data->origin == Data::PM)
-			{
-				$_msg = new Message("PRIVMSG", "Results for +".$query."+:", $data->sender);
+			if($data->origin == Data::PM) {
+				$_msg = new Message("PRIVMSG", "Results for +" . $query . "+:", $data->sender);
 				foreach($lines as $line)
 					$_msg = new Message("PRIVMSG", $line, $data->sender);
 			}
 			elseif($data->origin == Data::CHANNEL)
 			{
-				$_msg = new Message("PRIVMSG", "Results for +".$query."+:", $data->receiver);
+				$_msg = new Message("PRIVMSG", "Results for +" . $query . "+:", $data->receiver);
 				foreach($lines as $line)
 					$_msg = new Message("PRIVMSG", $line, $data->receiver);
 			}
@@ -99,18 +96,17 @@
 		private function google_search_api($args, $referer = 'http://localhost/')
 		{
 			// Is this cached?
-			if(isset($this->cache->{'google_search__'.$args['q']}))
-				return $this->cache->{'google_search__'.$args['q']};
+			if(isset($this->cache->{'google_search__' . $args['q']}))
+				return $this->cache->{'google_search__' . $args['q']};
 
 			$url = "https://ajax.googleapis.com/ajax/services/search/web";
 
 			// Sets necessary arguments
-			if(!array_key_exists('v', $args))
-			{
+			if(!array_key_exists('v', $args)) {
 				$args['v'] = '1.0';
 			}
 
-			$url .= '?'.http_build_query($args, '', '&');
+			$url .= '?' . http_build_query($args, '', '&');
 
 			$ch = curl_init();
 			curl_setopt($ch, CURLOPT_URL, $url);
@@ -126,12 +122,11 @@
 			$results = json_decode($body);
 
 			// Was the search successful?
-			if(is_object($results->responseData))
-			{
+			if(is_object($results->responseData)) {
 				$results = $results->responseData->results;
 
 				// Cache it!
-				$this->cache->{'google_search__'.$args['q']} = $results;
+				$this->cache->{'google_search__' . $args['q']} = $results;
 
 				return $results;
 			}
@@ -151,7 +146,7 @@
 		 */
 		private function google_search_html($query, $numresults = 3)
 		{
-			$off_site = "http://www.google.com/search?q=".urlencode($query)."&ie=UTF-8&oe=UTF-8";
+			$off_site = "http://www.google.com/search?q=" . urlencode($query) . "&ie=UTF-8&oe=UTF-8";
 			$buf = file_get_contents($off_site) or die("Unable to grab contents.");
 			// Get rid of highlights and linebreaks along with other tags
 			$buf = str_replace("<em>", "", $buf);
@@ -170,16 +165,14 @@
 			preg_match_all($urlpattern, $buf, $urls);
 			preg_match_all($titlepattern, $buf, $titles);
 			preg_match_all($descriptionpattern, $buf, $descriptions);
-			
+
 			// Find the results, if there are any
-			if($urls && $titles)
-			{
+			if($urls && $titles) {
 				// Initiate counter for amount of search results found
 				$i = 1;
 				foreach($urls[1] as $url)
 				{
-					if($i <= $numresults)
-					{
+					if($i <= $numresults) {
 						$result[$i]['id'] = $i;
 						$result[$i]['url'] = html_entity_decode(htmlspecialchars_decode($url, ENT_QUOTES), ENT_QUOTES);
 						$i++;
@@ -188,8 +181,7 @@
 				$i = 1;
 				foreach($titles[1] as $title)
 				{
-					if($i <= $numresults)
-					{
+					if($i <= $numresults) {
 						$result[$i]['title'] = html_entity_decode(htmlspecialchars_decode($title, ENT_QUOTES), ENT_QUOTES);
 						$i++;
 					}
@@ -197,18 +189,18 @@
 				$i = 1;
 				foreach($descriptions[1] as $description)
 				{
-					if($i <= $numresults)
-					{
+					if($i <= $numresults) {
 						$result[$i]['description'] = html_entity_decode(htmlspecialchars_decode($description, ENT_QUOTES), ENT_QUOTES);
 						$i++;
 					}
 				}
 				return $result;
 			}
-			
+
 			// If no results are found, return nothing
 			return;
 		}
-				
+
 	}
+
 ?>

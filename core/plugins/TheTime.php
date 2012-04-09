@@ -1,9 +1,9 @@
 <?php
-/**
- * TheTime plugin
- * 
- * Displays the current bot time
- */
+	/**
+	 * TheTime plugin
+	 *
+	 * Displays the current bot time
+	 */
 
 	class TheTime extends PluginEngine
 	{
@@ -18,30 +18,30 @@
 		/**
 		 * Properties
 		 */
-		
 
-		/** 
+
+		/**
 		 * Constructor
 		 */
 		public function __construct()
 		{
 			$this->register_command('thetime', array('TheTime', 'the_time'));
 			$this->register_documentation('thetime', array('auth_level' => 0,
-														'access_type' => 'channel',
-														'documentation' => array("*Usage:| !thetime",
-																				"Displays the current server time and the respective timezone.")
-														));
+				'access_type' => 'channel',
+				'documentation' => array("*Usage:| !thetime",
+					"Displays the current server time and the respective timezone.")
+			));
 		}
 
 		public function the_time($data)
 		{
 			// Only check channel
-			if($data->origin == Data::CHANNEL)
-			{
+			if($data->origin == Data::CHANNEL) {
 				$date = date("H:ia T");
-				$_msg = new Message("PRIVMSG", "The time is +".$date."|.", $data->receiver);
+				$_msg = new Message("PRIVMSG", "The time is +" . $date . "|.", $data->receiver);
 			}
 		}
-				
+
 	}
+
 ?>

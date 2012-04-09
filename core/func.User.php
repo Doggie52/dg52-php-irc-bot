@@ -8,10 +8,10 @@
 	 *
 	 * Functions that are connected to user input
 	 */
-	
+
 	/**
 	 * Looks up the specified command's help
-	 * 
+	 *
 	 * @access public
 	 * @param string $command The command specified
 	 * @param string $commandarray The array of commands and their respective help entries
@@ -22,14 +22,13 @@
 	{
 		$command = strtolower($command);
 		// If the user is not looking for specific support for a command
-		if(!$command)
-		{
+		if(!$command) {
 			$commandlist = "";
 			// For all PM commands
 			send_data("PRIVMSG", format_text("bold", "COMMANDS AVAILABLE VIA PM"), $username);
 			foreach($commandarray['pm'] as $commandname => $commandusage)
 			{
-				$commandlist .= "!".$commandname.", ";
+				$commandlist .= "!" . $commandname . ", ";
 			}
 			send_data("PRIVMSG", substr($commandlist, 0, -2), $username);
 			$commandlist = "";
@@ -37,7 +36,7 @@
 			send_data("PRIVMSG", format_text("bold", "COMMANDS AVAILABLE VIA CHANNEL"), $username);
 			foreach($commandarray['channel'] as $commandname => $commandusage)
 			{
-				$commandlist .= "!".$commandname.", ";
+				$commandlist .= "!" . $commandname . ", ";
 			}
 			send_data("PRIVMSG", substr($commandlist, 0, -2), $username);
 			return 1;
@@ -45,8 +44,7 @@
 		else
 		{
 			// If the command looked up exists in the documentation (either in PM or channel)
-			if(array_key_exists($command, $commandarray['pm']))
-			{
+			if(array_key_exists($command, $commandarray['pm'])) {
 				foreach($commandarray['pm'][$command] as $usage)
 				{
 					send_data("PRIVMSG", $usage, $username);

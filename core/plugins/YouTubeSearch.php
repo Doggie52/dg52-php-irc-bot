@@ -1,11 +1,11 @@
 <?php
-/**
- * YouTubeSearch plugin
- * 
- * Allows the user to do a basic YouTube search via channel and PM.
- *
- * REQUIRES: PHP cURL extension
- */
+	/**
+	 * YouTubeSearch plugin
+	 *
+	 * Allows the user to do a basic YouTube search via channel and PM.
+	 *
+	 * REQUIRES: PHP cURL extension
+	 */
 
 	class YouTubeSearch extends PluginEngine
 	{
@@ -23,7 +23,7 @@
 		private $resultLimit = 3;
 		private $cache;
 
-		/** 
+		/**
 		 * Constructor
 		 */
 		public function __construct()
@@ -31,10 +31,10 @@
 			$this->register_command('yt', array('YouTubeSearch', 'do_search'));
 			$this->register_command('youtube', array('YouTubeSearch', 'do_search'));
 			$this->register_documentation('youtube', array('auth_level' => 0,
-														'access_type' => 'both',
-														'documentation' => array("*Usage:| !youtube <query> OR !yt <query>",
-																				"Queries YouTube search for <query> and returns the results.")
-														));
+				'access_type' => 'both',
+				'documentation' => array("*Usage:| !youtube <query> OR !yt <query>",
+					"Queries YouTube search for <query> and returns the results.")
+			));
 
 			// Initialize cache object
 			$this->cache = DiskCache::getInstance();
@@ -46,11 +46,10 @@
 		public function do_search($data)
 		{
 			// Get the query
-			$query = substr($data->fullLine, strlen('!'.$data->command.' '));
+			$query = substr($data->fullLine, strlen('!' . $data->command . ' '));
 
 			// Checks whether cURL is loaded
-			if(in_array('curl', get_loaded_extensions()))
-			{
+			if(in_array('curl', get_loaded_extensions())) {
 				if(!($results = $this->youtube_search_api(array('q' => $query))))
 					return false;
 			}
@@ -64,20 +63,19 @@
 			$i = 1;
 			foreach($results as $result)
 			{
-				$lines[] = "#".$i." *".$result->title->{'$t'}."* - __".$result->link[0]->href."__";
+				$lines[] = "#" . $i . " *" . $result->title->{'$t'} . "* - __" . $result->link[0]->href . "__";
 				$i++;
 			}
 
 			// Distinguish between PM and channel
-			if($data->origin == Data::PM)
-			{
-				$_msg = new Message("PRIVMSG", "Results for +".$query."+:", $data->sender);
+			if($data->origin == Data::PM) {
+				$_msg = new Message("PRIVMSG", "Results for +" . $query . "+:", $data->sender);
 				foreach($lines as $line)
 					$_msg = new Message("PRIVMSG", $line, $data->sender);
 			}
 			elseif($data->origin == Data::CHANNEL)
 			{
-				$_msg = new Message("PRIVMSG", "Results for +".$query."+:", $data->receiver);
+				$_msg = new Message("PRIVMSG", "Results for +" . $query . "+:", $data->receiver);
 				foreach($lines as $line)
 					$_msg = new Message("PRIVMSG", $line, $data->receiver);
 			}
@@ -95,27 +93,24 @@
 		private function youtube_search_api($args, $referer = 'http://localhost/')
 		{
 			// Is this cached?
-			if(isset($this->cache->{'youtube_query__'.$args['q']}))
-				return $this->cache->{'youtube_query__'.$args['q']};
+			if(isset($this->cache->{'youtube_query__' . $args['q']}))
+				return $this->cache->{'youtube_query__' . $args['q']};
 
 			$url = "https://gdata.youtube.com/feeds/api/videos";
 
 			// Sets necessary arguments
-			if(!array_key_exists('alt', $args))
-			{
+			if(!array_key_exists('alt', $args)) {
 				$args['alt'] = 'json';
 			}
-			if(!array_key_exists('max-results', $args))
-			{
+			if(!array_key_exists('max-results', $args)) {
 				$args['max-results'] = $this->resultLimit;
 			}
 			// Only return what's necessary
-			if(!array_key_exists('fields', $args))
-			{
+			if(!array_key_exists('fields', $args)) {
 				$args['fields'] = 'entry(title,link[@rel=\'alternate\'])';
 			}
 
-			$url .= '?'.http_build_query($args, '', '&');
+			$url .= '?' . http_build_query($args, '', '&');
 
 			$ch = curl_init();
 			curl_setopt($ch, CURLOPT_URL, $url);
@@ -131,12 +126,11 @@
 			$results = json_decode($body);
 
 			// Was the search successful?
-			if(is_object($results->feed))
-			{
+			if(is_object($results->feed)) {
 				$results = $results->feed->entry;
 
 				// Cache it!
-				$this->cache->{'youtube_query__'.$args['q']} = $results;
+				$this->cache->{'youtube_query__' . $args['q']} = $results;
 
 				return $results;
 			}
@@ -154,7 +148,7 @@
 		 */
 		private function youtube_search_html($query, $numresults = 3)
 		{
-			$off_site = "http://www.youtube.com/results?search_query=".urlencode($query)."&ie=UTF-8&oe=UTF-8";
+			$off_site = "http://www.youtube.com/results?search_query=" . urlencode($query) . "&ie=UTF-8&oe=UTF-8";
 			$buf = file_get_contents($off_site) or die("Unable to grab contents.");
 			// Get rid of highlights and linebreaks along with other tags
 			$buf = str_replace("<em>", "", $buf);
@@ -173,26 +167,23 @@
 			preg_match_all($urlpattern, $buf, $videos);
 			// preg_match_all($titlepattern, $buf, $titles);
 			preg_match_all($descriptionpattern, $buf, $descriptions);
-			
+
 			// Find the results, if there are any
-			if($videos)
-			{
+			if($videos) {
 				// Initiate counter for amount of search results found
 				$i = 1;
 				foreach($videos[1] as $url)
 				{
-					if($i <= $numresults)
-					{
+					if($i <= $numresults) {
 						$result[$i]['id'] = $i;
-						$result[$i]['url'] = "http://www.youtube.com".html_entity_decode(htmlspecialchars_decode($url, ENT_QUOTES), ENT_QUOTES);
+						$result[$i]['url'] = "http://www.youtube.com" . html_entity_decode(htmlspecialchars_decode($url, ENT_QUOTES), ENT_QUOTES);
 						$i++;
 					}
 				}
 				$i = 1;
 				foreach($videos[2] as $title)
 				{
-					if($i <= $numresults)
-					{
+					if($i <= $numresults) {
 						$result[$i]['title'] = html_entity_decode(htmlspecialchars_decode($title, ENT_QUOTES), ENT_QUOTES);
 						$i++;
 					}
@@ -200,18 +191,18 @@
 				$i = 1;
 				foreach($descriptions[1] as $description)
 				{
-					if($i <= $numresults)
-					{
+					if($i <= $numresults) {
 						$result[$i]['description'] = html_entity_decode(htmlspecialchars_decode($description, ENT_QUOTES), ENT_QUOTES);
 						$i++;
 					}
 				}
 				return $result;
 			}
-			
+
 			// If no results are found, return nothing
 			return;
 		}
-				
+
 	}
+
 ?>

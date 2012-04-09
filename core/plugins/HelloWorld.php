@@ -1,9 +1,9 @@
 <?php
-/**
- * HelloWorld plugin
- * 
- * Sample plugin to showcase simple "Hello World!"-functionality.
- */
+	/**
+	 * HelloWorld plugin
+	 *
+	 * Sample plugin to showcase simple "Hello World!"-functionality.
+	 */
 
 	class HelloWorld extends PluginEngine
 	{
@@ -13,13 +13,13 @@
 		public $PLUGIN_VERSION = "1.0";
 
 		private $matches = array(
-							'hello',
-							'hi',
-							'hey',
-							'howdy',
-							'yo'
-			);
-		
+			'hello',
+			'hi',
+			'hey',
+			'howdy',
+			'yo'
+		);
+
 		public function __construct()
 		{
 			// Register our function to both private and channel messages
@@ -33,10 +33,8 @@
 			$fullLine = explode(" ", $data->fullLine);
 
 			// If the first word matches any of our matches
-			if(in_array(strtolower($fullLine[0]), $this->matches))
-			{
-				if($data->origin == Data::PM)
-				{
+			if(in_array(strtolower($fullLine[0]), $this->matches)) {
+				if($data->origin == Data::PM) {
 					$_msg = new Message("PRIVMSG", "Hello world! You just sent this via PM.", $data->sender);
 				}
 				elseif($data->origin == Data::CHANNEL)
@@ -50,6 +48,7 @@
 				$_msg = new Message("PRIVMSG", "+Italic|. +__ItalicUnderscore|. ", $data->sender);
 				$_msg = new Message("PRIVMSG", "__Underscore|. *+__BoldItalicUnderscore|.", $data->sender);
 			}
-		}		
+		}
 	}
+
 ?>

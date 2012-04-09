@@ -20,21 +20,21 @@
 		 * A static list of plugin hooks with an array each to stored the callbacks
 		 */
 		static public $hooks = array(
-								'load' => array(),				// called when bot has loaded
-								'connect' => array(),			// called when bot has successfully connected
-								'disconnect' => array(),		// called when bot has disconnected
-								'private_message' => array(),	// called when bot receives a private message
-								'channel_message' => array(),	// called when the channel the bot is in receivs a message
-			);
-		
+			'load' => array(), // called when bot has loaded
+			'connect' => array(), // called when bot has successfully connected
+			'disconnect' => array(), // called when bot has disconnected
+			'private_message' => array(), // called when bot receives a private message
+			'channel_message' => array(), // called when the channel the bot is in receivs a message
+		);
+
 		/**
 		 * A static list of the commands registered by all plugins
 		 *
 		 * Structure:
 		 * array( 'command name' => array(
-		 * 								'plugin name',
-		 * 								'command function name'
-		 * 								)
+		 *								 'plugin name',
+		 *								 'command function name'
+		 *								 )
 		 */
 		static public $commands = array();
 
@@ -43,22 +43,22 @@
 		 *
 		 * Structure:
 		 * array( 'command name' => array(
-		 * 								'auth_level' => 0/1,
-		 * 								'access_type' => 'pm'/'channel'/'both'
-		 * 								'documentation' => 'single line'/array(
-		 * 																	'multiple',
-		 * 																	'lines'
-		 * 																	)
-		 * 								)
+		 *								 'auth_level' => 0/1,
+		 *								 'access_type' => 'pm'/'channel'/'both'
+		 *								 'documentation' => 'single line'/array(
+		 *																	 'multiple',
+		 *																	 'lines'
+		 *																	 )
+		 *								 )
 		 * )
 		 */
 		static public $documentation = array();
-		
+
 		private function __construct()
 		{
-			
+
 		}
-		
+
 		/**
 		 * Loads all plugins and appends them to array
 		 */
@@ -73,10 +73,10 @@
 				self::$plugins[$pluginName] = new $pluginName;
 			}
 		}
-		
+
 		/**
 		 * Triggers an event notification based on parameters
-		 * 
+		 *
 		 * @access public
 		 * @param string $hook Name of the hook to fire
 		 * @param object $data (optional) The data object to pass to plugins
@@ -87,7 +87,7 @@
 			// Does the hook exist?
 			if(!isset(self::$hooks[$hook]))
 				return;
-			
+
 			// Fire the events
 			foreach(self::$hooks[$hook] as $callback)
 				call_user_func_array(array(self::$plugins[$callback[0]], $callback[1]), array($data));
@@ -95,7 +95,7 @@
 
 		/**
 		 * Runs a command
-		 * 
+		 *
 		 * @access public
 		 * @param string $command Name of the command to fire
 		 * @param object $data The data object to pass to plugins
@@ -108,16 +108,16 @@
 				return false;
 
 			// Does the user have the necessary privileges?
-			if(self::$documentation[$command]['auth_level'] > $data->authLevel)
-			{
+			if(self::$documentation[$command]['auth_level'] > $data->authLevel) {
 				$_msg = new Message("PRIVMSG", "You do not have sufficient privileges to run +{$command}|!", $data->sender);
 				return false;
 			}
-			
+
 			// Fire the callback associated with the command
 			$callback = self::$commands[$command];
 			call_user_func_array(array(self::$plugins[$callback[0]], $callback[1]), array($data));
 		}
-		
+
 	}
+
 ?>
