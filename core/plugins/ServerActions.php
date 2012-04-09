@@ -20,62 +20,62 @@
 		 */
 		public function register_bot()
 		{
-			$_cmd = new Message('USER', BOT_NICKNAME . ' douglasstridsberg.com ' . BOT_NICKNAME . ' :' . BOT_NAME);
-			$_cmd = new Message('NICK', BOT_NICKNAME);
+			$_cmd = new Message( 'USER', BOT_NICKNAME . ' douglasstridsberg.com ' . BOT_NICKNAME . ' :' . BOT_NAME );
+			$_cmd = new Message( 'NICK', BOT_NICKNAME );
 
 			// Temporarily tap into the socket
 			global $socket;
-			while(!feof($socket))
+			while ( !feof( $socket ) )
 			{
-				if(($line = fgets($socket))) {
+				if ( ( $line = fgets( $socket ) ) ) {
 					// If the debug output is turned on, spew out all data received from server
-					if(DEBUG_OUTPUT) {
-						debug_message("DEBUG OUTPUT: " . trim($line));
+					if ( DEBUG_OUTPUT ) {
+						debug_message( "DEBUG OUTPUT: " . trim( $line ) );
 					}
 
 					// Check for pings sent before bot has connected
-					$this->pong(new Data($line), $line);
+					$this->pong( new Data( $line ), $line );
 
 					// If '376' is sent, the bot has connected and received the last MOTD line
 					// This has a potentital of not working with all IRCDs, in that case one should look for RPL_WELCOME
-					if(strpos($line, ' ' . Data::RPL_ENDOFMOTD . ' ') !== false) {
-						debug_message("Bot was greeted.");
+					if ( strpos( $line, ' ' . Data::RPL_ENDOFMOTD . ' ' ) !== false ) {
+						debug_message( "Bot was greeted." );
 						break;
 					}
 				}
 			}
 		}
 
-		public function quit($data)
+		public function quit( $data )
 		{
-			$_cmd = new Message("QUIT", ":" . BOT_QUITMSG);
+			$_cmd = new Message( "QUIT", ":" . BOT_QUITMSG );
 
-			debug_message("Bot has disconnected and been turned off!");
+			debug_message( "Bot has disconnected and been turned off!" );
 		}
 
-		public function pong($data, $rawdata)
+		public function pong( $data, $rawdata )
 		{
-			if($data->type == Data::PING) {
+			if ( $data->type == Data::PING ) {
 				// Explode raw data to get server
-				$_temp_expl = explode(" ", $rawdata);
+				$_temp_expl = explode( " ", $rawdata );
 				// Plays ping-pong with the server to stay connected
-				$pong = new Message("PONG", $_temp_expl[1]);
-				if(!SUPPRESS_PING) {
-					debug_message("PONG was sent.");
+				$pong = new Message( "PONG", $_temp_expl[1] );
+				if ( !SUPPRESS_PING ) {
+					debug_message( "PONG was sent." );
 				}
 			}
 		}
 
 		public function __construct()
 		{
-			$this->register_action('load', array('ServerActions', 'register_bot'));
+			$this->register_action( 'load', array( 'ServerActions', 'register_bot' ) );
 
-			$this->register_command('quit', array('ServerActions', 'quit'));
-			$this->register_documentation('quit', array('auth_level' => 1,
+			$this->register_command( 'quit', array( 'ServerActions', 'quit' ) );
+			$this->register_documentation( 'quit', array( 'auth_level' => 1,
 				'access_type' => 'both',
-				'documentation' => array("*Usage:| !quit / !q",
-					"Quits the server.")
-			));
+				'documentation' => array( "*Usage:| !quit / !q",
+					"Quits the server." )
+			) );
 		}
 	}
 
