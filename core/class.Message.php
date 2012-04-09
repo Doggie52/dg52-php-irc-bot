@@ -15,10 +15,24 @@
 	class Message
 	{
 		/**
-		 * Properties
+		 * The command sent in the message.
+		 *
+		 * @var string
 		 */
 		private $command;
+
+		/**
+		 * The body of the message.
+		 *
+		 * @var string
+		 */
 		private $body;
+
+		/**
+		 * The receiver of the message.
+		 *
+		 * @var string
+		 */
 		private $receiver;
 
 		/**
@@ -28,7 +42,11 @@
 		const MESSAGE = 2;
 
 		/**
-		 * Constructor, allowing a short-hand version of sending a message
+		 * __construct()
+		 *
+		 * @abstract Constructor, allowing a short-hand version of sending a message.
+		 *
+		 * @return bool If message was successfully sent or not.
 		 */
 		public function __construct( $cmd = null, $body = null, $rcvr = null )
 		{
@@ -36,21 +54,24 @@
 			$this->body = $this->markup_text( $body );
 			$this->receiver = $rcvr;
 
-			if ( !empty( $this->command ) ) {
-				$this->send();
+			if ( $this->send() )
 				return true;
-			}
 		}
 
 		/**
-		 * send
+		 * send()
 		 *
-		 * Sends the message with defined properties, if they are set
+		 * @abstract Sends the message with defined properties, if they are set.
+		 *
+		 * @return bool If message was successfully sent or not.
 		 */
 		public function send()
 		{
 			// Fetch the socket
 			global $socket;
+
+			if ( empty( $this->command ) )
+				return false;
 
 			// If it is a command with no body
 			if ( empty( $this->body ) ) {
@@ -84,36 +105,36 @@
 		}
 
 		/**
-		 * set_command
+		 * set_command()
 		 *
-		 * Sets the command of a message
+		 * @abstract Sets the command of a message.
 		 *
-		 * @param string $cmd The command
+		 * @param string $cmd The command.
 		 */
 		public function set_command( $cmd )
 		{
-			$this->$command = $cmd;
+			$this->command = $cmd;
 
 		}
 
 		/**
-		 * set_body
+		 * set_body()
 		 *
-		 * Sets the body of the message
+		 * @abstract Sets the body of the message.
 		 *
-		 * @param string $msg The actual message
+		 * @param string $msg The actual message.
 		 */
 		public function set_body( $msg )
 		{
-			$this->$body = $msg;
+			$this->body = $msg;
 		}
 
 		/**
-		 * set_receiver
+		 * set_receiver()
 		 *
-		 * Sets the receiver of the message
+		 * @abstract Sets the receiver of the message.
 		 *
-		 * @param string $rcvr The receiver
+		 * @param string $rcvr The receiver.
 		 */
 		public function set_receiver( $rcvr )
 		{
@@ -128,13 +149,13 @@
 		}
 
 		/**
-		 * Searches the message for markup that styles the text
+		 * markup_text()
 		 *
-		 * @todo Allow multiple styles to applied to same text
+		 * @abstract Searches the message for markup that styles the text.
 		 *
 		 * @access public
-		 * @param string $message The message to markup
-		 * @return string $message The marked up message
+		 * @param string $message The message to markup.
+		 * @return string $message The marked up message.
 		 */
 		function markup_text( $message )
 		{
@@ -147,9 +168,7 @@
 
 			// Loop throuh all markups and replace when necessary
 			foreach ( $markups as $char => $markup )
-			{
 				$message = str_replace( $char, $markup, $message );
-			}
 
 			return $message;
 		}

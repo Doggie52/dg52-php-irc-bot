@@ -9,15 +9,22 @@
 	 * Handles plugins.
 	 */
 
+	/**
+	 * PluginHandler class
+	 */
 	class PluginHandler
 	{
 		/**
-		 * A static list of plugin objects, available to access by any plugin
+		 * A static list of plugin objects, available to access by any plugin.
+		 *
+		 * @var array
 		 */
 		static public $plugins = array();
 
 		/**
-		 * A static list of plugin hooks with an array each to stored the callbacks
+		 * A static list of plugin hooks with an array each to stored the callbacks.
+		 *
+		 * @var array
 		 */
 		static public $hooks = array(
 			'load' => array(), // called when bot has loaded
@@ -28,18 +35,20 @@
 		);
 
 		/**
-		 * A static list of the commands registered by all plugins
+		 * A static list of the commands registered by all plugins.
 		 *
 		 * Structure:
 		 * array( 'command name' => array(
 		 *								 'plugin name',
 		 *								 'command function name'
 		 *								 )
+		 *
+		 * @var array
 		 */
 		static public $commands = array();
 
 		/**
-		 * A static list of the commands together with their documentation
+		 * A static list of the commands together with their documentation.
 		 *
 		 * Structure:
 		 * array( 'command name' => array(
@@ -51,16 +60,23 @@
 		 *																	 )
 		 *								 )
 		 * )
+		 *
+		 * @var array
 		 */
 		static public $documentation = array();
 
+		/**
+		 * __construct()
+		 */
 		private function __construct()
 		{
 
 		}
 
 		/**
-		 * Loads all plugins and appends them to array
+		 * load_plugins()
+		 *
+		 * @abstract Loads all plugins and appends them to array.
 		 */
 		static public function load_plugins()
 		{
@@ -75,12 +91,13 @@
 		}
 
 		/**
-		 * Triggers an event notification based on parameters
+		 * trigger_hook()
+		 *
+		 * @abstract Triggers an event notification based on parameters.
 		 *
 		 * @access public
-		 * @param string $hook Name of the hook to fire
-		 * @param object $data (optional) The data object to pass to plugins
-		 * @return void
+		 * @param string $hook Name of the hook to fire.
+		 * @param object $data (optional) The data object to pass to plugins.
 		 */
 		static public function trigger_hook( $hook, $data = null )
 		{
@@ -94,12 +111,14 @@
 		}
 
 		/**
-		 * Runs a command
+		 * run_command()
+		 *
+		 * @abstract Runs a command
 		 *
 		 * @access public
-		 * @param string $command Name of the command to fire
-		 * @param object $data The data object to pass to plugins
-		 * @return bool Whether or not the command was run successfully
+		 * @param string $command Name of the command to fire.
+		 * @param object $data The data object to pass to plugins.
+		 * @return bool Whether or not the command was run successfully.
 		 */
 		static public function run_command( $command, $data )
 		{
@@ -116,6 +135,8 @@
 			// Fire the callback associated with the command
 			$callback = self::$commands[$command];
 			call_user_func_array( array( self::$plugins[$callback[0]], $callback[1] ), array( $data ) );
+
+			return true;
 		}
 
 	}

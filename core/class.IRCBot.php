@@ -14,17 +14,31 @@
 	 */
 	class IRCBot
 	{
-		// This is going to hold the data received from the socket
+		/**
+		 * Holds the raw data sent from the socket.
+		 *
+		 * @var string
+		 */
 		private $rawData;
 
-		// This is going to hold all the current data object from the server
+		/**
+		 * This is going to hold the current data object from the server.
+		 *
+		 * @var object
+		 */
 		private $data;
 
-		// This holds the plugin objects
+		/**
+		 * This holds the plugin objects.
+		 *
+		 * @var array
+		 */
 		private $plugins;
 
 		/**
-		 * Constructs the bot by opening the server connection and CLI interface, logging the bot in and importing list of administrators.
+		 * __construct()
+		 *
+		 * Constructs the bot by opening the server connection and CLI interface and loading all plugins.
 		 *
 		 * @access public
 		 * @return void
@@ -45,7 +59,6 @@
 
 			// Include class definitions
 			include( "core/func.Functions.php" );
-			include( "core/func.User.php" );
 			include( "core/class.Data.php" );
 			include( "core/class.Message.php" );
 			include( "core/class.PluginHandler.php" );
@@ -65,11 +78,11 @@
 			$newpath = preg_replace( "/%date%/", @date( 'Ymd' ), LOG_PATH );
 			// Clears the logfile if LOG_APPEND is FALSE and if the file already exists
 			if ( !LOG_APPEND && file_exists( $newpath ) ) {
-				if ( unlink( $newpath ) ) {
+				if ( unlink( $newpath ) )
 					debug_message( "Log cleared!" );
-				}
 			}
 
+			// Load all plugins
 			pluginHandler::load_plugins();
 			// Trigger plugin load
 			pluginHandler::trigger_hook( 'load' );
@@ -77,19 +90,21 @@
 			pluginHandler::trigger_hook( 'connect' );
 
 			// Initializes the main bot workhorse
-			$this->main();
+			$this->run();
 
 			// Closes the socket
 			fclose( $socket ) or die( 'Unable to close the socket!' );
 		}
 
 		/**
-		 * This is the workhorse function, grabs the data from the server and displays on the browser if DEBUG_OUTPUT is true.
+		 * run()
+		 *
+		 * @abstract This is the workhorse function, grabs the data from the server and displays on the browser if DEBUG_OUTPUT is true.
 		 *
 		 * @access private
 		 * @return void
 		 */
-		private function main()
+		private function run()
 		{
 			// Fetch the socket
 			global $socket;
@@ -111,10 +126,10 @@
 				if ( $this->rawData = fgets( $socket ) ) {
 					// If the debug output is turned on, spew out all data received from server
 					if ( DEBUG_OUTPUT ) {
-						debug_message( "DEBUG OUTPUT: " . trim( $this->rawData ) );
+						debug_message( "[DEBUG] " . trim( $this->rawData ) );
 					}
-					flush();
 
+					// Parse the raw data
 					$this->data = new Data( $this->rawData );
 
 					// Ping?
@@ -179,13 +194,10 @@
 	 http://code.google.com/p/dg52-php-irc-bot
 	
 				\n";
-			if ( GUI ) {
+			if ( GUI )
 				echo( nl2br( $info ) );
-			}
 			else
-			{
 				echo( $info );
-			}
 		}
 
 		/**
@@ -196,22 +208,18 @@
 		 */
 		private function reload_users()
 		{
-			// Open the users.inc file
-			$file = fopen( USERS_PATH, "r" );
 			// Turn the hostnames into lowercase (does not compromise security, as hostnames are unique anyway)
-			$userlist = strtolower( @fread( $file, filesize( USERS_PATH ) ) );
-			fclose( $file );
-			if ( $userlist ) {
-				// Split each line into separate entry in the returned array
-				$users = explode( "\n", $userlist );
-				debug_message( "The list of administrators was successfully loaded into the system!" );
-				return $users;
-			}
-			else
+			if ( !( $userlist = strtolower( file_get_contents( USERS_PATH ) ) ) )
 			{
 				debug_message( "Something went wrong when loading the list of administrators." );
 				return false;
 			}
+
+			// Split each line into separate entry in the returned array
+			$users = explode( "\n", $userlist );
+
+			debug_message( "The list of administrators was successfully loaded into the system!" );
+			return $users;
 		}
 
 	}

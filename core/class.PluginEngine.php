@@ -15,17 +15,41 @@
 	 */
 	abstract class PluginEngine
 	{
-
 		/**
-		 * Variables
+		 * Name of the plugin.
+		 *
+		 * @var string
 		 */
-		public $PLUGIN_NAME, $PLUGIN_AUTHOR, $PLUGIN_DESCRIPTION, $PLUGIN_VERSION;
+		public $PLUGIN_NAME;
 
 		/**
-		 * Registers a callback to a hook
+		 * Author of the plugin.
+		 *
+		 * @var string
+		 */
+		public $PLUGIN_AUTHOR;
+
+		/**
+		 * Short description of the plugin.
+		 *
+		 * @var string
+		 */
+		public $PLUGIN_DESCRIPTION;
+
+		/**
+		 * Version number of the plugin.
+		 *
+		 * @var string
+		 */
+		public $PLUGIN_VERSION;
+
+		/**
+		 * register_action()
+		 *
+		 * @abstract Registers a callback to a hook.
 		 *
 		 * @access protected
-		 * @param string $hook The hook to register the callback to
+		 * @param string $hook The hook to register the callback to.
 		 * @param array $callback [0]: name of the plugin's class, [1]: name of the function (callback) to register to the hook
 		 */
 		protected function register_action( $hook, $callback )
@@ -41,12 +65,14 @@
 		}
 
 		/**
-		 * Special case of registering a callback to a hook, when the plugin registers a command
+		 * register_command()
+		 *
+		 * @abstract Special case of registering a callback to a hook, when the plugin registers a command.
 		 *
 		 * @access protected
-		 * @param string $command The name of the command to register
+		 * @param string $command The name of the command to register.
 		 * @param array $callback [0]: name of the plugin's class, [1]: name of the function (callback) to register to the hook
-		 * @param string $documentation The usage documentation assigned to the command
+		 * @param string $documentation The usage documentation assigned to the command.
 		 */
 		protected function register_command( $command, $callback, $documentation = null )
 		{
@@ -61,32 +87,31 @@
 		}
 
 		/**
-		 * Allows plugins to register documentation for their commands with this library
+		 * register_documentation()
+		 *
+		 * @abstract Allows plugins to register documentation for their commands with this library.
 		 *
 		 * @access protected
-		 * @param string $command The name of the command to which to register documentation
-		 * @param mixed $documentation The string (one line) or array (multi-line, one line per entry) of documentation available for the command
+		 * @param string $command The name of the command to which to register documentation.
+		 * @param mixed $documentation The string (one line) or array (multi-line, one line per entry) of documentation available for the command.
 		 */
 		static function register_documentation( $command, $documentation )
 		{
 			// Checks for empty arguments
 			if ( empty( $command ) || empty( $documentation ) ) {
 				debug_message( "Both arguments need to be filled in." );
-
 				return;
 			}
 
 			// Makes sure $ocumentation is the correct structure
 			if ( !isset( $documentation['auth_level'] ) || !isset( $documentation['access_type'] ) || empty( $documentation['documentation'] ) ) {
 				debug_message( "The correct documentation structure is needed." );
-
 				return;
 			}
 
 			// Checks for already existing documentation
 			if ( !empty( PluginHandler::$documentation[$command] ) ) {
 				debug_message( "Documentation for the command \"" . $command . "\" already exists." );
-
 				return;
 			}
 
@@ -94,12 +119,14 @@
 		}
 
 		/**
-		 * Triggers a debug message that can be tied back to the plugin
+		 * debug_message()
+		 *
+		 * @abstract Triggers a debug message that can be tied back to the plugin.
 		 *
 		 * @todo Send name of plugin class with the message
 		 *
 		 * @access protected
-		 * @param string $msg The debug message to be sent
+		 * @param string $msg The debug message to be sent.
 		 */
 		protected function debug_message( $msg )
 		{

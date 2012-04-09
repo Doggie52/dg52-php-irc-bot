@@ -51,7 +51,10 @@
 			// Checks whether cURL is loaded
 			if ( in_array( 'curl', get_loaded_extensions() ) ) {
 				if ( !( $results = $this->youtube_search_api( array( 'q' => $query ) ) ) )
+				{
+					$_msg = new Message( "PRIVMSG", "No results found! Either your quota is exceeded or there were no results.", $data->sender );
 					return false;
+				}
 			}
 			else
 			{
