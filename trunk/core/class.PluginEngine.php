@@ -28,11 +28,11 @@
 		 * @param string $hook The hook to register the callback to
 		 * @param array $callback [0]: name of the plugin's class, [1]: name of the function (callback) to register to the hook
 		 */
-		protected function register_action($hook, $callback)
+		protected function register_action( $hook, $callback )
 		{
 			// Does the hook exist?
-			if(!isset(PluginHandler::$hooks[$hook])) {
-				debug_message("[PLUGIN] " . $callback[0] . ": Hook \"" . $hook . "\" does not exist!");
+			if ( !isset( PluginHandler::$hooks[$hook] ) ) {
+				debug_message( "[PLUGIN] " . $callback[0] . ": Hook \"" . $hook . "\" does not exist!" );
 				return;
 			}
 
@@ -48,11 +48,11 @@
 		 * @param array $callback [0]: name of the plugin's class, [1]: name of the function (callback) to register to the hook
 		 * @param string $documentation The usage documentation assigned to the command
 		 */
-		protected function register_command($command, $callback, $documentation = null)
+		protected function register_command( $command, $callback, $documentation = null )
 		{
 			// Does the command already exist?
-			if(isset(PluginHandler::$commands[$command])) {
-				debug_message("[PLUGIN] " . $callback[0] . ": Command \"" . $command . "\" already exists!");
+			if ( isset( PluginHandler::$commands[$command] ) ) {
+				debug_message( "[PLUGIN] " . $callback[0] . ": Command \"" . $command . "\" already exists!" );
 				return;
 			}
 
@@ -67,25 +67,25 @@
 		 * @param string $command The name of the command to which to register documentation
 		 * @param mixed $documentation The string (one line) or array (multi-line, one line per entry) of documentation available for the command
 		 */
-		static function register_documentation($command, $documentation)
+		static function register_documentation( $command, $documentation )
 		{
 			// Checks for empty arguments
-			if(empty($command) || empty($documentation)) {
-				debug_message("Both arguments need to be filled in.");
+			if ( empty( $command ) || empty( $documentation ) ) {
+				debug_message( "Both arguments need to be filled in." );
 
 				return;
 			}
 
 			// Makes sure $ocumentation is the correct structure
-			if(!isset($documentation['auth_level']) || !isset($documentation['access_type']) || empty($documentation['documentation'])) {
-				debug_message("The correct documentation structure is needed.");
+			if ( !isset( $documentation['auth_level'] ) || !isset( $documentation['access_type'] ) || empty( $documentation['documentation'] ) ) {
+				debug_message( "The correct documentation structure is needed." );
 
 				return;
 			}
 
 			// Checks for already existing documentation
-			if(!empty(PluginHandler::$documentation[$command])) {
-				debug_message("Documentation for the command \"" . $command . "\" already exists.");
+			if ( !empty( PluginHandler::$documentation[$command] ) ) {
+				debug_message( "Documentation for the command \"" . $command . "\" already exists." );
 
 				return;
 			}
@@ -101,9 +101,9 @@
 		 * @access protected
 		 * @param string $msg The debug message to be sent
 		 */
-		protected function debug_message($msg)
+		protected function debug_message( $msg )
 		{
-			debug_message("[PLUGIN] " . $msg);
+			debug_message( "[PLUGIN] " . $msg );
 		}
 
 	}

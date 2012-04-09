@@ -33,23 +33,23 @@
 		{
 			// Our TCP/IP connection
 			global $socket;
-			$socket = fsockopen(SERVER_IP, SERVER_PORT);
+			$socket = fsockopen( SERVER_IP, SERVER_PORT );
 
 			// Our CLI interface
 			global $cli;
 			$cli = STDIN;
 
 			// Set non-blocking mode on both sockets
-			stream_set_blocking($socket, 0);
-			stream_set_blocking($cli, 0);
+			stream_set_blocking( $socket, 0 );
+			stream_set_blocking( $cli, 0 );
 
 			// Include class definitions
-			include("core/func.Functions.php");
-			include("core/func.User.php");
-			include("core/class.Data.php");
-			include("core/class.Message.php");
-			include("core/class.PluginHandler.php");
-			include("core/cache/class.DiskCache.php");
+			include( "core/func.Functions.php" );
+			include( "core/func.User.php" );
+			include( "core/class.Data.php" );
+			include( "core/class.Message.php" );
+			include( "core/class.PluginHandler.php" );
+			include( "core/cache/class.DiskCache.php" );
 
 			// Set default cache path
 			DiskCache::$cacheDir = DISK_CACHE_PATH;
@@ -62,25 +62,25 @@
 			$users = $this->reload_users();
 
 			// Replaces %date% with the date in the form yyyymmdd
-			$newpath = preg_replace("/%date%/", @date('Ymd'), LOG_PATH);
+			$newpath = preg_replace( "/%date%/", @date( 'Ymd' ), LOG_PATH );
 			// Clears the logfile if LOG_APPEND is FALSE and if the file already exists
-			if(!LOG_APPEND && file_exists($newpath)) {
-				if(unlink($newpath)) {
-					debug_message("Log cleared!");
+			if ( !LOG_APPEND && file_exists( $newpath ) ) {
+				if ( unlink( $newpath ) ) {
+					debug_message( "Log cleared!" );
 				}
 			}
 
 			pluginHandler::load_plugins();
 			// Trigger plugin load
-			pluginHandler::trigger_hook('load');
+			pluginHandler::trigger_hook( 'load' );
 			// When the loop is broken, we have been greeted
-			pluginHandler::trigger_hook('connect');
+			pluginHandler::trigger_hook( 'connect' );
 
 			// Initializes the main bot workhorse
 			$this->main();
 
 			// Closes the socket
-			fclose($socket) or die('Unable to close the socket!');
+			fclose( $socket ) or die( 'Unable to close the socket!' );
 		}
 
 		/**
@@ -96,7 +96,7 @@
 			// Fetch the CLI
 			global $cli;
 
-			while(!feof($socket))
+			while ( !feof( $socket ) )
 			{
 				/* Disabling due to Windows socket inconsistency
 				if($cliinput = fgets($cli))
@@ -108,27 +108,27 @@
 				ob_start();
 
 				// If there is something new in the socket (prevents over-use of resources)
-				if($this->rawData = fgets($socket)) {
+				if ( $this->rawData = fgets( $socket ) ) {
 					// If the debug output is turned on, spew out all data received from server
-					if(DEBUG_OUTPUT) {
-						debug_message("DEBUG OUTPUT: " . trim($this->rawData));
+					if ( DEBUG_OUTPUT ) {
+						debug_message( "DEBUG OUTPUT: " . trim( $this->rawData ) );
 					}
 					flush();
 
-					$this->data = new Data($this->rawData);
+					$this->data = new Data( $this->rawData );
 
 					// Ping?
-					PluginHandler::$plugins['ServerActions']->pong($this->data, $this->rawData);
+					PluginHandler::$plugins['ServerActions']->pong( $this->data, $this->rawData );
 
 					// If the message is a command
-					if($this->data->type == Data::COMMAND)
-						PluginHandler::run_command($this->data->command, $this->data);
+					if ( $this->data->type == Data::COMMAND )
+						PluginHandler::run_command( $this->data->command, $this->data );
 					else
 					{
-						if($this->data->origin == Data::CHANNEL)
-							PluginHandler::trigger_hook('channel_message', $this->data);
-						elseif($this->data->origin == Data::PM)
-							PluginHandler::trigger_hook('private_message', $this->data);
+						if ( $this->data->origin == Data::CHANNEL )
+							PluginHandler::trigger_hook( 'channel_message', $this->data );
+						elseif ( $this->data->origin == Data::PM )
+							PluginHandler::trigger_hook( 'private_message', $this->data );
 					}
 				}
 
@@ -136,8 +136,8 @@
 				ob_end_flush();
 
 				// Sleeps the bot to conserve CPU power
-				if(SLEEP_MSEC > 0)
-					usleep(SLEEP_MSEC);
+				if ( SLEEP_MSEC > 0 )
+					usleep( SLEEP_MSEC );
 			}
 		}
 
@@ -149,7 +149,7 @@
 		 */
 		private function print_header()
 		{
-			$svnrev = get_latest_rev("http://dg52-php-irc-bot.googlecode.com/svn/trunk/");
+			$svnrev = get_latest_rev( "http://dg52-php-irc-bot.googlecode.com/svn/trunk/" );
 			$info = "
 	     _  ___ ___ ___ 
 	  __| |/ __| __|_  )
@@ -179,12 +179,12 @@
 	 http://code.google.com/p/dg52-php-irc-bot
 	
 				\n";
-			if(GUI) {
-				echo(nl2br($info));
+			if ( GUI ) {
+				echo( nl2br( $info ) );
 			}
 			else
 			{
-				echo($info);
+				echo( $info );
 			}
 		}
 
@@ -197,19 +197,19 @@
 		private function reload_users()
 		{
 			// Open the users.inc file
-			$file = fopen(USERS_PATH, "r");
+			$file = fopen( USERS_PATH, "r" );
 			// Turn the hostnames into lowercase (does not compromise security, as hostnames are unique anyway)
-			$userlist = strtolower(@fread($file, filesize(USERS_PATH)));
-			fclose($file);
-			if($userlist) {
+			$userlist = strtolower( @fread( $file, filesize( USERS_PATH ) ) );
+			fclose( $file );
+			if ( $userlist ) {
 				// Split each line into separate entry in the returned array
-				$users = explode("\n", $userlist);
-				debug_message("The list of administrators was successfully loaded into the system!");
+				$users = explode( "\n", $userlist );
+				debug_message( "The list of administrators was successfully loaded into the system!" );
 				return $users;
 			}
 			else
 			{
-				debug_message("Something went wrong when loading the list of administrators.");
+				debug_message( "Something went wrong when loading the list of administrators." );
 				return false;
 			}
 		}

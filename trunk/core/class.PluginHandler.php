@@ -64,12 +64,12 @@
 		 */
 		static public function load_plugins()
 		{
-			include("class.PluginEngine.php");
-			foreach(glob("core/plugins/*.php") as $pluginName)
+			include( "class.PluginEngine.php" );
+			foreach ( glob( "core/plugins/*.php" ) as $pluginName )
 			{
-				include_once($pluginName);
+				include_once( $pluginName );
 				// Get the plugin name without the .php
-				$pluginName = basename($pluginName, ".php");
+				$pluginName = basename( $pluginName, ".php" );
 				self::$plugins[$pluginName] = new $pluginName;
 			}
 		}
@@ -82,15 +82,15 @@
 		 * @param object $data (optional) The data object to pass to plugins
 		 * @return void
 		 */
-		static public function trigger_hook($hook, $data = null)
+		static public function trigger_hook( $hook, $data = null )
 		{
 			// Does the hook exist?
-			if(!isset(self::$hooks[$hook]))
+			if ( !isset( self::$hooks[$hook] ) )
 				return;
 
 			// Fire the events
-			foreach(self::$hooks[$hook] as $callback)
-				call_user_func_array(array(self::$plugins[$callback[0]], $callback[1]), array($data));
+			foreach ( self::$hooks[$hook] as $callback )
+				call_user_func_array( array( self::$plugins[$callback[0]], $callback[1] ), array( $data ) );
 		}
 
 		/**
@@ -101,21 +101,21 @@
 		 * @param object $data The data object to pass to plugins
 		 * @return bool Whether or not the command was run successfully
 		 */
-		static public function run_command($command, $data)
+		static public function run_command( $command, $data )
 		{
 			// Does the hook exist?
-			if(!isset(self::$commands[$command]))
+			if ( !isset( self::$commands[$command] ) )
 				return false;
 
 			// Does the user have the necessary privileges?
-			if(self::$documentation[$command]['auth_level'] > $data->authLevel) {
-				$_msg = new Message("PRIVMSG", "You do not have sufficient privileges to run +{$command}|!", $data->sender);
+			if ( self::$documentation[$command]['auth_level'] > $data->authLevel ) {
+				$_msg = new Message( "PRIVMSG", "You do not have sufficient privileges to run +{$command}|!", $data->sender );
 				return false;
 			}
 
 			// Fire the callback associated with the command
 			$callback = self::$commands[$command];
-			call_user_func_array(array(self::$plugins[$callback[0]], $callback[1]), array($data));
+			call_user_func_array( array( self::$plugins[$callback[0]], $callback[1] ), array( $data ) );
 		}
 
 	}

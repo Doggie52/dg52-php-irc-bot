@@ -8,7 +8,7 @@
 	 *
 	 * Main public executable wrapper
 	 *
-	 * TODO:
+	 * @TODO:
 	 *		- Documentation for class
 	 *		- Make use of usleep() to minimize CPU load
 	 *		- Users and channel abilities
@@ -23,23 +23,23 @@
 	 * Pre-start checklist
 	 */
 	// Disable time-limit
-	set_time_limit(0);
+	set_time_limit( 0 );
 	// Let's hide those errors, shall we? No need for debug right now
-	ini_set('display_errors', 'on');
+	ini_set( 'display_errors', 'on' );
 
 	/**
 	 * Main includes
 	 */
 	// Some configuration is needed
-	include("cfg/config.php");
+	include( "cfg/config.php" );
 	// The main class definitions are also useful ;)
-	include("core/class.IRCBot.php");
+	include( "core/class.IRCBot.php" );
 
 	/**
 	 * Optional GUI
 	 */
 	// Are we in need of a GUI?
-	if(GUI) {
+	if ( GUI ) {
 		echo '
 			<html>
 				<head>
@@ -61,7 +61,7 @@
 	$bot = new IRCBot();
 
 	// When the bot finally completes its endless cycle we want to clean up the GUI
-	if(GUI) {
+	if ( GUI ) {
 		echo'
 					</div>
 				</body>

@@ -20,118 +20,118 @@
 
 		public function __construct()
 		{
-			$this->register_action('load', array('HelpLibrary', 'store_documentation'));
-			$this->register_command('help', array('HelpLibrary', 'help'));
-			$this->register_documentation('help', array('auth_level' => 0,
+			$this->register_action( 'load', array( 'HelpLibrary', 'store_documentation' ) );
+			$this->register_command( 'help', array( 'HelpLibrary', 'help' ) );
+			$this->register_documentation( 'help', array( 'auth_level' => 0,
 				'access_type' => 'both',
-				'documentation' => array("*Usage:| !help <command>",
-					"Shows help for <command>.")
-			));
+				'documentation' => array( "*Usage:| !help <command>",
+					"Shows help for <command>." )
+			) );
 		}
 
 		/**
 		 * Shows help for a specific command or lists all command available to the user
 		 */
-		public function help($data)
+		public function help( $data )
 		{
 			// If no specific function has been specified
-			if(!isset($data->commandArgs[0])) {
-				$this->list_all_commands($data);
+			if ( !isset( $data->commandArgs[0] ) ) {
+				$this->list_all_commands( $data );
 			}
 			else
 			{
-				$this->show_help_command($data);
+				$this->show_help_command( $data );
 			}
 		}
 
 		/**
 		 * Lists all commands that are available to the user
 		 */
-		public function list_all_commands($data)
+		public function list_all_commands( $data )
 		{
-			$_msg = new Message("PRIVMSG", "*ALL COMMANDS*", $data->sender);
+			$_msg = new Message( "PRIVMSG", "*ALL COMMANDS*", $data->sender );
 			$line = '';
-			switch($data->authLevel)
+			switch ( $data->authLevel )
 			{
 				case 1:
-					$_msg = new Message("PRIVMSG", "+Access level needed+", $data->sender);
-					foreach($this->commandDocumentation as $command => $documentation)
+					$_msg = new Message( "PRIVMSG", "+Access level needed+", $data->sender );
+					foreach ( $this->commandDocumentation as $command => $documentation )
 					{
 						// Only show commands where auth level is needed
-						if($documentation['auth_level'] != 1)
+						if ( $documentation['auth_level'] != 1 )
 							continue;
 
 						// List the commands in a string
 						$line .= $command . ", ";
 					}
 
-					$line = substr($line, 0, -2);
+					$line = substr( $line, 0, -2 );
 
-					$_msg = new Message("PRIVMSG", $line, $data->sender);
+					$_msg = new Message( "PRIVMSG", $line, $data->sender );
 				// No break here, to enable authenticated users to see all commands
 				case 0:
 					$line = '';
-					$_msg = new Message("PRIVMSG", "+No access level needed+", $data->sender);
-					foreach($this->commandDocumentation as $command => $documentation)
+					$_msg = new Message( "PRIVMSG", "+No access level needed+", $data->sender );
+					foreach ( $this->commandDocumentation as $command => $documentation )
 					{
 						// Only show commands where auth level isn't needed
-						if($documentation['auth_level'] != 0)
+						if ( $documentation['auth_level'] != 0 )
 							continue;
 
 						// List the commands in a string
 						$line .= $command . ", ";
 					}
 
-					$line = substr($line, 0, -2);
+					$line = substr( $line, 0, -2 );
 
-					$_msg = new Message("PRIVMSG", $line, $data->sender);
+					$_msg = new Message( "PRIVMSG", $line, $data->sender );
 					break;
 			}
 
-			$_msg = new Message("PRIVMSG", "+For more information, type !help <command>.+", $data->sender);
+			$_msg = new Message( "PRIVMSG", "+For more information, type !help <command>.+", $data->sender );
 		}
 
 		/**
 		 * Shows help for a specific command
 		 */
-		public function show_help_command($data)
+		public function show_help_command( $data )
 		{
 			// Get the first word/command
 			$command = $data->commandArgs[0];
 
 			// Checks if command is available
-			if(empty($this->commandDocumentation[$command])) {
-				$_msg = new Message("PRIVMSG", "The command was not found!", $data->sender);
+			if ( empty( $this->commandDocumentation[$command] ) ) {
+				$_msg = new Message( "PRIVMSG", "The command was not found!", $data->sender );
 				return;
 			}
 
 			// Checks if command is available for the user's authentication level
-			if($this->commandDocumentation[$command]['auth_level'] > $data->authLevel) {
-				$_msg = new Message("PRIVMSG", "This command is not available for you!", $data->sender);
+			if ( $this->commandDocumentation[$command]['auth_level'] > $data->authLevel ) {
+				$_msg = new Message( "PRIVMSG", "This command is not available for you!", $data->sender );
 				return;
 			}
 
 			// The command documentation is now ready to be displayed, check if it is a single-line one
-			if(!is_array($this->commandDocumentation[$command]['documentation'])) {
-				$line = "*" . strtoupper($this->commandDocumentation[$command]['access_type']) . ":* ";
+			if ( !is_array( $this->commandDocumentation[$command]['documentation'] ) ) {
+				$line = "*" . strtoupper( $this->commandDocumentation[$command]['access_type'] ) . ":* ";
 				$line .= "+" . $command . "+ ";
 				$line .= "- " . $this->commandDocumentation[$command]['documentation'];
 
-				$_msg = new Message("PRIVMSG", $line, $data->sender);
+				$_msg = new Message( "PRIVMSG", $line, $data->sender );
 			}
 			else
 			{
-				$line = "*" . strtoupper($this->commandDocumentation[$command]['access_type']) . ":* ";
+				$line = "*" . strtoupper( $this->commandDocumentation[$command]['access_type'] ) . ":* ";
 				$line .= "+" . $command . "+ ";
 				// Print first line
 				$line .= "- " . $this->commandDocumentation[$command]['documentation'][0];
 
-				$_msg = new Message("PRIVMSG", $line, $data->sender);
+				$_msg = new Message( "PRIVMSG", $line, $data->sender );
 
 				// For every next line, i.e. starting at entry 1
-				for($i = 1; $i < count($this->commandDocumentation[$command]['documentation']); $i++)
+				for ( $i = 1; $i < count( $this->commandDocumentation[$command]['documentation'] ); $i++ )
 				{
-					$_msg = new Message("PRIVMSG", $this->commandDocumentation[$command]['documentation'][$i], $data->sender);
+					$_msg = new Message( "PRIVMSG", $this->commandDocumentation[$command]['documentation'][$i], $data->sender );
 				}
 			}
 		}
@@ -142,7 +142,7 @@
 		public function store_documentation()
 		{
 			$this->commandDocumentation = PluginHandler::$documentation;
-			ksort($this->commandDocumentation);
+			ksort( $this->commandDocumentation );
 		}
 	}
 
