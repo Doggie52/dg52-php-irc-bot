@@ -26,13 +26,14 @@
 	set_time_limit( 0 );
 	// Let's hide those errors, shall we? No need for debug right now
 	ini_set( 'display_errors', 'on' );
+	// Checking to see if bot has been configured properly
+	if ( !file_exists( "core/config.php" ) )
+		exit( debug_message( 'You must configure the bot before running it! Open cfg/config.dist.php for more information.' ) );
 
 	/**
 	 * Main includes
 	 */
-	// Some configuration is needed
-	include( "cfg/config.php" );
-	// The main class definitions are also useful ;)
+	require( "cfg/config.php" );
 	include( "core/class.IRCBot.php" );
 
 	/**
