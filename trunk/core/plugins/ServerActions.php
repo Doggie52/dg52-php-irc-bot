@@ -34,7 +34,15 @@
 					}
 
 					// Check for pings sent before bot has connected
-					$this->pong( new Data( $line ), $line );
+					if ( $this->pong( new Data( $line ), $line ) )
+						continue;
+
+					// If '433' is sent, we need to use the alternate bot nickname
+					if ( strpos( $line, ' ' . Data::ERR_NICKNAMEINUSE . ' ' ) !== false ) {
+						$_cmd = new Message( 'NICK', BOT_NICKNAME_ALT );
+						debug_message( "Bot was forced to use alternate nickname!" );
+						continue;
+					}
 
 					// If '376' is sent, the bot has connected and received the last MOTD line
 					// This has a potentital of not working with all IRCDs, in that case one should look for RPL_WELCOME
@@ -63,6 +71,8 @@
 				if ( !SUPPRESS_PING ) {
 					debug_message( "PONG was sent." );
 				}
+
+				return true;
 			}
 		}
 

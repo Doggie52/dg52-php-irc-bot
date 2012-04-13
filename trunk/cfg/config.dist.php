@@ -28,6 +28,7 @@
 	 */
 	define( 'BOT_NICKNAME', 		'<nickname>' );						// The nickname the bot should use. No spaces allowed.
 	define( 'BOT_NAME', 			'<realname>' );			// The 'real' name of the bot.
+	define( 'BOT_NICKNAME_ALT', 	'<alt_nickname>' );				// The alternate nickname of the bot, should the main nickname be taken.
 	define( 'BOT_PASSWORD', 		'<pass>' );							// The password the bot should use when connecting to the server.
 	define( 'BOT_QUITMSG', 			'dG52 PHP IRC Bot' );			// The message the bot will transmit when disconnecting from the server.
 	define( 'BOT_CHANNELS', 		'<channel(s)>' );					// Array of channels to join on connect. Values must be separated by a space.
