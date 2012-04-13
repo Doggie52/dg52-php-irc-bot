@@ -67,6 +67,10 @@
 			// Set default cache path
 			DiskCache::$cacheDir = DISK_CACHE_PATH;
 
+			// Prune cache
+			$cache = DiskCache::getInstance();
+			$cache->prune();
+
 			// Print header
 			$this->print_header();
 
@@ -166,33 +170,33 @@
 		{
 			$svnrev = get_latest_rev( "http://dg52-php-irc-bot.googlecode.com/svn/trunk/" );
 			$info = "
-	     _  ___ ___ ___ 
+	     _  ___ ___ ___
 	  __| |/ __| __|_  )
-	 / _` | (_ |__ \/ / 
+	 / _` | (_ |__ \/ /
 	 \__,_|\___|___/___|
-	                    
-	  ___ _  _ ___   ___ ___  ___ 
+
+	  ___ _  _ ___   ___ ___  ___
 	 | _ \ || | _ \ |_ _| _ \/ __|
-	 |  _/ __ |  _/  | ||   / (__ 
+	 |  _/ __ |  _/  | ||   / (__
 	 |_| |_||_|_|   |___|_|_\\___|
-	                              
-	  ___      _   
-	 | _ ) ___| |_ 
+
+	  ___      _
+	 | _ ) ___| |_
 	 | _ \/ _ \  _|
 	 |___/\___/\__|
-	 
+
 	 dG52 PHP IRC Bot
 	   Author: Douglas Stridsberg
 	   Email: doggie52@gmail.com
 	   URL: www.douglasstridsberg.com
 	   Latest (online) revision: r" . $svnrev . "
 	     (if you have an earlier revision than this, please update!)
-	 
+
 	 Any issues, questions or feedback should be redirected
 	 to the following URL.
-	 
+
 	 http://code.google.com/p/dg52-php-irc-bot
-	
+
 				\n";
 			if ( GUI )
 				echo( nl2br( $info ) );
