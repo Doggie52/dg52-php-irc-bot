@@ -33,12 +33,14 @@
 						debug_message( "DEBUG OUTPUT: " . trim( $line ) );
 					}
 
+					$_data = new Data( $line );
+
 					// Check for pings sent before bot has connected
-					if ( $this->pong( new Data( $line ), $line ) )
+					if ( $this->pong( $_data, $line ) )
 						continue;
 
 					// If '433' is sent, we need to use the alternate bot nickname
-					if ( strpos( $line, ' ' . Data::ERR_NICKNAMEINUSE . ' ' ) !== false ) {
+					if ( $_data->replyCode == Data::ERR_NICKNAMEINUSE ) {
 						$_cmd = new Message( 'NICK', BOT_NICKNAME_ALT );
 						debug_message( "Bot was forced to use alternate nickname!" );
 						continue;
@@ -46,7 +48,7 @@
 
 					// If '376' is sent, the bot has connected and received the last MOTD line
 					// This has a potentital of not working with all IRCDs, in that case one should look for RPL_WELCOME
-					if ( strpos( $line, ' ' . Data::RPL_ENDOFMOTD . ' ' ) !== false ) {
+					if ( $_data->replyCode == Data::RPL_ENDOFMOTD ) {
 						debug_message( "Bot was greeted." );
 						break;
 					}
