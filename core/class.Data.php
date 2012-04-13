@@ -101,6 +101,7 @@
 		 */
 		const RPL_WELCOME = 001;
 		const RPL_ENDOFMOTD = 376;
+		const ERR_NICKNAMEINUSE = 433;
 
 		/**
 		 * __get()

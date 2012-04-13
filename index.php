@@ -27,8 +27,8 @@
 	// Let's hide those errors, shall we? No need for debug right now
 	ini_set( 'display_errors', 'on' );
 	// Checking to see if bot has been configured properly
-	if ( !file_exists( "core/config.php" ) )
-		exit( debug_message( 'You must configure the bot before running it! Open cfg/config.dist.php for more information.' ) );
+	if ( !file_exists( "cfg/config.php" ) || !file_exists( "cfg/users.inc" ) )
+		exit( 'You must configure the bot before running it! Either config.php or users.inc (or both) is missing.' );
 
 	/**
 	 * Main includes
